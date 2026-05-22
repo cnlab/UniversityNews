@@ -1,0 +1,36 @@
+col,label,block,community_id,eigenvector_abs,r_composite,pct_to_gain_Contact reps: oppose cuts,pct_to_gain_Talk to others about cuts,pct_to_gain_Share info online,pct_to_gain_Contact reps: support funding,ror_Contact reps: oppose cuts,ror_Talk to others about cuts,ror_Share info online,ror_Contact reps: support funding
+research_3_mean,Perceived impact of research (overall),Research Beliefs,NA,1,0.325,4.9,11.1,7.5,7.3,2.28,3.69,2.1,2.96
+research_4_mean,Science engagement & trust beliefs,Research Beliefs,NA,1,0.504,10.2,15.8,12.2,15.4,5.7,7.12,3.37,12.48
+research_5.1_mean,Importance of research areas (overall),Research Beliefs,NA,1,0.241,5.4,8.5,11.6,4.5,2.4,2.71,2.99,1.97
+research_5.2_mean,Likelihood research achieves goals (overall),Research Beliefs,NA,1,0.125,8.2,11.1,10.8,10.5,3.75,3.69,2.82,4.68
+research_6.1_mean,Perceived problems with research (severity),Research Beliefs,NA,1,0.027,4.2,-2.4,16,4.9,2.07,0.7,4.28,2.08
+research_6.2_mean,Likelihood of research problems (overall),Research Beliefs,NA,1,-0.06,4.2,-2.4,-5,-2.2,2.07,0.7,0.55,0.67
+govtfund_4_mean,Perceived who supports govt research funding,Govt Funding,NA,1,0.062,-2.4,9.2,-6.7,2.3,0.59,2.87,0.41,1.48
+govtfund_5_pos_mean,Perceived benefits of govt funding,Govt Funding,NA,1,0.192,4.5,4.1,6.8,6.8,2.17,1.69,1.99,2.81
+govtfund_5_neg_mean,Perceived costs/risks of govt funding,Govt Funding,NA,1,-0.121,-4.6,1.8,1.6,-5.5,0.32,1.26,1.18,0.28
+gotvfund_6_mean,Research objectivity & public benefit beliefs,Govt Funding,NA,1,0.281,8.2,1.4,-2.1,4.1,3.75,1.2,0.79,1.88
+govtfund_8_mean,Tax investment in research benefits,Govt Funding,NA,1,0.29,3.1,5.2,7.2,5,1.8,2,2.16,2.32
+govtfund_9_mean,Approval of cuts to research/science funding,Govt Funding,NA,1,-0.21,3.5,17.1,22.1,5.4,1.88,10,10.93,2.43
+highered_1_mean,Approval of higher ed institutions,Higher Education,NA,1,0.255,3.5,5.6,10.7,2.6,1.88,2.1,3.03,1.55
+highered_2_mean,Trust in higher ed institutions,Higher Education,NA,1,0.278,0.9,1.8,2.7,2.3,1.23,1.34,1.42,1.58
+highered_3_mean,Higher ed contribution to science,Higher Education,NA,1,0.376,6.2,-1,2.5,5.3,2.6,0.88,1.29,2.14
+highered_4_mean,Perception higher ed is nonprofit-oriented,Higher Education,NA,1,0.192,1.9,5,8,4.3,1.39,1.82,2.16,1.92
+univ_2_mean,Universities contribute to society (overall),University Perceptions,NA,1,0.431,7.2,12.7,18.3,9.3,3.39,4.8,6.17,4.22
+univ_5_mean,Who benefits from universities (overall),University Perceptions,NA,1,0.42,13.9,10.4,13.1,13,11.06,3.5,3.57,7.28
+climate_4_mean,Climate research importance (overall),Climate,NA,1,0.321,5.9,10.7,7.2,7.8,2.94,4.11,2.16,3.65
+research_1,Knowledge of university research,Research Beliefs,NA,1,0.214,-1.3,1.8,-1.7,-2.2,0.78,1.26,0.83,0.67
+research_2,Science is best way to find truth,Research Beliefs,NA,1,0.163,2,8.5,5,3.2,1.64,5,2,2.01
+govtfund_1,Approval of federal research funding,Govt Funding,NA,1,0.308,1.4,2.6,-0.1,2.1,1.58,1.83,0.98,1.88
+govtfund_2,Govt investment is ESSENTIAL,Govt Funding,NA,1,0.148,2.1,1.9,1.4,2.4,NA,3.33,1.9,NA
+govtfund_3,Knowledge of funding cuts,Govt Funding,NA,1,0.405,5,5.2,3.5,6,4.24,2.75,1.69,4.96
+govtfund_7_1,Priority: making a profit,Govt Funding,NA,1,0.027,2.2,1,1.3,3.4,1.7,1.16,1.19,2.09
+govtfund_7_2,Priority: advance knowledge & benefit society,Govt Funding,NA,1,0.314,5.8,7.5,9.1,4.9,8.64,6.2,5.52,4.24
+govtfund_7_3,Priority: develop products to sell,Govt Funding,NA,1,0.112,-2.2,-1.9,-3.5,-1.2,0.56,0.7,0.59,0.76
+govtfund_7_4,Priority: serve interests of government,Govt Funding,NA,1,-0.009,3.6,0,0.3,-2.3,2.52,1.01,1.05,0.54
+govfund_10,Local area negatively impacted by cuts,Govt Funding,NA,1,-0.186,6.3,17.1,10.7,11.2,3.08,10,3.03,6.25
+univ_4_1,Universities discover new knowledge,University Perceptions,NA,1,0.226,4.3,7.8,7.8,3.4,3.78,6.46,3.84,2.47
+univ_4_2,Universities apply and connect knowledge,University Perceptions,NA,1,0.228,5.7,11.2,10,4.8,3.47,6.47,3.5,2.57
+univ_4_3,Universities apply knowledge-based solutions,University Perceptions,NA,1,0.26,5.7,9,10,4.8,3.47,4.18,3.5,2.57
+climate_1,Believes global warming is happening,Climate,NA,1,0.252,0.6,0.9,1.1,0.7,NA,NA,NA,NA
+climate_2,Believes warming caused by humans,Climate,NA,1,0.191,1.9,3.3,4.7,1,3.4,5.39,7.63,1.64
+climate_3,Trust in climate scientists,Climate,NA,1,0.364,10,9,10.6,6.5,7.88,3.56,3.3,3.18

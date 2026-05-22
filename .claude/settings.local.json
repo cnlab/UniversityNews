@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh api *)",
+      "Bash(python3 -c \"import json,sys; [print\\(f['name'], f['type']\\) for f in json.load\\(sys.stdin\\)]\")",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Read(//Users/nicolecooper/.claude/**)",
+      "Bash(Rscript *)",
+      "Bash(grep -v \"^[[:space:]]*[0-9]*[[:space:]]*$\")",
+      "Bash(pandoc --version)",
+      "Read(//Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/**)",
+      "Read(//usr/local/bin/**)",
+      "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript *)",
+      "Bash(wait)",
+      "Bash(python3 -c ' *)",
+      "Bash(pip3 install *)",
+      "Bash(python3)",
+      "Bash(grep -v \"Timing$\\\\|First Click$\\\\|Last Click$\\\\|Page Submit$\\\\|Click Count$\")",
+      "Bash(grep -v \"Timing$\\\\|First Click$\\\\|Last Click$\\\\|Page Submit$\\\\|Click Count$\\\\|TextEntryLine\")",
+      "Bash(python3 make_survey_doc.py)",
+      "Read(//tmp/**)",
+      "Bash(export PATH=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64:$PATH\")",
+      "Read(//Applications/**)",
+      "Read(//usr/local/**)",
+      "Read(//Users/nicolecooper/Library/**)",
+      "Bash(PATH=/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64:__TRACKED_VAR__ Rscript -e 'rmarkdown::render\\('\\\\''05_belief_network.Rmd'\\\\''\\)')",
+      "Bash(PATH=/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64:__TRACKED_VAR__ Rscript -e ' *)",
+      "Bash(PATH=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64:$PATH\" Rscript *)",
+      "Read(//Users/nicolecooper/Documents/GitHub/**)",
+      "Read(//Users/nicolecooper/**)",
+      "Read(//Users/nicolecooper/Desktop/**)",
+      "Bash(unzip -l \"/Users/nicolecooper/Desktop/UniversityNews/Data/Raw/UnivNews_Step0_April+20,+2026_11.03 \\(1\\).zip\")",
+      "Bash(rsync -av --exclude=.DS_Store --exclude=*.zip --exclude=archive/ /Users/nicolecooper/Desktop/UniversityNews/ /Users/nicolecooper/Documents/GitHub/UniversityNews/)"
+    ]
+  }
+}

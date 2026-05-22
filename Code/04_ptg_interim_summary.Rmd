@@ -1,0 +1,465 @@
+---
+title: "Step 1: PTG Interim Summary — Promising Belief Targets"
+author: "Nicole Cooper"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+options(scipen = 999)
+```
+
+```{r packages}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, gt, reactable, ggrepel, plotly)
+```
+
+```{r load}
+path   <- "~/Documents/GitHub/UniversityNews"
+d_full <- read_csv(sprintf("%s/Output/04_promising_beliefs.csv", path),
+                   show_col_types = FALSE)
+net    <- read_csv(sprintf("%s/Output/05_belief_network.csv", path),
+                   show_col_types = FALSE)
+N      <- d_full |> filter(outcome == "Talk to others about cuts") |>
+          summarise(n = first(n_total)) |> pull(n)
+n_nodes    <- nrow(net)
+np_ratio   <- round(N / n_nodes, 1)
+n_communities <- net |> filter(!is.na(community_id)) |> pull(community_id) |> n_distinct()
+```
+
+```{r constants}
+target_vars <- c(
+  "research_4_4", "research_4_3",
+  "research_3_2", "research_3_1", "research_3_3", "research_3_13",
+  "govtfund_5_10", "gotvfund_6_5", "govtfund_5_7", "govtfund_5_6",
+  "govtfund_5_4", "govtfund_5_5", "govtfund_5_3",
+  "govfund_10", "govtfund_8_1",
+  "univ_2_7", "univ_2_9",
+  "highered_2_2", "highered_2_1"
+)
+
+theme_map <- tribble(
+  ~variable,          ~theme,
+  "research_4_4",     "Science salience",
+  "research_4_3",     "Science salience",
+  "research_3_2",     "Personal relevance",
+  "research_3_1",     "Personal relevance",
+  "research_3_3",     "Personal relevance",
+  "research_3_13",    "Personal relevance",
+  "govtfund_5_10",    "Researcher integrity",
+  "gotvfund_6_5",     "Researcher integrity",
+  "govtfund_5_7",     "Researcher integrity",
+  "govtfund_5_6",     "Researcher integrity",
+  "govtfund_5_4",     "Govt funding benefits",
+  "govtfund_5_5",     "Govt funding benefits",
+  "govtfund_5_3",     "Govt funding benefits",
+  "govfund_10",       "Local / economic impact",
+  "govtfund_8_1",     "Local / economic impact",
+  "univ_2_7",         "University contributions",
+  "univ_2_9",         "University contributions",
+  "highered_2_2",     "Institutional trust",
+  "highered_2_1",     "Institutional trust"
+)
+
+dropped_battery_vars <- c("gotvfund_6_5")   # govtfund_6 battery dropped from network
+not_in_network_vars  <- c("gotvfund_6_5", "highered_2_2")  # not present in network
+
+outcome_short <- c(
+  "Talk to others about cuts"       = "Talk",
+  "Share info online about cuts"    = "Share",
+  "Contact reps to oppose cuts"     = "Oppose",
+  "Contact reps to support funding" = "Support"
+)
+
+theme_colors <- c(
+  "Science salience"        = "#4E79A7",
+  "Personal relevance"      = "#F28E2B",
+  "Researcher integrity"    = "#E15759",
+  "Govt funding benefits"   = "#59A14F",
+  "Local / economic impact" = "#76B7B2",
+  "University contributions"= "#EDC948",
+  "Institutional trust"     = "#B07AA1"
+)
+```
+
+```{r build-tables}
+prefixes <- paste0(
+  "^(Effects on: |Govt funding likelihood: |",
+  "Univ[.] contributes to: |Tax investment: [.][.][.]|",
+  "Trust: |Perceived support: |Importance: |Likelihood: )"
+)
+
+# Centrality lookup — direct join where variable is now a network node
+centrality <- net |>
+  select(col, eigenvector_abs, community_id) |>
+  mutate(cent_pct = round(percent_rank(eigenvector_abs) * 100))
+
+# Wide PTG table with lower-bound cells
+wide_ptg <- d_full |>
+  filter(variable %in% target_vars) |>
+  mutate(
+    outcome_s = outcome_short[outcome],
+    lb        = pmax(pct_to_gain - se_ptg, 0),
+    cell      = case_when(
+      small_n_flag       ~ paste0(pct_to_gain, " [!]"),
+      is.na(pct_to_gain) ~ "—",
+      TRUE               ~ sprintf("%.1f (%.1f)", pct_to_gain, lb)
+    )
+  ) |>
+  select(variable, label, direction, outcome_s, cell) |>
+  pivot_wider(names_from = outcome_s, values_from = cell)
+
+# Composite PTG
+composite <- d_full |>
+  filter(variable %in% target_vars, !is.na(pct_to_gain)) |>
+  group_by(variable) |>
+  summarise(
+    composite    = round(mean(pct_to_gain), 1),
+    composite_lb = round(mean(pmax(pct_to_gain - se_ptg, 0)), 1),
+    any_small_n  = any(small_n_flag),
+    .groups = "drop"
+  )
+
+# Credibility flag: lb ≥ 5 on ≥ 2 outcomes
+credible_vars <- d_full |>
+  filter(variable %in% target_vars, !is.na(pct_to_gain)) |>
+  mutate(lb = pmax(pct_to_gain - se_ptg, 0)) |>
+  group_by(variable) |>
+  summarise(n_credible = sum(lb >= 5), .groups = "drop") |>
+  filter(n_credible >= 2) |>
+  pull(variable)
+
+summary_table <- wide_ptg |>
+  left_join(theme_map,   by = "variable") |>
+  left_join(composite,   by = "variable") |>
+  left_join(centrality,  by = c("variable" = "col")) |>
+  mutate(
+    Belief    = str_remove(label, prefixes),
+    Dir       = ifelse(direction == "positive", "+", "−"),
+    Note      = case_when(
+      variable %in% dropped_battery_vars ~ "‡",
+      variable %in% not_in_network_vars  ~ "†",
+      TRUE                               ~ ""
+    ),
+    flagged   = variable %in% credible_vars,
+    Centrality = case_when(
+      variable %in% not_in_network_vars ~ "—",
+      is.na(eigenvector_abs)            ~ "—",
+      TRUE ~ sprintf("%.2f (%d%%)", eigenvector_abs, cent_pct)
+    )
+  ) |>
+  arrange(theme, desc(composite)) |>
+  select(variable, theme, Belief, Dir, Note,
+         Talk, Share, Oppose, Support,
+         composite, composite_lb, eigenvector_abs, Centrality, community_id, flagged)
+
+# Per-outcome top-5 (lb ≥ 5, not small_n)
+top5 <- function(oc) {
+  d_full |>
+    filter(outcome == oc, moveable, block != "Past Engagement",
+           !small_n_flag, !is.na(pct_to_gain)) |>
+    mutate(lb = pmax(pct_to_gain - se_ptg, 0)) |>
+    filter(lb >= 5) |>
+    arrange(desc(pct_to_gain)) |>
+    slice_head(n = 5) |>
+    mutate(
+      Belief     = str_remove(label, prefixes),
+      `PTG (lb)` = sprintf("%.1f (%.1f)", pct_to_gain, lb),
+      ROR        = round(ror, 2),
+      `n`        = n_at_strongest
+    ) |>
+    select(Block = block, Belief, Dir = direction, `PTG (lb)`, ROR, n)
+}
+```
+
+---
+
+# Overview
+
+**N = `r N`** (Cohorts 1–3 combined). This document summarizes findings from a Hornik & Woolf (1999) percentage-to-gain (PTG) analysis examining which beliefs are most associated with four behavioral intentions related to government funding of university research, and integrates belief network centrality (EBIC-GLASSO, `r n_nodes` nodes, N/p = `r np_ratio`, `r n_communities` communities) to prioritize among similarly-ranked targets. It is intended as an interim working summary, not a final analysis.
+
+---
+
+# Methods note
+
+**PTG** = (rate of "Definitely will" among those at the desired belief position) − (overall rate of "Definitely will"). Predictor dichotomized at the top response if positively correlated with intent composite, bottom if negatively correlated.
+
+**Reliability threshold:** estimates based on fewer than 30 participants at the desired position are flagged (`[!]`). None of the targets in this summary trigger that flag.
+
+**Ceiling flag:** beliefs where ≥ 60% already holds the desired position are excluded.
+
+**Lower bound** = PTG − 1 SE (floored at 0). A lower bound ≥ 5 on at least two outcomes is the working criterion for a "credible" target (shaded rows in the table below).
+
+**Centrality** = eigenvector centrality from the EBIC-GLASSO partial correlation network (`r n_nodes` nodes). Higher centrality = more connected to other influential beliefs. Percentile rank shown in parentheses.
+
+**‡** From `govtfund_6` battery (dropped from network; α = 0.41). PTG valid but lower priority.
+**†** Not included as a node in the belief network.
+
+---
+
+# Cross-outcome summary table
+
+Values are **PTG (lower bound)**. Centrality column shows eigenvector centrality (percentile rank). Shaded rows meet the credibility criterion (lb ≥ 5 on ≥ 2 outcomes).
+
+```{r summary-gt}
+summary_table |>
+  gt(groupname_col = "theme") |>
+  cols_hide(c(variable, composite_lb, eigenvector_abs, community_id, flagged)) |>
+  cols_label(
+    Belief     = "Belief",
+    Dir        = "Dir",
+    Note       = "",
+    Talk       = "Talk to others",
+    Share      = "Share online",
+    Oppose     = "Oppose cuts",
+    Support    = "Support funding",
+    composite  = "Composite PTG",
+    Centrality = "Centrality (pctile)"
+  ) |>
+  tab_spanner(label = "% to gain (lower bound)", columns = c(Talk, Share, Oppose, Support)) |>
+  tab_style(
+    style = cell_fill(color = "#eef4fb"),
+    locations = cells_body(rows = flagged == TRUE)
+  ) |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(columns = composite)
+  ) |>
+  tab_style(
+    style = cell_text(color = "#888888", style = "italic"),
+    locations = cells_body(columns = Note, rows = Note %in% c("‡", "†"))
+  ) |>
+  tab_style(
+    style = cell_text(color = "#888888"),
+    locations = cells_row_groups()
+  ) |>
+  tab_footnote(
+    footnote = "‡ govtfund_6 battery dropped from network (α = 0.41). † Not a network node.",
+    locations = cells_column_labels(columns = Note)
+  ) |>
+  tab_footnote(
+    footnote = "Composite = mean PTG across all four outcomes.",
+    locations = cells_column_labels(columns = composite)
+  ) |>
+  tab_footnote(
+    footnote = "Eigenvector centrality from EBIC-GLASSO network (58 nodes). Percentile rank in parentheses.",
+    locations = cells_column_labels(columns = Centrality)
+  ) |>
+  tab_options(
+    row_group.font.weight     = "bold",
+    table.font.size           = 13,
+    data_row.padding          = px(4),
+    column_labels.font.weight = "bold"
+  )
+```
+
+---
+
+# Outcome-by-outcome highlights
+
+## Talk to others about cuts
+
+```{r top5-talk}
+top5("Talk to others about cuts") |>
+  gt() |>
+  tab_options(table.font.size = 13, data_row.padding = px(4))
+```
+
+The personal relevance cluster dominates. **People you care about** (PTG = `r d_full |> filter(variable=="research_3_2", outcome=="Talk to others about cuts") |> pull(pct_to_gain)`, ROR = `r d_full |> filter(variable=="research_3_2", outcome=="Talk to others about cuts") |> pull(ror)`) is the single strongest target: proximate personal concern mobilizes interpersonal communication. Multiple research_3 items appear (local community, you personally, disadvantaged individuals), reinforcing a stakes/proximity framing.
+
+## Share info online about cuts
+
+```{r top5-share}
+top5("Share info online about cuts") |>
+  gt() |>
+  tab_options(table.font.size = 13, data_row.padding = px(4))
+```
+
+Personal relevance again tops the list, but **researcher integrity beliefs** rise substantially compared to talking. Beliefs that researchers lie to maintain funding and that money is spent on less important things rank highly. This may reflect the broadcast, confrontational character of online sharing relative to private conversation. The arts-funding cuts item (ROR = `r d_full |> filter(variable=="govtfund_9_4", outcome=="Share info online about cuts") |> pull(ror) |> round(2)`) has a high ROR but likely reflects general political engagement rather than a modifiable belief.
+
+## Contact reps to oppose cuts
+
+```{r top5-oppose}
+top5("Contact reps to oppose cuts") |>
+  gt() |>
+  tab_options(table.font.size = 13, data_row.padding = px(4))
+```
+
+PTG values are lower overall — contacting representatives is a higher-effort behavior. **Science salience** (thinking about the impact of science on daily life) becomes the top target (PTG = `r d_full |> filter(variable=="research_4_4", outcome=="Contact reps to oppose cuts") |> pull(pct_to_gain)`, ROR = `r d_full |> filter(variable=="research_4_4", outcome=="Contact reps to oppose cuts") |> pull(ror)`). **Local impact** also has a reliable estimate (lower bound = `r d_full |> filter(variable=="govfund_10", outcome=="Contact reps to oppose cuts") |> mutate(lb=round(pct_to_gain-se_ptg,1)) |> pull(lb)`): connecting research cuts to local constituents may be particularly effective for motivating representative contact.
+
+## Contact reps to support funding
+
+```{r top5-support}
+top5("Contact reps to support funding") |>
+  gt() |>
+  tab_options(table.font.size = 13, data_row.padding = px(4))
+```
+
+**Science salience** is the strongest target here as well (PTG = `r d_full |> filter(variable=="research_4_4", outcome=="Contact reps to support funding") |> pull(pct_to_gain)`, ROR = `r d_full |> filter(variable=="research_4_4", outcome=="Contact reps to support funding") |> pull(ror)`). **Clear how to apply research findings** ranks 2nd (PTG = `r d_full |> filter(variable=="research_4_3", outcome=="Contact reps to support funding") |> pull(pct_to_gain)`) — applied relevance framing may be particularly effective for motivating proactive support.
+
+---
+
+# Network centrality
+
+Eigenvector centrality indicates how well-connected each belief is to other influential beliefs in the network. A high-centrality belief is embedded in the broader structure and may cascade: shifting it could move adjacent beliefs as well. A low-centrality belief predicts behavior but is structurally isolated — it may respond well to direct messaging but is unlikely to produce downstream ripple effects.
+
+The priority zone is the **upper-right quadrant** below: above-average on both composite PTG and centrality.
+
+```{r centrality-scatter, fig.width = 9, fig.height = 6}
+plot_df <- summary_table |>
+  filter(!variable %in% not_in_network_vars, !is.na(eigenvector_abs)) |>
+  mutate(
+    label_plot = str_wrap(Belief, 28),
+    theme      = factor(theme, levels = names(theme_colors))
+  )
+
+mean_cent <- mean(plot_df$eigenvector_abs, na.rm = TRUE)
+mean_ptg  <- mean(plot_df$composite,      na.rm = TRUE)
+
+ggplot(plot_df, aes(eigenvector_abs, composite, color = theme)) +
+  annotate("rect",
+    xmin = mean_cent, xmax = Inf, ymin = mean_ptg, ymax = Inf,
+    fill = "#2D93AD", alpha = 0.07) +
+  geom_hline(yintercept = mean_ptg,  linetype = "dashed", color = "grey60", linewidth = 0.5) +
+  geom_vline(xintercept = mean_cent, linetype = "dashed", color = "grey60", linewidth = 0.5) +
+  geom_point(size = 3.5) +
+  geom_label_repel(
+    aes(label = label_plot),
+    size = 2.8, alpha = 0.88, lineheight = 0.9,
+    box.padding = 0.4, point.padding = 0.2,
+    segment.color = "grey65", max.overlaps = 20
+  ) +
+  scale_color_manual(values = theme_colors, name = NULL) +
+  scale_x_continuous(labels = scales::number_format(accuracy = 0.01)) +
+  labs(
+    x        = "Eigenvector centrality",
+    y        = "Composite PTG (%)",
+    subtitle = "Shaded = above average on both dimensions (priority targets)"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom",
+        panel.grid.minor = element_blank())
+```
+
+```{r centrality-table}
+summary_table |>
+  filter(!variable %in% not_in_network_vars) |>
+  arrange(desc(eigenvector_abs)) |>
+  select(theme, Belief, composite, Centrality, community_id) |>
+  rename(
+    Theme       = theme,
+    `Composite PTG` = composite,
+    Community   = community_id
+  ) |>
+  reactable(
+    striped = TRUE, compact = TRUE, sortable = TRUE, filterable = TRUE,
+    defaultPageSize = 20,
+    columns = list(
+      Belief          = colDef(minWidth = 240),
+      `Composite PTG` = colDef(
+        style = function(value) {
+          if (is.numeric(value) && value >= 12)
+            list(color = "#2166ac", fontWeight = "bold")
+          else list()
+        }
+      )
+    )
+  )
+```
+
+## Quadrant interpretation
+
+```{r quadrant-summary}
+quad_df <- summary_table |>
+  filter(!variable %in% not_in_network_vars, !is.na(eigenvector_abs)) |>
+  mutate(
+    hi_ptg  = composite > mean(composite, na.rm = TRUE),
+    hi_cent = eigenvector_abs > mean(eigenvector_abs, na.rm = TRUE),
+    quadrant = case_when(
+       hi_ptg &  hi_cent ~ "High PTG + High centrality (priority)",
+       hi_ptg & !hi_cent ~ "High PTG + Low centrality (direct target)",
+      !hi_ptg &  hi_cent ~ "Low PTG + High centrality (structural hub)",
+      TRUE               ~ "Low PTG + Low centrality"
+    )
+  )
+
+quad_df |>
+  filter(quadrant %in% c("High PTG + High centrality (priority)",
+                         "High PTG + Low centrality (direct target)")) |>
+  arrange(quadrant, desc(composite)) |>
+  select(Quadrant = quadrant, Belief, Theme = theme,
+         `Composite PTG` = composite, Centrality) |>
+  reactable(
+    striped = TRUE, compact = TRUE,
+    groupBy = "Quadrant",
+    columns = list(
+      Belief    = colDef(minWidth = 260),
+      Quadrant  = colDef(minWidth = 200)
+    )
+  )
+```
+
+**High PTG + High centrality** beliefs are the primary targets: shifting them is both associated with behavior change and likely to propagate through the belief network.
+
+**High PTG + Low centrality** beliefs are strong direct targets but structurally isolated: they predict behavior without being well-connected to other beliefs. Useful for direct messaging, but less likely to produce broader attitude ripple effects.
+
+---
+
+# Key takeaways
+
+```{r takeaways-data}
+r44_comp   <- composite |> filter(variable == "research_4_4") |> pull(composite)
+r32_comp   <- composite |> filter(variable == "research_3_2") |> pull(composite)
+r43_comp   <- composite |> filter(variable == "research_4_3") |> pull(composite)
+r44_cent   <- centrality |> filter(col == "research_4_4") |> pull(cent_pct)
+r32_cent   <- centrality |> filter(col == "research_3_2") |> pull(cent_pct)
+r57_cent   <- centrality |> filter(col == "govtfund_5_7")  |> pull(cent_pct)
+
+lb_check <- d_full |>
+  filter(variable %in% target_vars, !is.na(pct_to_gain)) |>
+  mutate(lb = pmax(pct_to_gain - se_ptg, 0)) |>
+  group_by(variable) |>
+  summarise(n_lb5 = sum(lb >= 5), .groups = "drop")
+
+r44_nlb5 <- lb_check |> filter(variable == "research_4_4") |> pull(n_lb5)
+r32_nlb5 <- lb_check |> filter(variable == "research_3_2") |> pull(n_lb5)
+
+hi_ptg_hi_cent <- quad_df |>
+  filter(quadrant == "High PTG + High centrality (priority)") |>
+  arrange(desc(composite)) |>
+  pull(Belief)
+```
+
+1. **Single best cross-cutting target: "Think about the impact of science on daily life"** (composite PTG = `r r44_comp`%, lb ≥ 5 on `r r44_nlb5` of 4 outcomes). However, its centrality is at the `r r44_cent`th percentile — it is a strong behavior predictor but peripheral in the belief network. It is a high-value **direct messaging target**, not a gateway belief.
+
+2. **Best combined target: personal relevance cluster (research_3).** "People you care about" (composite PTG = `r r32_comp`%, `r r32_cent`th centrality percentile) sits in the priority quadrant: high PTG and moderately central. The full personal relevance cluster (items 1, 2, 3, 13) all fall in community 3 together, confirming construct coherence. Shifting personal relevance beliefs may cascade through the network.
+
+3. **Social behaviors vs. political action require different frames.** Personal relevance drives talking and sharing; science salience and applied relevance ("clear how to apply research findings," composite PTG = `r r43_comp`%) drive contacting representatives. A single message strategy is unlikely to move all four outcomes equally.
+
+4. **Researcher skepticism cluster is specific to online sharing and is highly central.** "Taxpayer money is wasted" (centrality `r r57_cent`th percentile), "researchers lie," and "money spent on less important things" cluster together in community 11 and are each other's neighbors in the network. These beliefs form a coherent structural unit — but their behavioral payoff is concentrated in sharing behavior, not political action.
+
+5. **"Funded researchers held to higher standards"** is the most outcome-consistent govt funding item (lb ≥ 5 on three of four outcomes) but has near-zero centrality — structurally isolated. Strong for direct messaging; unlikely to cascade.
+
+6. **Local impact is the most reliable political action frame.** "Local area negatively impacted by cuts" has lower bounds ≥ 4% on all four outcomes and is the most actionable frame for constituent-targeted messaging.
+
+---
+
+# Caveats
+
+- **Correlational estimates only.** PTG identifies co-variation with intent; experimental manipulation is required to confirm causal effects.
+- **N = `r N` limits per-outcome power.** Lower bounds below ~5% should be treated as noise.
+- **Network N/p = `r np_ratio`** (`r n_nodes` nodes). At the lower edge of acceptable range; centrality estimates should be treated as directional, not precise.
+- **govtfund_6 items (‡)** excluded from network due to poor coherence. PTG estimates included here but lower priority.
+- **research_4_6** ("Science makes our way of life change too fast") appears in unexpected direction for political outcomes; dropped from network due to reverse-coding instability. Do not treat as an intervention target.
+
+---
+
+*Generated `r Sys.Date()`. PTG source: 04_promising_beliefs.csv. Network source: 05_belief_network.csv (N = `r N`, `r n_nodes` nodes, N/p = `r np_ratio`).*

@@ -1,0 +1,1076 @@
+---
+title: "Step 1: Belief Network Analysis"
+author: "Nicole Cooper"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 5)
+options(scipen = 999)
+```
+
+```{r packages}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, qgraph, igraph, ggrepel, reactable, RColorBrewer)
+```
+
+# Overview
+
+Belief network analysis following Lydic, Torres-Grillo, Levine, Cosme et al. (2025).
+Pipeline: GLASSO partial correlation network → walktrap community detection →
+eigenvector centrality → combine with Hornik & Woolf PTG to identify priority targets.
+
+**Node selection note (2026-05-20):** Subscale means are used only for batteries
+with internally consistent items (Cronbach α ≥ 0.65). Three batteries were revised:
+`research_4` split into literacy/engagement (items 1–4, α = 0.750) and benefit beliefs
+(items 5, 7, 8, α = 0.677) — item 6 dropped (reverse-coded item that does not behave
+as expected empirically); `govtfund_4` restricted to non-partisan stakeholder items
+(items 1–5, 11–13, α = 0.835) — partisan perception items (6–10) dropped; `gotvfund_6`
+restricted to items 2–4, 7 (α = 0.694) — private-company comparison items and
+profit-motive item dropped. Node selection finalized at N = 300.
+
+**PTG adaptation note:** H&W PTG is designed for single items on a common scale.
+For subscale means we dichotomize at the empirical 75th percentile as an approximation
+of "strongest desired position." Thresholds based on full N = 300 sample.
+
+---
+
+# 1. Data
+
+## 1.1 Load and clean
+
+```{r load}
+path <- "~/Documents/GitHub/UniversityNews"
+
+data <- readRDS(sprintf("%s/Data/Cleaned/UnivNews_Step1_combined.rds", path))
+
+cat(sprintf("N = %d\n", nrow(data)))
+```
+
+## 1.2 Scale levels and numeric recoding
+
+```{r scale-levels}
+lvl_know         <- c("None at all","A little","A moderate amount","A lot","A great deal")
+lvl_agree5       <- c("Strongly disagree","Somewhat disagree","Neither agree nor disagree",
+                      "Somewhat agree","Strongly agree")
+lvl_pos_neg      <- c("Extremely negative","Somewhat negative","Neither positive nor negative",
+                      "Somewhat positive","Extremely positive")
+lvl_importance   <- c("Not at all important","Slightly important","Moderately important",
+                      "Very important","Extremely important")
+lvl_likelihood_r <- c("Very unlikely","Somewhat unlikely","Neutral","Somewhat likely","Very likely")
+lvl_problematic  <- c("Not at all problematic","Slightly problematic","Moderately problematic",
+                      "Very problematic","Extremely problematic")
+lvl_approve4     <- c("Strongly disapprove","Somewhat disapprove","Somewhat approve","Strongly approve")
+lvl_approve5     <- c("Strongly disapprove","Somewhat disapprove","Neither approve nor disapprove",
+                      "Somewhat approve","Strongly approve")
+lvl_approve5_he  <- c("Strongly disapprove","Somewhat disapprove",
+                      "Neutral / neither approve nor disapprove","Somewhat approve","Strongly approve")
+lvl_likelihood_g <- c("Extremely unlikely","Somewhat unlikely","Neither likely nor unlikely",
+                      "Somewhat likely","Extremely likely")
+lvl_priority     <- c("Not a priority","Low priority","Somewhat priority",
+                      "Moderate priority","High priority")
+lvl_freq         <- c("Never","Once or twice a year","Once or twice a month",
+                      "Once or twice a week","Almost every day","Once or more per day")
+lvl_impact       <- c("Strong negative impact","Somewhat negative impact",
+                      "Neither positive nor negative impact",
+                      "Somewhat positive impact","Strong positive impact")
+lvl_climate_trust <- c("Not at all","Slightly","Moderately","Very strongly")
+lvl_proportion   <- c("None","Less than half","About half","Most","All")
+lvl_intent       <- c("Definitely will not","Probably will not","Maybe will not",
+                      "Unsure","Maybe will","Probably will","Definitely will")
+
+to_num <- function(x, levels) {
+  as.integer(factor(x, levels = levels, ordered = TRUE))
+}
+```
+
+```{r recode}
+d <- data |>
+  mutate(
+    # ── Research beliefs ─────────────────────────────────────────────────────
+    research_1  = to_num(research_1, lvl_know),
+    research_2  = to_num(research_2, lvl_agree5),
+
+    across(paste0("research_3_",   1:13), \(x) to_num(x, lvl_pos_neg)),
+    across(paste0("research_4_",   1:8),  \(x) to_num(x, lvl_agree5)),
+    across(paste0("research_5.1_", 1:13), \(x) to_num(x, lvl_importance)),
+    across(paste0("research_5.2_", 1:13), \(x) to_num(x, lvl_likelihood_r)),
+    across(paste0("research_6.1_", 1:11), \(x) to_num(x, lvl_problematic)),
+    across(paste0("research_6.2_", 1:11), \(x) to_num(x, lvl_likelihood_r)),
+
+    # ── Government funding ───────────────────────────────────────────────────
+    govtfund_1 = to_num(govtfund_1, lvl_approve4),
+    govtfund_2 = case_when(
+      grepl("ESSENTIAL", govtfund_2) ~ 1L,
+      govtfund_2 == ""               ~ NA_integer_,
+      TRUE                           ~ 0L
+    ),
+    govtfund_3  = to_num(govtfund_3, lvl_know),
+
+    across(paste0("govtfund_4_", 1:13), \(x) to_num(x, lvl_approve5)),
+    across(paste0("govtfund_5_", 1:10), \(x) to_num(x, lvl_likelihood_g)),
+    across(paste0("gotvfund_6_", 1:9),  \(x) to_num(x, lvl_agree5)),
+    across(paste0("govtfund_7_", 1:4),  \(x) to_num(x, lvl_priority)),
+    across(paste0("govtfund_8_", 1:7),  \(x) to_num(x, lvl_agree5)),
+    across(paste0("govtfund_9_", 1:5),  \(x) to_num(x, lvl_approve5)),
+
+    govfund_10  = to_num(govfund_10, lvl_impact),
+
+    # ── Higher education ─────────────────────────────────────────────────────
+    across(paste0("highered_1_", 1:3), \(x) to_num(x, lvl_approve5_he)),
+    across(paste0("highered_2_", 1:3), \(x) to_num(x, lvl_know)),
+    across(paste0("highered_3_", 1:6), \(x) to_num(x, lvl_know)),
+    across(paste0("highered_4_", 1:6), \(x) to_num(x, lvl_proportion)),
+
+    # ── University perceptions ───────────────────────────────────────────────
+    across(paste0("univ_2_", 1:10), \(x) to_num(x, lvl_agree5)),
+    across(paste0("univ_4_", 1:3),  \(x) to_num(x, lvl_agree5)),
+    across(paste0("univ_5_", 1:7),  \(x) to_num(x, lvl_know)),
+
+    # ── Climate ──────────────────────────────────────────────────────────────
+    climate_1 = case_when(climate_1 == "Yes" ~ 1L, climate_1 == "No" ~ 0L, TRUE ~ NA_integer_),
+    climate_2 = case_when(
+      grepl("humans", climate_2, ignore.case = TRUE) ~ 1L,
+      climate_2 == ""                                ~ NA_integer_,
+      TRUE                                           ~ 0L
+    ),
+    climate_3  = to_num(climate_3, lvl_climate_trust),
+    across(paste0("climate_4_", 1:4), \(x) to_num(x, lvl_importance))
+  )
+```
+
+## 1.3 Intent outcomes
+
+```{r intent}
+intent_cols   <- paste0("X", 1:4, "_intent")
+intent_labels <- c(
+  "Contact reps: oppose cuts",
+  "Talk to others about cuts",
+  "Share info online",
+  "Contact reps: support funding"
+)
+
+d <- d |>
+  mutate(
+    across(all_of(intent_cols), \(x) to_num(x, lvl_intent)),
+    intent_composite = rowMeans(pick(all_of(intent_cols)), na.rm = TRUE)
+  )
+```
+
+---
+
+# 2. Node construction
+
+Nodes are defined here.
+
+Two types:
+- **Subscale means** — item batteries aggregated to a single score per construct (α ≥ 0.65)
+- **Individual items** — standalone items or small batteries where items are conceptually distinct
+
+`govtfund_5` is split into positive (items 1–5: benefits of govt funding) and negative
+(items 6–10: costs/risks of govt funding) subscales because they have opposite valences.
+`research_4` is split into science literacy/engagement (items 1–4) and science benefit
+beliefs (items 5, 7, 8); item 6 ("Science makes our way of life change too fast") is
+excluded because reversing it reduces rather than increases internal consistency,
+suggesting it measures a distinct construct. `govtfund_4` uses items 1–5 and 11–13
+(workers, students, scientists, general public, community members, health researchers,
+pharma, tech) — partisan/political perception items 6–10 are excluded (α = 0.209 for
+those items alone). `gotvfund_6` uses items 2–4, 7 (oversight, everyday tools, daily
+benefits, objectivity of government-funded research); private-company comparison items
+and profit-motive item excluded.
+
+```{r nodes}
+# ── Subscale means ────────────────────────────────────────────────────────────
+
+d_nodes <- d |>
+  mutate(
+    # ── Research beliefs ───────────────────────────────────────────────────────
+    # research_3: high-PTG items kept as individual nodes; residual national/political
+    # impact items (4=US people, 11=US govt) retained as a 2-item subscale (α=0.669)
+    research_3_nat_mean = rowMeans(pick(all_of(paste0("research_3_", c(4, 11)))), na.rm = TRUE),
+    # research_3 items 1,2,3,13: individual nodes (high PTG; see Section 2.2)
+    # research_4 items 1-3: all kept as individual nodes (residual 2-item α=0.642 < threshold)
+    # research_4 benefit items 5, 7, 8: individual nodes (no mean)
+    # govtfund_5 items 1-10: all individual nodes
+    #   pos items (1-4): composite α=0.641 < threshold; all individualised
+    #   neg items (6-10): pulling high-PTG items 6 and 10 leaves residual α=0.618 < threshold
+    #   item 5 ("held to higher standards") already standalone
+
+    # ── Climate ───────────────────────────────────────────────────────────────
+    climate_4_mean      = rowMeans(pick(all_of(paste0("climate_4_", 1:4))), na.rm = TRUE)
+  )
+
+# ── Importance × likelihood composites ────────────────────────────────────────
+# research_5: perceived value = importance × likelihood for each of 13 research areas
+for (i in 1:13) d_nodes[[paste0(".r5p_", i)]] <-
+  d_nodes[[paste0("research_5.1_", i)]] * d_nodes[[paste0("research_5.2_", i)]]
+d_nodes$research_5_composite <- rowMeans(d_nodes[paste0(".r5p_", 1:13)], na.rm = TRUE)
+d_nodes[paste0(".r5p_", 1:13)] <- NULL
+
+# research_6: perceived risk = severity × likelihood for each of 11 negative outcomes
+for (i in 1:11) d_nodes[[paste0(".r6p_", i)]] <-
+  d_nodes[[paste0("research_6.1_", i)]] * d_nodes[[paste0("research_6.2_", i)]]
+d_nodes$research_6_composite <- rowMeans(d_nodes[paste0(".r6p_", 1:11)], na.rm = TRUE)
+d_nodes[paste0(".r6p_", 1:11)] <- NULL
+
+# ── Select all nodes in one matrix ────────────────────────────────────────────
+
+node_cols <- c(
+  # Subscale means / composites (4 nodes)
+  "research_3_nat_mean",                           # national impact (items 4,11; α=0.669)
+  "research_5_composite", "research_6_composite",  # product composites
+  "climate_4_mean",                                # climate research importance
+  # Individual items — Research Beliefs (13 nodes)
+  "research_1", "research_2",
+  "research_3_1", "research_3_2", "research_3_3", "research_3_13",
+  "research_4_1", "research_4_2", "research_4_3",
+  "research_4_4", "research_4_5", "research_4_7", "research_4_8",
+  # Individual items — Government Funding (30 nodes)
+  "govtfund_1", "govtfund_2", "govtfund_3",
+  "govtfund_5_1", "govtfund_5_2", "govtfund_5_3", "govtfund_5_4",
+  "govtfund_5_5",
+  "govtfund_5_6", "govtfund_5_7", "govtfund_5_8", "govtfund_5_9", "govtfund_5_10",
+  "govtfund_7_1", "govtfund_7_2", "govtfund_7_3", "govtfund_7_4",
+  "govtfund_8_1", "govtfund_8_2", "govtfund_8_3", "govtfund_8_4",
+  "govtfund_8_5", "govtfund_8_6", "govtfund_8_7",
+  "govtfund_9_1", "govtfund_9_2", "govtfund_9_3", "govtfund_9_4", "govtfund_9_5",
+  "govfund_10",
+  # Individual items — Higher Education (4 nodes)
+  "highered_1_1", "highered_2_1", "highered_3_1", "highered_4_1",
+  # Individual items — University Perceptions (4 nodes)
+  "univ_2_7", "univ_2_9",
+  "univ_5_1", "univ_5_2",
+  # Individual items — Climate (3 nodes)
+  "climate_1", "climate_2", "climate_3"
+)
+
+cat(sprintf("Total nodes: %d\n", length(node_cols)))
+```
+
+## 2.1 Node registry
+
+Human-readable labels and block membership for each node.
+
+```{r node-registry}
+node_registry <- tribble(
+  ~col,                        ~label,                                                              ~block,
+  # ── Subscale means / composites (4 nodes) ────────────────────────────────────────────────────
+  "research_3_nat_mean",       "Research impact: US people & government (nat. subscale)",           "Research Beliefs",
+  "research_5_composite",      "Research value (importance × likelihood)",                          "Research Beliefs",
+  "research_6_composite",      "Perceived research risk (severity × likelihood)",                   "Research Beliefs",
+  "climate_4_mean",            "Climate research importance",                                       "Climate",
+  # ── Individual items — Research Beliefs (13 nodes) ───────────────────────────────────────────
+  "research_1",                "Knowledge of university research",                                  "Research Beliefs",
+  "research_2",                "Science is the best way to find truth",                             "Research Beliefs",
+  "research_3_1",              "Research impact: you personally",                                   "Research Beliefs",
+  "research_3_2",              "Research impact: people you care about",                            "Research Beliefs",
+  "research_3_3",              "Research impact: local community",                                  "Research Beliefs",
+  "research_3_13",             "Research impact: disadvantaged individuals",                        "Research Beliefs",
+  "research_4_1",              "Usually understand academic research findings",                      "Research Beliefs",
+  "research_4_2",              "Know where to look up academic research",                           "Research Beliefs",
+  "research_4_3",              "Clear how to apply research findings in my life",                   "Research Beliefs",
+  "research_4_4",              "Often think about science impact on daily life",                    "Research Beliefs",
+  "research_4_5",              "Science benefits outweigh harms",                                   "Research Beliefs",
+  "research_4_7",              "Science creates opportunities for next generation",                 "Research Beliefs",
+  "research_4_8",              "Basic science has value without immediate benefits",                "Research Beliefs",
+  # ── Individual items — Government Funding (30 nodes) ─────────────────────────────────────────
+  "govtfund_1",                "Approval of federal research funding",                              "Govt Funding",
+  "govtfund_2",                "Govt investment in research is ESSENTIAL",                          "Govt Funding",
+  "govtfund_3",                "Knowledge of recent funding cuts",                                  "Govt Funding",
+  "govtfund_5_1",              "Govt funding benefit: researchers have enough resources",           "Govt Funding",
+  "govtfund_5_2",              "Govt funding benefit: research can focus long-term",                "Govt Funding",
+  "govtfund_5_3",              "Govt funding benefit: exciting research is sped up",                "Govt Funding",
+  "govtfund_5_4",              "Govt funding benefit: results become publicly available",           "Govt Funding",
+  "govtfund_5_5",              "Govt funding benefit: researchers held to higher standards",        "Govt Funding",
+  "govtfund_5_6",              "Govt funding risk: money spent on less important things",           "Govt Funding",
+  "govtfund_5_7",              "Govt funding risk: taxpayer money is wasted",                      "Govt Funding",
+  "govtfund_5_8",              "Govt funding risk: research delayed by oversight",                  "Govt Funding",
+  "govtfund_5_9",              "Govt funding risk: political agendas influence funding",            "Govt Funding",
+  "govtfund_5_10",             "Govt funding risk: researchers lie to maintain funding",            "Govt Funding",
+  "govtfund_7_1",              "Perceived university priority: making a profit",                    "Govt Funding",
+  "govtfund_7_2",              "Perceived university priority: advance knowledge & society",        "Govt Funding",
+  "govtfund_7_3",              "Perceived university priority: develop products to sell",           "Govt Funding",
+  "govtfund_7_4",              "Perceived university priority: serve govt interests",               "Govt Funding",
+  "govtfund_8_1",              "Tax investment in research: boosts economy",                        "Govt Funding",
+  "govtfund_8_2",              "Tax investment in research: improves health & saves lives",         "Govt Funding",
+  "govtfund_8_3",              "Tax investment in research: drives industry investment",            "Govt Funding",
+  "govtfund_8_4",              "Tax investment in research: makes US a leader",                    "Govt Funding",
+  "govtfund_8_5",              "Tax investment in research: protects national security",            "Govt Funding",
+  "govtfund_8_6",              "Tax investment in research: leads to breakthroughs",               "Govt Funding",
+  "govtfund_8_7",              "Tax investment in research: benefits people like you",              "Govt Funding",
+  "govtfund_9_1",              "Approve cutting: health research funding",                          "Govt Funding",
+  "govtfund_9_2",              "Approve cutting: education funding",                                "Govt Funding",
+  "govtfund_9_3",              "Approve cutting: science funding",                                  "Govt Funding",
+  "govtfund_9_4",              "Approve cutting: arts funding",                                     "Govt Funding",
+  "govtfund_9_5",              "Approve cutting: humanities funding",                               "Govt Funding",
+  "govfund_10",                "Local area negatively impacted by funding cuts",                    "Govt Funding",
+  # ── Individual items — Higher Education (4 nodes) ────────────────────────────────────────────
+  "highered_1_1",              "Approval: private colleges & universities",                         "Higher Education",
+  "highered_2_1",              "Trust: private colleges & universities",                            "Higher Education",
+  "highered_3_1",              "Scientific contribution: private colleges",                         "Higher Education",
+  "highered_4_1",              "Perception: private colleges are nonprofit",                        "Higher Education",
+  # ── Individual items — University Perceptions (4 nodes) ──────────────────────────────────────
+  "univ_2_7",                  "Universities contribute: compassion & tolerance",                   "University Perceptions",
+  "univ_2_9",                  "Universities contribute: better intl relationships",                "University Perceptions",
+  "univ_5_1",                  "Universities benefit: you personally",                              "University Perceptions",
+  "univ_5_2",                  "Universities benefit: people you care about",                       "University Perceptions",
+  # ── Individual items — Climate (3 nodes) ─────────────────────────────────────────────────────
+  "climate_1",                 "Believes global warming is happening",                              "Climate",
+  "climate_2",                 "Believes warming caused by humans",                                 "Climate",
+  "climate_3",                 "Trust in climate scientists",                                       "Climate"
+)
+
+cat(sprintf("Registry: %d nodes\n", nrow(node_registry)))
+```
+
+## 2.2 Node inclusion decisions
+
+Documents all inclusion decisions relative to the full survey instrument.
+Cronbach's α reported for subscale means; product composites do not have a
+traditional α.
+
+```{r inclusion-alpha}
+alpha_raw <- function(cols) {
+  mat <- na.omit(as.matrix(d[cols]))
+  k   <- ncol(mat)
+  if (k < 2 || var(rowSums(mat)) == 0) return(NA_real_)
+  V <- var(mat)
+  round((k / (k - 1)) * (1 - sum(diag(V)) / var(rowSums(mat))), 3)
+}
+```
+
+### Subscale means and composites
+
+```{r inclusion-subscales}
+subscale_df <- tribble(
+  ~Node,                   ~`Survey battery`,                    ~`k`,
+  ~`Items included`,
+  ~`Items dropped from battery`,
+  ~alpha_cols,
+
+  "research_3_nat_mean",
+  "research_3 (13 items)", 2L,
+  "Items 4,11 — impact on: people in the US, US government (national/political impact subscale)",
+  "Items 1,2,3,13 kept as individual nodes (high PTG); items 5–10,12 dropped (not theoretically central)",
+  list(paste0("research_3_", c(4, 11))),
+
+  "research_5_composite",
+  "research_5.1 × research_5.2 (13 areas × 2 ratings)", 13L,
+  "All 13 research areas — importance × likelihood product per area, mean across areas",
+  "None — all 13 areas used",
+  list(NULL),
+
+  "research_6_composite",
+  "research_6.1 × research_6.2 (11 outcomes × 2 ratings)", 11L,
+  "All 11 negative research outcomes — severity × likelihood product per outcome, mean across outcomes",
+  "None — all 11 outcomes used",
+  list(NULL),
+
+  "climate_4_mean",
+  "climate_4 (4 items)", 4L,
+  "Items 1–4 — importance of climate science, climate mitigation, climate adaptation, climate policy research",
+  "None — all 4 items used",
+  list(paste0("climate_4_", 1:4))
+) |>
+  mutate(
+    α = map_chr(alpha_cols, \(cols) {
+      if (is.null(cols[[1]])) return("product composite")
+      as.character(alpha_raw(cols[[1]]))
+    })
+  ) |>
+  select(-alpha_cols)
+
+reactable(
+  subscale_df,
+  columns = list(
+    Node              = colDef(minWidth = 160),
+    `Survey battery`  = colDef(minWidth = 160),
+    k                 = colDef(maxWidth = 40),
+    `Items included`  = colDef(minWidth = 220),
+    `Items dropped from battery` = colDef(minWidth = 220),
+    α                 = colDef(maxWidth = 120)
+  ),
+  striped = TRUE, wrap = TRUE
+)
+```
+
+### Individual items
+
+All `r nrow(filter(node_registry, !grepl("_mean$|_composite$", col)))` individual items retained in the network:
+
+```{r inclusion-individual}
+node_registry |>
+  filter(!grepl("_mean$|_composite$", col)) |>
+  select(block, col, label) |>
+  rename(Block = block, Variable = col, `Survey item` = label) |>
+  reactable(striped = TRUE, sortable = TRUE, filterable = TRUE, groupBy = "Block")
+```
+
+### Dropped batteries and items
+
+```{r inclusion-dropped}
+dropped_df <- tribble(
+  ~`Battery / item`,                     ~`Original k`, ~`Reason for exclusion`,
+
+  "research_4_6",
+  "1 item",
+  "Reverse-coded item ('Science makes our way of life change too fast'): reversing it reduces rather than increases internal consistency (α drops from 0.715 to 0.652), indicating it measures a distinct construct",
+
+  "research_3 items 5,6,7,8,9,10,12",
+  "7 of 13 items",
+  "Beneficiary targets not theoretically central to this study: students, scientists, universities themselves, pharma companies, tech companies, military, wealthy individuals. Items 1,2,3,13 kept as individual nodes; items 4,11 retained in research_3_nat_mean subscale.",
+
+  "govtfund_4 (all 13 items)",
+  "13 items",
+  "Perceived stakeholder support for research funding: dropped entirely. Partisan perception items (liberals, conservatives, politicians, climate skeptics, limited-govt advocates) had α = 0.21 in isolation, destroying overall battery coherence (full-battery α = 0.67)",
+
+  "govtfund_6 (all 9 items)",
+  "9 items",
+  "Heterogeneous battery (full α = 0.41): combines research governance beliefs, everyday-benefit claims, and private-company comparisons that measure distinct constructs and do not form a coherent scale",
+
+  "highered_1 items 2–3",
+  "2 of 3 items",
+  "Restricted to private colleges only: state university system and community college items dropped",
+
+  "highered_2 items 2–3",
+  "2 of 3 items",
+  "Restricted to private colleges only: state university system and community college items dropped",
+
+  "highered_3 items 2–6",
+  "5 of 6 items",
+  "Restricted to private colleges only: private companies, federal agencies, charitable foundations, state colleges, community colleges dropped",
+
+  "highered_4 items 2–6",
+  "5 of 6 items",
+  "Restricted to private colleges only: public colleges, community colleges, private companies, federal agencies, charitable foundations dropped",
+
+  "univ_5 items 3–7",
+  "5 of 7 items",
+  "Restricted to personal benefit perception: local communities, students who attend, students' families, employers and businesses, society as a whole dropped",
+
+  "univ_2 items 1–6, 8, 10",
+  "8 of 10 items",
+  "Low composite PTG (lb < 4%) and high node count: innovation, jobs, incomes, knowledgeable population, competitiveness, entrepreneurship, economic growth, local benefits dropped. Items 7 (compassion & tolerance, lb=6.7%) and 9 (intl relations, lb=5.9%) retained as individual nodes.",
+
+  "univ_4 (all 3 items)",
+  "3 items",
+  "Low composite PTG (lb < 4%) across all outcomes and theoretical overlap with research_4 literacy items: dropped entirely to reduce node count.",
+
+  "research_4_literacy_mean",
+  "3 items (formerly composite)",
+  "Composite α = 0.720 but residual 2-item composite after extracting r4_3 would fall to α = 0.642, below the 0.65 threshold. All three items (1,2,3) retained as individual nodes.",
+
+  "govtfund_5_pos_mean",
+  "4 items (formerly composite)",
+  "Full composite α = 0.641, below threshold. All four items retained as individual nodes.",
+
+  "govtfund_5_neg_mean",
+  "5 items (formerly composite)",
+  "Extracting high-PTG items 6 and 10 as individual nodes leaves residual α = 0.618, below threshold. All five items retained as individual nodes."
+)
+
+reactable(
+  dropped_df,
+  columns = list(
+    `Battery / item`       = colDef(minWidth = 180),
+    `Original k`           = colDef(maxWidth = 90),
+    `Reason for exclusion` = colDef(minWidth = 300)
+  ),
+  striped = TRUE, wrap = TRUE
+)
+```
+
+---
+
+# 3. Correlations: nodes × intent outcomes
+
+Spearman r used throughout (ordinal data on different scales).
+
+```{r node-intent-cors}
+cor_fun <- function(x, y) {
+  suppressWarnings(cor.test(x, y, method = "spearman", exact = FALSE)) |>
+    broom::tidy() |>
+    select(estimate, p.value) |>
+    rename(r = estimate, p = p.value)
+}
+
+node_cors <- map_dfr(node_cols, function(nc) {
+  x <- d_nodes[[nc]]
+  map_dfr(seq_along(intent_cols), function(i) {
+    y <- d_nodes[[intent_cols[i]]]
+    ct <- cor_fun(x, y)
+    tibble(node = nc, outcome = intent_labels[i],
+           r = round(ct$r, 3), p = round(ct$p, 3))
+  }) |>
+    bind_rows(
+      tibble(node = nc, outcome = "Composite",
+             r    = round(suppressWarnings(cor(x, d_nodes$intent_composite,
+                                               method = "spearman",
+                                               use = "complete.obs")), 3),
+             p = NA_real_)
+    )
+}) |>
+  left_join(node_registry, by = c("node" = "col"))
+
+node_cors |>
+  filter(outcome == "Composite") |>
+  arrange(desc(abs(r))) |>
+  select(block, label, r) |>
+  rename(Block = block, Node = label, `r (composite)` = r) |>
+  reactable(filterable = TRUE, sortable = TRUE, striped = TRUE)
+```
+
+---
+
+# 4. Belief network
+
+## 4.1 Correlation matrix
+
+```{r cor-matrix}
+node_mat <- d_nodes |>
+  select(all_of(node_cols)) |>
+  as.matrix()
+
+# Remove zero-variance nodes before GLASSO
+node_sds      <- apply(node_mat, 2, sd, na.rm = TRUE)
+dropped_nodes <- names(node_sds)[node_sds == 0 | is.na(node_sds)]
+if (length(dropped_nodes) > 0) {
+  cat(sprintf("Dropping %d zero-variance node(s): %s\n",
+              length(dropped_nodes), paste(dropped_nodes, collapse = ", ")))
+  node_cols_net <- setdiff(node_cols, dropped_nodes)
+  node_mat      <- node_mat[, node_cols_net, drop = FALSE]
+} else {
+  node_cols_net <- node_cols
+}
+
+cor_mat <- cor(node_mat, use = "pairwise.complete.obs")
+
+# Short labels for network plot (wrap to ~20 chars)
+node_labels <- node_registry$label |>
+  stringr::str_wrap(width = 18) |>
+  setNames(node_registry$col)
+
+labels_ordered <- node_labels[node_cols_net]
+```
+
+## 4.2 Network estimator
+
+EBIC-GLASSO partial correlation network (EBICglasso via qgraph, gamma = 0.5).
+GLASSO requires approximately 5–10 observations per node (N/p ≥ 5–10). With
+`r length(node_cols_net)` nodes and N = `r nrow(node_mat)`,
+N/p = `r round(nrow(node_mat) / length(node_cols_net), 1)` — within the acceptable range.
+
+```{r cor-network, fig.width=12, fig.height=12}
+n_obs <- nrow(node_mat)
+p     <- ncol(cor_mat)
+
+# EBIC-GLASSO partial correlation network
+graph <- tryCatch(
+  qgraph(cor_mat, graph = "glasso", sampleSize = n_obs,
+         DoNotPlot = TRUE, labels = labels_ordered),
+  error = function(e) {
+    cat(sprintf("GLASSO failed: %s\n", conditionMessage(e)))
+    NULL
+  }
+)
+
+glasso_mat <- if (!is.null(graph)) qgraph::getWmat(graph) else NULL
+n_edges    <- if (!is.null(glasso_mat)) sum(glasso_mat[upper.tri(glasso_mat)] != 0) else 0
+network_ok <- !is.null(graph) && n_edges > 0
+
+cat(sprintf("GLASSO edges retained: %d (of %d possible)\n", n_edges, p * (p - 1) / 2))
+
+if (network_ok) {
+  qgraph(
+    cor_mat,
+    graph       = "glasso",
+    sampleSize  = n_obs,
+    layout      = "spring",
+    repulsion   = 1.5,
+    negCol      = "#2D93AD",
+    posCol      = "#c44535",
+    edge.labels = FALSE,
+    labels      = labels_ordered,
+    label.scale = FALSE,
+    label.cex   = 0.5,
+    shape       = "ellipse",
+    vsize       = 5,
+    vsize2      = 3,
+    legend      = FALSE,
+    title       = sprintf("Belief Network (GLASSO, N = %d)", n_obs)
+  )
+} else {
+  cat(sprintf(
+    "GLASSO produced empty network at N = %d, p = %d (N/p = %.1f). Network sections skipped.\n",
+    n_obs, p, n_obs / p
+  ))
+}
+```
+
+---
+
+# 5. Community detection
+
+Walktrap algorithm on absolute edge weights (follows Lydic et al., 2025).
+
+```{r communities}
+as_igraph_qgraph <- function(x) {
+  adj <- qgraph::getWmat(x)
+  g   <- igraph::graph_from_adjacency_matrix(
+    abs(adj), mode = "undirected", weighted = TRUE, diag = FALSE
+  )
+  igraph::V(g)$label <- x$graphAttributes$Nodes$labels
+  g
+}
+
+if (network_ok) {
+  g        <- as_igraph_qgraph(graph)
+  g_abs    <- g
+  igraph::E(g_abs)$weight <- abs(igraph::E(g_abs)$weight)
+
+  wtc         <- igraph::cluster_walktrap(g_abs)
+  communities <- igraph::communities(wtc)
+
+  cat(sprintf("Number of communities detected: %d\n", length(communities)))
+  cat(sprintf("Modularity: %.3f\n", igraph::modularity(wtc)))
+
+  label_to_col   <- setNames(names(labels_ordered), as.character(labels_ordered))
+  membership_vec <- igraph::membership(wtc)
+  community_df <- tibble(
+    col          = label_to_col[names(membership_vec)],
+    community_id = as.integer(membership_vec)
+  ) |>
+    left_join(node_registry, by = "col") |>
+    arrange(community_id, block, label)
+} else {
+  cat("Community detection skipped (empty GLASSO network).\n")
+  community_df <- tibble(col = character(), community_id = integer(),
+                         label = character(), block = character())
+}
+```
+
+## 5.1 Community membership
+
+```{r community-membership}
+if (network_ok) {
+  community_df |>
+    select(community_id, block, label) |>
+    rename(`Community` = community_id, Block = block, Node = label) |>
+    reactable(filterable = TRUE, sortable = TRUE, striped = TRUE, groupBy = "Community")
+} else {
+  cat("Community membership table skipped (empty GLASSO network).\n")
+}
+```
+
+## 5.2 Network plot with communities
+
+```{r network-communities, fig.width=12, fig.height=12}
+if (network_ok) {
+  n_communities       <- length(communities)
+  palette_communities <- RColorBrewer::brewer.pal(max(n_communities, 3), "Set2")[seq_len(n_communities)]
+
+  qgraph(
+    glasso_mat,
+    layout      = "spring",
+    repulsion   = 1.5,
+    negCol      = "#2D93AD",
+    posCol      = "#c44535",
+    edge.labels = FALSE,
+    groups      = communities,
+    colors      = palette_communities,
+    labels      = labels_ordered,
+    label.scale = FALSE,
+    label.cex   = 0.5,
+    shape       = "ellipse",
+    vsize       = 5,
+    vsize2      = 3,
+    legend      = TRUE,
+    title       = sprintf("Belief Network by Community (GLASSO, N = %d)", n_obs)
+  )
+} else {
+  cat("Community network plot skipped (empty GLASSO network).\n")
+}
+```
+
+---
+
+# 6. Centrality
+
+Eigenvector centrality: reflects both the number of connections and how influential
+those connections are. Predicts actual causal influence of nodes reasonably well
+(Dablander & Hinne, 2019).
+
+```{r centrality}
+if (network_ok) {
+  centrality_raw <- igraph::eigen_centrality(g)$vector
+
+  centrality_df <- tibble(
+    col             = node_cols_net,
+    eigenvector     = centrality_raw,
+    eigenvector_abs = abs(centrality_raw)
+  ) |>
+    left_join(node_registry, by = "col") |>
+    left_join(community_df |> select(col, community_id), by = "col") |>
+    arrange(desc(eigenvector_abs))
+
+  centrality_df |>
+    select(community_id, block, label, eigenvector_abs) |>
+    rename(Community = community_id, Block = block, Node = label, Centrality = eigenvector_abs) |>
+    mutate(Centrality = round(Centrality, 3)) |>
+    reactable(filterable = TRUE, sortable = TRUE, striped = TRUE)
+} else {
+  centrality_df <- node_registry |>
+    mutate(eigenvector = NA_real_, eigenvector_abs = NA_real_, community_id = NA_integer_)
+  cat("Centrality skipped (empty GLASSO network).\n")
+}
+```
+
+## 6.1 Centrality plot
+
+```{r centrality-plot, fig.width=7, fig.height=10}
+if (network_ok) {
+  print(
+    centrality_df |>
+      mutate(
+        label_wrap   = stringr::str_wrap(label, 35),
+        community_id = factor(community_id)
+      ) |>
+      ggplot(aes(reorder(label_wrap, eigenvector_abs), eigenvector_abs, fill = community_id)) +
+      geom_col() +
+      coord_flip() +
+      scale_fill_brewer(palette = "Set2", name = "Community") +
+      labs(x = "", y = "Eigenvector centrality") +
+      theme_minimal() +
+      theme(axis.text.y = element_text(size = 8), legend.position = "top")
+  )
+} else {
+  cat("Centrality plot skipped (empty GLASSO network).\n")
+}
+```
+
+## 6.2 Centrality × correlation with composite
+
+Replicates Figure 1C from Lydic et al. (2025): tests whether more central nodes
+are also more strongly correlated with the behavioral outcome.
+
+```{r centrality-vs-r, fig.width=7, fig.height=6}
+if (network_ok) {
+  cent_cor <- centrality_df |>
+    left_join(
+      node_cors |> filter(outcome == "Composite") |> select(node, r),
+      by = c("col" = "node")
+    ) |>
+    mutate(r_abs = abs(r))
+
+  cor_test_result <- cor.test(cent_cor$eigenvector_abs, cent_cor$r_abs, method = "pearson")
+  cat(sprintf("r(centrality, |r with composite|) = %.2f, p = %.3f\n",
+              cor_test_result$estimate, cor_test_result$p.value))
+
+  print(
+    ggplot(cent_cor, aes(eigenvector_abs, r_abs)) +
+      geom_point(aes(color = factor(community_id)), size = 3) +
+      geom_smooth(method = "lm", color = "grey40", se = TRUE) +
+      geom_label_repel(aes(label = stringr::str_wrap(label, 20)),
+                       size = 2.5, alpha = 0.8,
+                       box.padding = 0.4, point.padding = 0.2,
+                       segment.color = "grey60", max.overlaps = 20) +
+      scale_color_brewer(palette = "Set2", name = "Community") +
+      labs(x = "Eigenvector centrality",
+           y = "|Spearman r with intent composite|",
+           title = "Centrality vs. association with intent") +
+      theme_minimal() +
+      theme(legend.position = "top")
+  )
+} else {
+  cat("Centrality vs. r plot skipped (empty GLASSO network).\n")
+}
+```
+
+---
+
+# 7. Percentage to gain (per node × per intent outcome)
+
+**Adaptation from H&W:** Outcome dichotomy = "Definitely will" (7 of 7-point scale).
+Predictor dichotomy = empirical 75th percentile as "strong endorsement" — used for
+both subscale means and individual items to maintain consistency. At N = 10 (pilot),
+expect many boundary cells (rate_other ≈ 0 or NA).
+
+```{r ptg-function}
+INTENT_TOP <- 7L   # "Definitely will"
+
+compute_ptg <- function(x_num, y_num) {
+  # Direction from sign of x_num correlation with y_num
+  # (called within an outcome-specific loop, so y_num is already one intent item)
+  r_xy <- suppressWarnings(cor(x_num, y_num, method = "spearman", use = "complete.obs"))
+  if (is.na(r_xy) || r_xy == 0) return(NULL)
+
+  # 75th percentile as "strongest desired position" threshold
+  q75 <- quantile(x_num, 0.75, na.rm = TRUE)
+
+  pred_01 <- case_when(
+    is.na(x_num)                     ~ NA_integer_,
+    r_xy > 0 & x_num >= q75         ~ 1L,   # desired: high values
+    r_xy < 0 & x_num <= (1 - 0.75 + min(x_num, na.rm=TRUE))  ~ 1L,  # placeholder; see below
+    TRUE                             ~ 0L
+  )
+
+  # Cleaner direction handling: bottom quartile if negative correlation
+  q25 <- quantile(x_num, 0.25, na.rm = TRUE)
+  pred_01 <- case_when(
+    is.na(x_num)              ~ NA_integer_,
+    r_xy > 0 & x_num >= q75  ~ 1L,
+    r_xy < 0 & x_num <= q25  ~ 1L,
+    TRUE                      ~ 0L
+  )
+
+  out_01 <- case_when(
+    is.na(y_num)        ~ NA_integer_,
+    y_num == INTENT_TOP ~ 1L,
+    TRUE                ~ 0L
+  )
+
+  ok <- !is.na(pred_01) & !is.na(out_01)
+  p  <- pred_01[ok]
+  o  <- out_01[ok]
+
+  n_total     <- length(p)
+  n_strongest <- sum(p == 1L)
+  n_other     <- sum(p == 0L)
+  rate_overall <- mean(o)
+
+  if (n_strongest == 0 || n_other == 0) {
+    return(tibble(
+      direction       = if (r_xy > 0) "positive" else "negative",
+      pct_at_q75      = round(n_strongest / n_total * 100, 1),
+      rate_strongest  = NA_real_,
+      rate_other      = NA_real_,
+      rate_overall    = round(rate_overall * 100, 1),
+      pct_to_gain     = NA_real_,
+      ror             = NA_real_
+    ))
+  }
+
+  rate_s <- mean(o[p == 1L])
+  rate_o <- mean(o[p == 0L])
+  ptg    <- (rate_s - rate_overall) * 100
+  ror    <- if (rate_o %in% c(0, 1) || rate_s %in% c(0, 1)) NA_real_ else
+              (rate_s / (1 - rate_s)) / (rate_o / (1 - rate_o))
+
+  tibble(
+    direction      = if (r_xy > 0) "positive" else "negative",
+    pct_at_q75     = round(n_strongest / n_total * 100, 1),
+    rate_strongest = round(rate_s  * 100, 1),
+    rate_other     = round(rate_o  * 100, 1),
+    rate_overall   = round(rate_overall * 100, 1),
+    pct_to_gain    = round(ptg, 1),
+    ror            = round(ror, 2)
+  )
+}
+```
+
+```{r ptg-compute}
+ptg_results <- map_dfr(node_cols, function(nc) {
+  x <- d_nodes[[nc]]
+  map_dfr(seq_along(intent_cols), function(i) {
+    y  <- d_nodes[[intent_cols[i]]]
+    pt <- compute_ptg(x, y)
+    if (is.null(pt)) return(NULL)
+    bind_cols(tibble(node = nc, outcome = intent_labels[i]), pt)
+  })
+}) |>
+  left_join(node_registry, by = c("node" = "col"))
+```
+
+---
+
+# 8. Centrality × PTG: combined analysis
+
+One plot per intent outcome. Upper-right quadrant = above-average on both centrality
+and PTG → highest-priority targets. Follows Figure 1C approach from Lydic et al. (2025).
+
+```{r combined-data}
+if (network_ok) {
+  combined <- centrality_df |>
+    select(col, label, block, community_id, eigenvector_abs) |>
+    left_join(
+      ptg_results |> select(node, outcome, pct_to_gain),
+      by = c("col" = "node")
+    ) |>
+    left_join(
+      node_cors |>
+        filter(outcome != "Composite") |>
+        select(node, outcome, r_spearman = r),
+      by = c("col" = "node", "outcome")
+    )
+} else {
+  combined <- NULL
+}
+```
+
+```{r centrality-ptg-plots, fig.width=8, fig.height=7, results='asis'}
+if (is.null(combined)) {
+  cat("Centrality × PTG plots skipped (empty GLASSO network).\n")
+} else walk(intent_labels, function(ol) {
+  cat(sprintf("\n\n## 8.%d %s\n\n", which(intent_labels == ol), ol))
+
+  plot_data <- combined |>
+    filter(outcome == ol) |>
+    filter(!is.na(pct_to_gain), !is.na(eigenvector_abs))
+
+  if (nrow(plot_data) == 0) {
+    cat("No data for this outcome (all PTG values NA — no data).\n")
+    return(invisible(NULL))
+  }
+
+  mean_cent <- mean(plot_data$eigenvector_abs, na.rm = TRUE)
+  mean_ptg  <- mean(plot_data$pct_to_gain,     na.rm = TRUE)
+
+  p <- ggplot(plot_data, aes(eigenvector_abs, pct_to_gain)) +
+    geom_hline(yintercept = mean_ptg,  linetype = "dashed", color = "grey60") +
+    geom_vline(xintercept = mean_cent, linetype = "dashed", color = "grey60") +
+    annotate("rect",
+             xmin = mean_cent, xmax = Inf,
+             ymin = mean_ptg,  ymax = Inf,
+             alpha = 0.06, fill = "#2D93AD") +
+    geom_point(aes(color = factor(community_id)), size = 3) +
+    geom_label_repel(
+      aes(label = stringr::str_wrap(label, 22)),
+      size = 2.5, alpha = 0.85,
+      box.padding = 0.4, point.padding = 0.2,
+      segment.color = "grey60", max.overlaps = 30
+    ) +
+    scale_color_brewer(palette = "Set2", name = "Community") +
+    labs(
+      x     = "Eigenvector centrality",
+      y     = "% to gain",
+      title = sprintf("Centrality × PTG: %s", ol),
+      subtitle = "Shaded = above-average on both (priority targets) | Dashed lines = means"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "top")
+
+  print(p)
+  cat("\n")
+
+  # Print top nodes in upper-right quadrant
+  top_nodes <- plot_data |>
+    filter(eigenvector_abs > mean_cent, pct_to_gain > mean_ptg) |>
+    arrange(desc(eigenvector_abs + pct_to_gain / max(pct_to_gain, na.rm = TRUE))) |>
+    select(block, label, eigenvector_abs, pct_to_gain) |>
+    mutate(across(where(is.numeric), \(x) round(x, 2)))
+
+  if (nrow(top_nodes) > 0) {
+    cat(sprintf("**%d nodes above average on both metrics:**\n\n", nrow(top_nodes)))
+    print(reactable(top_nodes,
+                    columns = list(
+                      block          = colDef(name = "Block"),
+                      label          = colDef(name = "Node"),
+                      eigenvector_abs = colDef(name = "Centrality"),
+                      pct_to_gain    = colDef(name = "% to gain")
+                    ),
+                    striped = TRUE))
+  } else {
+    cat("No nodes above average on both metrics .\n")
+  }
+}) # end walk / end else
+```
+
+---
+
+# 9. Summary table
+
+Full metrics for all nodes × all outcomes.
+
+```{r summary-table}
+if (network_ok) {
+  summary_out <- centrality_df |>
+    select(col, label, block, community_id, eigenvector_abs) |>
+    left_join(
+      node_cors |>
+        filter(outcome != "Composite") |>
+        select(node, outcome, r_spearman = r, p_spearman = p),
+      by = c("col" = "node")
+    ) |>
+    left_join(
+      ptg_results |> select(node, outcome, pct_to_gain, ror, direction),
+      by = c("col" = "node", "outcome")
+    )
+
+  summary_out |>
+    mutate(across(where(is.numeric), \(x) round(x, 3))) |>
+    select(outcome, block, label, community_id, eigenvector_abs,
+           r_spearman, pct_to_gain, ror) |>
+    rename(
+      Outcome    = outcome,
+      Block      = block,
+      Node       = label,
+      Community  = community_id,
+      Centrality = eigenvector_abs,
+      `r (Spearman)` = r_spearman,
+      `% to gain`    = pct_to_gain,
+      ROR        = ror
+    ) |>
+    reactable(filterable = TRUE, sortable = TRUE, striped = TRUE, groupBy = "Outcome")
+} else {
+  # Show PTG + correlations only (no centrality/community — empty network)
+  node_cors |>
+    filter(outcome != "Composite") |>
+    left_join(
+      ptg_results |> select(node, outcome, pct_to_gain, ror, direction),
+      by = c("node", "outcome")
+    ) |>
+    mutate(across(where(is.numeric), \(x) round(x, 3))) |>
+    select(outcome, block, label, r, p, pct_to_gain, ror) |>
+    rename(
+      Outcome = outcome, Block = block, Node = label,
+      `r (Spearman)` = r, `p` = p,
+      `% to gain` = pct_to_gain, ROR = ror
+    ) |>
+    reactable(filterable = TRUE, sortable = TRUE, striped = TRUE, groupBy = "Outcome")
+}
+```
+
+---
+
+# 10. Export
+
+```{r export}
+dir.create(file.path(path, "Output"), showWarnings = FALSE)
+
+out_path <- file.path(path, "Output", "05_belief_network.csv")
+
+ptg_wide <- ptg_results |>
+  select(node, outcome, pct_to_gain, ror) |>
+  pivot_wider(names_from = outcome,
+              values_from = c(pct_to_gain, ror),
+              names_glue = "{.value}_{outcome}")
+
+cors_composite <- node_cors |>
+  filter(outcome == "Composite") |>
+  select(node, r_composite = r)
+
+if (network_ok) {
+  export_df <- centrality_df |>
+    select(col, label, block, community_id, eigenvector_abs) |>
+    left_join(cors_composite, by = c("col" = "node")) |>
+    left_join(ptg_wide,       by = c("col" = "node"))
+} else {
+  export_df <- node_registry |>
+    select(col, label, block) |>
+    mutate(community_id = NA_integer_, eigenvector_abs = NA_real_) |>
+    left_join(cors_composite, by = c("col" = "node")) |>
+    left_join(ptg_wide,       by = c("col" = "node"))
+}
+
+write_csv(export_df, out_path)
+cat(sprintf("Saved: %s\n", out_path))
+cat(sprintf("Rows: %d | Columns: %d\n", nrow(export_df), ncol(export_df)))
+```

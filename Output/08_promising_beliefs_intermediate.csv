@@ -1,0 +1,707 @@
+outcome,block,variable,label,moveable,direction,n_total,n_at_strongest,pct_at_strongest,pct_available,outcome_rate_strongest,outcome_rate_other,outcome_rate_overall,pct_to_gain,se_ptg,ror,ceiling_flag
+Perceived benefits of govt funding,Research Beliefs,research_1,Knowledge of university research,TRUE,positive,300,29,9.7,90.3,37.9,28.4,29.3,8.6,9.4,1.54,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_2,Scientific methods are the best way to find truth,TRUE,positive,300,127,42.3,57.7,34.6,25.4,29.3,5.3,5,1.55,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_1,Effects on: You personally,TRUE,positive,300,68,22.7,77.3,48.5,23.7,29.3,19.2,6.6,3.03,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_2,Effects on: People you care about,TRUE,positive,300,66,22,78,50,23.5,29.3,20.7,6.7,3.25,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_3,Effects on: Local community,TRUE,positive,300,60,20,80,56.7,22.5,29.3,27.3,6.9,4.5,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_4,Effects on: People in the US,TRUE,positive,300,94,31.3,68.7,46.8,21.4,29.3,17.5,5.8,3.24,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_5,Effects on: Students at universities,TRUE,positive,300,128,42.7,57.3,41.4,20.3,29.3,12.1,5.1,2.77,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_6,Effects on: Scientists at universities,TRUE,positive,300,175,58.3,41.7,34.9,21.6,29.3,5.5,4.5,1.94,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_7,Effects on: Universities themselves,TRUE,positive,300,172,57.3,42.7,36.6,19.5,29.3,7.3,4.5,2.38,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_8,Effects on: Pharmaceutical companies,TRUE,positive,300,119,39.7,60.3,37.8,23.8,29.3,8.5,5.2,1.95,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_9,Effects on: Technology companies,TRUE,positive,300,126,42,58,33.3,26.4,29.3,4,5,1.39,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_10,Effects on: The military,TRUE,positive,300,66,22,78,39.4,26.5,29.3,10.1,6.6,1.8,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_11,Effects on: The US government,TRUE,positive,300,83,27.7,72.3,42.2,24.4,29.3,12.8,6,2.26,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_12,Effects on: Wealthy individuals,TRUE,positive,300,71,23.7,76.3,32.4,28.4,29.3,3.1,6.1,1.21,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_3_13,Effects on: Disadvantaged individuals,TRUE,positive,300,62,20.7,79.3,50,23.9,29.3,20.7,6.9,3.18,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_4_1,I usually understand academic research findings,TRUE,positive,300,75,25,75,37.3,26.7,29.3,8,6.2,1.64,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_4_2,I know where to look up academic research,TRUE,positive,300,97,32.3,67.7,39.2,24.6,29.3,9.8,5.6,1.97,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_4_3,Clear how to apply research findings in my life,TRUE,positive,300,50,16.7,83.3,38,27.6,29.3,8.7,7.4,1.61,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_4_4,I think about the impact of science on my daily life,TRUE,positive,300,58,19.3,80.7,36.2,27.7,29.3,6.9,6.8,1.48,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_4_5,Benefits of scientific research outweigh harms,TRUE,positive,300,96,32,68,44.8,22.1,29.3,15.5,5.7,2.87,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_4_6,Science makes our way of life change too fast,TRUE,negative,300,55,18.3,81.7,41.8,26.5,29.3,12.5,7.2,1.99,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_4_7,Scientific research will create opportunities for next generation,TRUE,positive,300,164,54.7,45.3,36.6,20.6,29.3,7.3,4.6,2.23,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_4_8,Research advancing knowledge is necessary even w/o immediate benefits,TRUE,positive,300,175,58.3,41.7,36.6,19.2,29.3,7.2,4.5,2.43,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_1,Importance: Advancing social science,TRUE,positive,300,145,48.3,51.7,39.3,20,29.3,10,4.8,2.59,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_2,Importance: Developing new medicines,TRUE,positive,300,229,76.3,23.7,31,23.9,29.3,1.7,4,1.43,TRUE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_3,Importance: Protecting the environment,TRUE,positive,300,185,61.7,38.3,33.5,22.6,29.3,4.2,4.4,1.73,TRUE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_4,Importance: Developing new energy technologies,TRUE,positive,300,130,43.3,56.7,40,21.2,29.3,10.7,5,2.48,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_5,Importance: Technologies for economic growth,TRUE,positive,300,100,33.3,66.7,35,26.5,29.3,5.7,5.4,1.49,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_6,Importance: Innovative manufacturing,TRUE,positive,300,58,19.3,80.7,29.3,29.3,29.3,-0,6.5,1,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_7,Importance: Defense and national security technologies,TRUE,negative,300,15,5,95,40,28.8,29.3,10.7,12.9,1.65,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_8,Importance: AI and machine learning,TRUE,positive,300,60,20,80,36.7,27.5,29.3,7.3,6.8,1.53,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_9,Importance: Exploring space,TRUE,positive,300,54,18,82,42.6,26.4,29.3,13.3,7.2,2.07,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_10,Importance: Improving education systems,TRUE,positive,300,125,41.7,58.3,39.2,22.3,29.3,9.9,5.1,2.25,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_11,Importance: Better public policies,TRUE,positive,300,93,31,69,35.5,26.6,29.3,6.2,5.6,1.52,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_12,Importance: Helping individuals improve their lives,TRUE,positive,300,84,28,72,38.1,25.9,29.3,8.8,5.9,1.76,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.1_13,Importance: Awareness of others' experiences,TRUE,positive,300,72,24,76,37.5,26.8,29.3,8.2,6.3,1.64,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_1,Likelihood: Advancing social science,TRUE,positive,300,120,40,60,40.8,21.7,29.3,11.5,5.2,2.5,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_2,Likelihood: Developing new medicines,TRUE,positive,300,166,55.3,44.7,35.5,21.6,29.3,6.2,4.6,2,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_3,Likelihood: Protecting the environment,TRUE,positive,300,128,42.7,57.3,39.8,21.5,29.3,10.5,5.1,2.42,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_4,Likelihood: Developing new energy technologies,TRUE,positive,300,112,37.3,62.7,39.3,23.4,29.3,10,5.3,2.12,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_5,Likelihood: Technologies for economic growth,TRUE,positive,300,77,25.7,74.3,41.6,25.1,29.3,12.2,6.2,2.12,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_6,Likelihood: Innovative manufacturing,TRUE,positive,300,74,24.7,75.3,40.5,25.7,29.3,11.2,6.3,1.97,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_7,Likelihood: Defense and national security technologies,TRUE,positive,300,108,36,64,36.1,25.5,29.3,6.8,5.3,1.65,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_8,Likelihood: AI and machine learning,TRUE,positive,300,146,48.7,51.3,34.2,24.7,29.3,4.9,4.7,1.59,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_9,Likelihood: Exploring space,TRUE,positive,300,89,29.7,70.3,40.4,24.6,29.3,11.1,5.8,2.08,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_10,Likelihood: Improving education systems,TRUE,positive,300,111,37,63,42.3,21.7,29.3,13,5.4,2.65,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_11,Likelihood: Better public policies,TRUE,positive,300,59,19.7,80.3,54.2,23.2,29.3,24.9,7,3.92,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_12,Likelihood: Helping individuals improve their lives,TRUE,positive,300,74,24.7,75.3,43.2,24.8,29.3,13.9,6.3,2.31,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_5.2_13,Likelihood: Awareness of others' experiences,TRUE,positive,300,70,23.3,76.7,38.6,26.5,29.3,9.2,6.4,1.74,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_1,Problematic: Researchers make mistakes,TRUE,positive,300,71,23.7,76.3,32.4,28.4,29.3,3.1,6.1,1.21,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_2,Problematic: Research is slow to have impact,TRUE,negative,300,32,10.7,89.3,28.1,29.5,29.3,-1.2,8.4,0.94,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_3,Problematic: Few people can access results,TRUE,negative,300,17,5.7,94.3,41.2,28.6,29.3,11.8,12.2,1.75,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_4,Problematic: Findings don't generalize,TRUE,positive,300,34,11.3,88.7,44.1,27.4,29.3,14.8,8.9,2.09,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_5,Problematic: Studies fail to yield results,TRUE,positive,300,21,7,93,33.3,29,29.3,4,10.6,1.22,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_6,Problematic: Research wastes money,TRUE,negative,300,14,4.7,95.3,28.6,29.4,29.3,-0.8,12.4,0.96,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_7,Problematic: New tech eliminates jobs,TRUE,positive,300,84,28,72,33.3,27.8,29.3,4,5.8,1.3,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_8,Problematic: New tech invades privacy,TRUE,positive,300,101,33.7,66.3,29.7,29.1,29.3,0.4,5.3,1.03,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_9,Problematic: Research creates dangerous technology,TRUE,positive,300,141,47,53,34.8,24.5,29.3,5.4,4.8,1.64,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_10,Problematic: Findings are misused,TRUE,positive,300,98,32.7,67.3,34.7,26.7,29.3,5.4,5.5,1.46,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.1_11,Problematic: Results reporting is biased by media,TRUE,positive,300,85,28.3,71.7,37.6,26,29.3,8.3,5.9,1.71,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_1,Neg. likelihood: Researchers make mistakes,TRUE,negative,300,16,5.3,94.7,31.2,29.2,29.3,1.9,11.9,1.1,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_2,Neg. likelihood: Research is slow to have impact,TRUE,positive,300,76,25.3,74.7,38.2,26.3,29.3,8.8,6.2,1.73,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_3,Neg. likelihood: Few people can access results,TRUE,negative,300,13,4.3,95.7,46.2,28.6,29.3,16.8,14.1,2.14,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_4,Neg. likelihood: Findings don't generalize,TRUE,negative,300,11,3.7,96.3,27.3,29.4,29.3,-2.1,13.7,0.9,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_5,Neg. likelihood: Studies fail to yield results,TRUE,negative,300,10,3.3,96.7,50,28.6,29.3,20.7,16,2.49,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_6,Neg. likelihood: Research wastes money,TRUE,negative,300,24,8,92,25,29.7,29.3,-4.3,9.2,0.79,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_7,Neg. likelihood: New tech eliminates jobs,TRUE,positive,300,62,20.7,79.3,35.5,27.7,29.3,6.2,6.6,1.43,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_8,Neg. likelihood: New tech invades privacy,TRUE,negative,300,15,5,95,26.7,29.5,29.3,-2.7,11.7,0.87,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_9,Neg. likelihood: Research creates dangerous technology,TRUE,positive,300,62,20.7,79.3,33.9,28.2,29.3,4.5,6.6,1.31,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_10,Neg. likelihood: Findings are misused,TRUE,negative,300,18,6,94,50,28,29.3,20.7,12.1,2.57,FALSE
+Perceived benefits of govt funding,Research Beliefs,research_6.2_11,Neg. likelihood: Results reporting is biased by media,TRUE,negative,300,21,7,93,57.1,27.2,29.3,27.8,11.1,3.56,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_2,Govt investment is ESSENTIAL (vs. private sufficient),TRUE,positive,284,236,83.1,16.9,34.3,14.6,31,3.3,4.1,3.06,TRUE
+Perceived benefits of govt funding,Govt Funding,govtfund_3,Knowledge of funding cuts,TRUE,positive,300,19,6.3,93.7,47.4,28.1,29.3,18,11.8,2.3,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_1,Perceived support: People who directly benefit,TRUE,positive,300,216,72,28,32.9,20.2,29.3,3.5,4.1,1.93,TRUE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_2,Perceived support: Students at universities,TRUE,positive,300,170,56.7,43.3,35.9,20.8,29.3,6.5,4.5,2.13,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_3,Perceived support: Scientists at universities,TRUE,positive,300,212,70.7,29.3,33.5,19.3,29.3,4.2,4.2,2.1,TRUE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_4,Perceived support: The general public,TRUE,positive,300,32,10.7,89.3,28.1,29.5,29.3,-1.2,8.4,0.94,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_5,Perceived support: People in the military,TRUE,positive,300,56,18.7,81.3,42.9,26.2,29.3,13.5,7.1,2.11,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_6,Perceived support: People who identify as liberals,TRUE,positive,300,117,39,61,43.6,20.2,29.3,14.3,5.3,3.05,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_7,Perceived support: People who identify as conservatives,TRUE,positive,300,25,8.3,91.7,48,27.6,29.3,18.7,10.3,2.42,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_8,Perceived support: People who favor minimal govt spending,TRUE,negative,300,137,45.7,54.3,29.2,29.4,29.3,-0.1,4.7,0.99,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_9,Perceived support: Politicians,TRUE,positive,300,32,10.7,89.3,31.2,29.1,29.3,1.9,8.6,1.11,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_10,Perceived support: People who don't believe in mainstream science,TRUE,negative,300,159,53,47,32.1,26.2,29.3,2.7,4.5,1.33,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_11,Perceived support: Medical and mental health professionals,TRUE,positive,300,178,59.3,40.7,37.6,17.2,29.3,8.3,4.5,2.9,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_12,Perceived support: Pharmaceutical companies,TRUE,positive,300,132,44,56,33.3,26.2,29.3,4,4.9,1.41,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_4_13,Perceived support: Technology companies,TRUE,positive,300,116,38.7,61.3,32.8,27.2,29.3,3.4,5.1,1.31,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_5_6,Govt funding likelihood: Money spent on less important things,TRUE,negative,300,43,14.3,85.7,44.2,26.8,29.3,14.9,8,2.16,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_5_7,Govt funding likelihood: Taxpayer money is wasted,TRUE,negative,300,57,19,81,50.9,24.3,29.3,21.5,7.1,3.23,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_5_8,Govt funding likelihood: Research delayed by oversight,TRUE,negative,300,9,3,97,66.7,28.2,29.3,37.3,15.9,5.1,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_5_9,Govt funding likelihood: Political agendas influence funding,TRUE,negative,300,7,2.3,97.7,85.7,28,29.3,56.4,13.5,15.44,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_5_10,Govt funding likelihood: Researchers lie to maintain funding,TRUE,negative,300,49,16.3,83.7,42.9,26.7,29.3,13.5,7.5,2.06,FALSE
+Perceived benefits of govt funding,Govt Funding,gotvfund_6_1,Rules should ensure govt-funded research is done well,TRUE,positive,300,165,55,45,35.2,22.2,29.3,5.8,4.6,1.9,FALSE
+Perceived benefits of govt funding,Govt Funding,gotvfund_6_2,Oversight committees protect against unethical research,TRUE,positive,300,96,32,68,51,19.1,29.3,21.7,5.7,4.41,FALSE
+Perceived benefits of govt funding,Govt Funding,gotvfund_6_3,Many everyday tools are the result of academic research,TRUE,positive,300,128,42.7,57.3,46.9,16.3,29.3,17.5,5.1,4.54,FALSE
+Perceived benefits of govt funding,Govt Funding,gotvfund_6_4,University research benefits lives in ways hard to see,TRUE,positive,300,100,33.3,66.7,52,18,29.3,22.7,5.6,4.94,FALSE
+Perceived benefits of govt funding,Govt Funding,gotvfund_6_5,University researchers motivated primarily by profit,TRUE,negative,300,61,20.3,79.7,49.2,24.3,29.3,19.8,6.9,3.02,FALSE
+Perceived benefits of govt funding,Govt Funding,gotvfund_6_6,Private companies research primarily to benefit the public,TRUE,positive,300,23,7.7,92.3,43.5,28.2,29.3,14.1,10.7,1.96,FALSE
+Perceived benefits of govt funding,Govt Funding,gotvfund_6_7,Govt-funded research is more objective than privately funded,TRUE,positive,300,70,23.3,76.7,50,23,29.3,20.7,6.5,3.34,FALSE
+Perceived benefits of govt funding,Govt Funding,gotvfund_6_8,Private company research is biased toward company interests,TRUE,positive,300,96,32,68,39.6,24.5,29.3,10.2,5.6,2.02,FALSE
+Perceived benefits of govt funding,Govt Funding,gotvfund_6_9,Results of private company research will become publicly accessible,TRUE,positive,300,32,10.7,89.3,56.2,26.1,29.3,26.9,9.2,3.64,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_7_1,Priority: Making a profit,TRUE,negative,300,38,12.7,87.3,44.7,27.1,29.3,15.4,8.5,2.18,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_7_2,Priority: Advance knowledge and benefit society,TRUE,positive,300,164,54.7,45.3,43.9,11.8,29.3,14.6,4.7,5.87,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_7_3,Priority: Develop products that can be sold,TRUE,negative,300,21,7,93,52.4,27.6,29.3,23,11.2,2.89,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_7_4,Priority: Serve interests of the government,TRUE,positive,300,73,24.3,75.7,32.9,28.2,29.3,3.5,6.1,1.25,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_8_1,Tax investment: ...boosts the economy,TRUE,positive,300,98,32.7,67.3,51,18.8,29.3,21.7,5.7,4.5,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_8_2,Tax investment: ...improves health and saves lives,TRUE,positive,300,177,59,41,42.4,10.6,29.3,13,4.6,6.22,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_8_3,Tax investment: ...drives industry investment,TRUE,positive,300,107,35.7,64.3,43,21.8,29.3,13.7,5.5,2.71,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_8_4,Tax investment: ...makes America a leader,TRUE,positive,300,127,42.3,57.7,43.3,19.1,29.3,14,5.1,3.24,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_8_5,Tax investment: ...protects national security,TRUE,positive,300,99,33,67,51.5,18.4,29.3,22.2,5.7,4.71,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_8_6,Tax investment: ...leads to scientific breakthroughs,TRUE,positive,300,179,59.7,40.3,41.9,10.7,29.3,12.6,4.5,5.99,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_8_7,Tax investment: ...benefits people like you,TRUE,positive,300,135,45,55,41.5,19.4,29.3,12.1,5,2.95,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_9_1,Approve cuts to: Health research funding,TRUE,negative,300,203,67.7,32.3,37.4,12.4,29.3,8.1,4.3,4.24,TRUE
+Perceived benefits of govt funding,Govt Funding,govtfund_9_2,Approve cuts to: Education funding,TRUE,negative,300,194,64.7,35.3,36.6,16,29.3,7.3,4.3,3.02,TRUE
+Perceived benefits of govt funding,Govt Funding,govtfund_9_3,Approve cuts to: Science funding,TRUE,negative,300,176,58.7,41.3,39.8,14.5,29.3,10.4,4.5,3.89,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_9_4,Approve cuts to: Arts funding,TRUE,negative,300,109,36.3,63.7,42.2,22,29.3,12.9,5.4,2.59,FALSE
+Perceived benefits of govt funding,Govt Funding,govtfund_9_5,Approve cuts to: Humanities funding,TRUE,negative,300,135,45,55,38.5,21.8,29.3,9.2,4.9,2.24,FALSE
+Perceived benefits of govt funding,Govt Funding,govfund_10,Local area would be negatively impacted by cuts,TRUE,negative,300,86,28.7,71.3,39.5,25.2,29.3,10.2,5.9,1.94,FALSE
+Perceived benefits of govt funding,Past Engagement,past_engage_1,Conversations about science topics,TRUE,positive,300,16,5.3,94.7,37.5,28.9,29.3,8.2,12.4,1.48,FALSE
+Perceived benefits of govt funding,Past Engagement,past_engage_2,Shared/commented social media posts about science,TRUE,positive,300,8,2.7,97.3,62.5,28.4,29.3,33.2,17.3,4.2,FALSE
+Perceived benefits of govt funding,Past Engagement,past_engage_3,Attended rallies or protests about science,TRUE,positive,300,4,1.3,98.7,100,28.4,29.3,70.7,2.6,NA,FALSE
+Perceived benefits of govt funding,Past Engagement,past_engage_4,Shared info online about cuts to research funding,TRUE,positive,300,6,2,98,66.7,28.6,29.3,37.3,19.4,5,FALSE
+Perceived benefits of govt funding,Past Engagement,past_engage_5,Talked to others about cuts to research funding,TRUE,positive,300,9,3,97,33.3,29.2,29.3,4,15.9,1.21,FALSE
+Perceived benefits of govt funding,Past Engagement,past_engage_6,Contacted reps to oppose cuts to research funding,TRUE,positive,300,4,1.3,98.7,50,29.1,29.3,20.7,25.1,2.44,FALSE
+Perceived benefits of govt funding,Past Engagement,past_engage_7,Contacted reps to support research funding,TRUE,positive,300,7,2.3,97.7,57.1,28.7,29.3,27.8,18.9,3.32,FALSE
+Perceived benefits of govt funding,Higher Education,highered_1_1,Approval: Private colleges and universities,TRUE,positive,300,79,26.3,73.7,39.2,25.8,29.3,9.9,6.1,1.86,FALSE
+Perceived benefits of govt funding,Higher Education,highered_1_2,Approval: State public university system,TRUE,positive,300,119,39.7,60.3,43.7,19.9,29.3,14.4,5.3,3.13,FALSE
+Perceived benefits of govt funding,Higher Education,highered_1_3,Approval: Local community college(s),TRUE,positive,300,142,47.3,52.7,40.1,19.6,29.3,10.8,4.9,2.75,FALSE
+Perceived benefits of govt funding,Higher Education,highered_2_1,Trust: Private colleges and universities,TRUE,positive,300,47,15.7,84.3,38.3,27.7,29.3,9,7.6,1.62,FALSE
+Perceived benefits of govt funding,Higher Education,highered_2_2,Trust: State public university system,TRUE,positive,300,66,22,78,43.9,25.2,29.3,14.6,6.7,2.32,FALSE
+Perceived benefits of govt funding,Higher Education,highered_2_3,Trust: Local community college(s),TRUE,positive,300,69,23,77,40.6,26,29.3,11.2,6.5,1.95,FALSE
+Perceived benefits of govt funding,Higher Education,highered_3_1,Contribution to science: Private colleges and universities,TRUE,positive,283,127,44.9,55.1,35.4,23.7,29,6.5,5,1.76,FALSE
+Perceived benefits of govt funding,Higher Education,highered_3_2,"Contribution to science: Private companies (pharma, tech)",TRUE,positive,285,110,38.6,61.4,37.3,24.6,29.5,7.8,5.3,1.82,FALSE
+Perceived benefits of govt funding,Higher Education,highered_3_3,Contribution to science: Federal government agencies,TRUE,positive,280,86,30.7,69.3,43,23.7,29.6,13.4,6,2.43,FALSE
+Perceived benefits of govt funding,Higher Education,highered_3_4,Contribution to science: Charitable foundations,TRUE,positive,280,86,30.7,69.3,36,26.8,29.6,6.4,5.9,1.54,FALSE
+Perceived benefits of govt funding,Higher Education,highered_3_5,Contribution to science: State colleges and universities,TRUE,positive,284,138,48.6,51.4,36.2,21.9,28.9,7.4,4.9,2.02,FALSE
+Perceived benefits of govt funding,Higher Education,highered_3_6,Contribution to science: Community colleges,TRUE,positive,281,60,21.4,78.6,31.7,26.7,27.8,3.9,6.6,1.27,FALSE
+Perceived benefits of govt funding,Higher Education,highered_4_1,Proportion nonprofit: Private colleges and universities,TRUE,positive,275,18,6.5,93.5,44.4,27.2,28.4,16.1,12,2.14,FALSE
+Perceived benefits of govt funding,Higher Education,highered_4_2,Proportion nonprofit: Public state colleges and universities,TRUE,positive,277,58,20.9,79.1,46.6,24.2,28.9,17.7,7.1,2.73,FALSE
+Perceived benefits of govt funding,Higher Education,highered_4_3,Proportion nonprofit: Community colleges,TRUE,positive,274,46,16.8,83.2,50,24.6,28.8,21.2,7.9,3.07,FALSE
+Perceived benefits of govt funding,Higher Education,highered_4_4,"Proportion nonprofit: Private companies (pharma, tech)",TRUE,negative,284,153,53.9,46.1,31.4,26.7,29.2,2.1,4.6,1.25,FALSE
+Perceived benefits of govt funding,Higher Education,highered_4_5,Proportion nonprofit: Federal government agencies,TRUE,positive,273,56,20.5,79.5,48.2,24,28.9,19.3,7.2,2.95,FALSE
+Perceived benefits of govt funding,Higher Education,highered_4_6,Proportion nonprofit: Charitable foundations,TRUE,positive,288,100,34.7,65.3,37,26.1,29.9,7.1,5.5,1.67,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_2_1,Univ. contributes to: Greater innovation,TRUE,positive,300,147,49,51,41.5,17.6,29.3,12.2,4.8,3.31,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_2_2,Univ. contributes to: Better jobs and career advancement,TRUE,positive,300,103,34.3,65.7,45.6,20.8,29.3,16.3,5.6,3.19,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_2_3,Univ. contributes to: Higher household incomes,TRUE,positive,300,85,28.3,71.7,41.2,24.7,29.3,11.8,6,2.14,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_2_4,Univ. contributes to: A more knowledgeable population,TRUE,positive,300,140,46.7,53.3,43.6,16.9,29.3,14.2,4.9,3.8,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_2_5,Univ. contributes to: US competitive advantage,TRUE,positive,300,115,38.3,61.7,41.7,21.6,29.3,12.4,5.3,2.6,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_2_6,Univ. contributes to: More entrepreneurship,TRUE,positive,300,89,29.7,70.3,43.8,23.2,29.3,14.5,5.9,2.58,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_2_7,Univ. contributes to: Increased compassion and tolerance,TRUE,positive,300,79,26.3,73.7,51.9,21.3,29.3,22.6,6.2,3.99,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_2_8,Univ. contributes to: Overall economic growth,TRUE,positive,300,99,33,67,42.4,22.9,29.3,13.1,5.6,2.48,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_2_9,Univ. contributes to: Better international relations,TRUE,positive,300,74,24.7,75.3,45.9,23.9,29.3,16.6,6.4,2.71,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_2_10,Univ. contributes to: Benefits to local communities,TRUE,positive,300,99,33,67,38.4,24.9,29.3,9.1,5.5,1.88,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_4_1,Universities discover new knowledge,TRUE,positive,300,150,50,50,44.7,14,29.3,15.3,4.8,4.96,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_4_2,Universities apply and connect knowledge,TRUE,positive,300,119,39.7,60.3,46.2,18.2,29.3,16.9,5.3,3.85,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_4_3,Universities apply knowledge-based solutions,TRUE,positive,300,115,38.3,61.7,47,18.4,29.3,17.6,5.3,3.93,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_5_1,Benefits: You personally,TRUE,positive,300,89,29.7,70.3,42.7,23.7,29.3,13.4,5.9,2.4,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_5_2,Benefits: People you care about,TRUE,positive,300,68,22.7,77.3,41.2,25.9,29.3,11.8,6.5,2.01,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_5_3,Benefits: Local communities,TRUE,positive,300,76,25.3,74.7,43.4,24.6,29.3,14.1,6.3,2.36,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_5_4,Benefits: Students who attend,TRUE,positive,300,134,44.7,55.3,42.5,18.7,29.3,13.2,5,3.22,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_5_5,Benefits: Students' families,TRUE,positive,300,72,24,76,44.4,24.6,29.3,15.1,6.4,2.46,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_5_6,Benefits: Employers and businesses,TRUE,positive,300,78,26,74,42.3,24.8,29.3,13,6.2,2.23,FALSE
+Perceived benefits of govt funding,University Perceptions,univ_5_7,Benefits: Society as a whole,TRUE,positive,300,113,37.7,62.3,43.4,20.9,29.3,14,5.4,2.91,FALSE
+Perceived benefits of govt funding,Climate,climate_1,Believes global warming is happening,TRUE,positive,271,254,93.7,6.3,31.5,17.6,30.6,0.9,4,2.15,TRUE
+Perceived benefits of govt funding,Climate,climate_2,Believes global warming is caused by humans,TRUE,positive,300,228,76,24,34.2,13.9,29.3,4.9,4.1,3.22,TRUE
+Perceived benefits of govt funding,Climate,climate_3,Trust in climate scientists,TRUE,positive,300,111,37,63,46.8,19,29.3,17.5,5.4,3.75,FALSE
+Perceived benefits of govt funding,Climate,climate_4_1,Climate research importance: Climate science and earth systems,TRUE,positive,300,135,45,55,45.9,15.8,29.3,16.6,5,4.54,FALSE
+Perceived benefits of govt funding,Climate,climate_4_2,Climate research importance: Climate mitigation approaches,TRUE,positive,300,148,49.3,50.7,43.2,15.8,29.3,13.9,4.8,4.06,FALSE
+Perceived benefits of govt funding,Climate,climate_4_3,Climate research importance: Climate adaptation and resilience,TRUE,positive,300,140,46.7,53.3,44.3,16.2,29.3,15,5,4.1,FALSE
+Perceived benefits of govt funding,Climate,climate_4_4,"Climate research importance: Climate policy, economics, and human impact",TRUE,positive,300,130,43.3,56.7,41.5,20,29.3,12.2,5.1,2.84,FALSE
+Perceived benefits of govt funding,Demographics,age,Age,FALSE,positive,300,1,0.3,99.7,0,29.4,29.3,-29.3,2.6,NA,FALSE
+Perceived benefits of govt funding,Demographics,ses_ladder,Subjective SES (ladder),FALSE,positive,300,7,2.3,97.7,14.3,29.7,29.3,-15,13.5,0.39,FALSE
+Perceived benefits of govt funding,Demographics,politics_ideology,Political ideology (liberal → conservative),FALSE,negative,237,48,20.3,79.7,45.8,27,30.8,15,7.8,2.29,FALSE
+Perceived benefits of govt funding,Demographics,ses_degree,Education level,FALSE,positive,237,14,5.9,94.1,35.7,29.1,29.5,6.2,13.1,1.35,FALSE
+Perceived benefits of govt funding,Demographics,ses_income,Household income,FALSE,positive,292,23,7.9,92.1,39.1,28.6,29.5,9.7,10.5,1.6,FALSE
+Perceived benefits of govt funding,Demographics,lgbtq,LGBTQ+ identity,FALSE,positive,293,62,21.2,78.8,41.9,26,29.4,12.6,6.8,2.06,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_1,Knowledge of university research,TRUE,negative,300,11,3.7,96.3,27.3,26.3,26.3,0.9,13.7,1.05,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_2,Scientific methods are the best way to find truth,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_1,Effects on: You personally,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_2,Effects on: People you care about,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_3,Effects on: Local community,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_4,Effects on: People in the US,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_5,Effects on: Students at universities,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_6,Effects on: Scientists at universities,TRUE,negative,300,3,1,99,33.3,26.3,26.3,7,27.3,1.4,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_7,Effects on: Universities themselves,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_8,Effects on: Pharmaceutical companies,TRUE,negative,300,3,1,99,0,26.6,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_9,Effects on: Technology companies,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_10,Effects on: The military,TRUE,negative,300,7,2.3,97.7,28.6,26.3,26.3,2.2,17.3,1.12,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_11,Effects on: The US government,TRUE,negative,300,6,2,98,16.7,26.5,26.3,-9.7,15.4,0.55,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_12,Effects on: Wealthy individuals,TRUE,positive,300,71,23.7,76.3,25.4,26.6,26.3,-1,5.8,0.94,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_3_13,Effects on: Disadvantaged individuals,TRUE,negative,300,6,2,98,50,25.9,26.3,23.7,20.6,2.87,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_4_1,I usually understand academic research findings,TRUE,negative,300,6,2,98,16.7,26.5,26.3,-9.7,15.4,0.55,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_4_2,I know where to look up academic research,TRUE,negative,300,6,2,98,16.7,26.5,26.3,-9.7,15.4,0.55,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_4_3,Clear how to apply research findings in my life,TRUE,negative,300,9,3,97,0,27.1,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_4_4,I think about the impact of science on my daily life,TRUE,negative,300,17,5.7,94.3,11.8,27.2,26.3,-14.6,8.2,0.36,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_4_5,Benefits of scientific research outweigh harms,TRUE,negative,300,5,1.7,98.3,20,26.4,26.3,-6.3,18.1,0.7,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_4_6,Science makes our way of life change too fast,TRUE,positive,300,45,15,85,33.3,25.1,26.3,7,7.5,1.49,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_4_7,Scientific research will create opportunities for next generation,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_4_8,Research advancing knowledge is necessary even w/o immediate benefits,TRUE,negative,300,3,1,99,0,26.6,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_1,Importance: Advancing social science,TRUE,negative,300,16,5.3,94.7,0,27.8,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_2,Importance: Developing new medicines,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_3,Importance: Protecting the environment,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_4,Importance: Developing new energy technologies,TRUE,negative,300,3,1,99,33.3,26.3,26.3,7,27.3,1.4,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_5,Importance: Technologies for economic growth,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_6,Importance: Innovative manufacturing,TRUE,negative,300,3,1,99,33.3,26.3,26.3,7,27.3,1.4,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_7,Importance: Defense and national security technologies,TRUE,negative,300,15,5,95,20,26.7,26.3,-6.3,10.6,0.69,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_8,Importance: AI and machine learning,TRUE,negative,300,36,12,88,13.9,28,26.3,-12.4,6.3,0.41,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_9,Importance: Exploring space,TRUE,negative,300,14,4.7,95.3,21.4,26.6,26.3,-4.9,11.3,0.75,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_10,Importance: Improving education systems,TRUE,negative,300,2,0.7,99.3,50,26.2,26.3,23.7,35.4,2.82,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_11,Importance: Better public policies,TRUE,negative,300,7,2.3,97.7,28.6,26.3,26.3,2.2,17.3,1.12,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_12,Importance: Helping individuals improve their lives,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.1_13,Importance: Awareness of others' experiences,TRUE,negative,300,8,2.7,97.3,0,27.1,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_1,Likelihood: Advancing social science,TRUE,negative,300,7,2.3,97.7,0,27,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_2,Likelihood: Developing new medicines,TRUE,negative,300,4,1.3,98.7,0,26.7,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_3,Likelihood: Protecting the environment,TRUE,negative,300,5,1.7,98.3,20,26.4,26.3,-6.3,18.1,0.7,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_4,Likelihood: Developing new energy technologies,TRUE,negative,300,6,2,98,16.7,26.5,26.3,-9.7,15.4,0.55,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_5,Likelihood: Technologies for economic growth,TRUE,negative,300,12,4,96,16.7,26.7,26.3,-9.7,11.1,0.55,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_6,Likelihood: Innovative manufacturing,TRUE,negative,300,8,2.7,97.3,25,26.4,26.3,-1.3,15.5,0.93,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_7,Likelihood: Defense and national security technologies,TRUE,negative,300,5,1.7,98.3,0,26.8,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_8,Likelihood: AI and machine learning,TRUE,positive,300,146,48.7,51.3,28.1,24.7,26.3,1.7,4.5,1.19,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_9,Likelihood: Exploring space,TRUE,negative,300,8,2.7,97.3,37.5,26,26.3,11.2,17.3,1.71,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_10,Likelihood: Improving education systems,TRUE,negative,300,6,2,98,0,26.9,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_11,Likelihood: Better public policies,TRUE,negative,300,20,6.7,93.3,15,27.1,26.3,-11.3,8.4,0.47,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_12,Likelihood: Helping individuals improve their lives,TRUE,negative,300,6,2,98,33.3,26.2,26.3,7,19.4,1.41,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_5.2_13,Likelihood: Awareness of others' experiences,TRUE,negative,300,16,5.3,94.7,18.8,26.8,26.3,-7.6,10.1,0.63,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_1,Problematic: Researchers make mistakes,TRUE,positive,300,71,23.7,76.3,25.4,26.6,26.3,-1,5.8,0.94,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_2,Problematic: Research is slow to have impact,TRUE,positive,300,21,7,93,28.6,26.2,26.3,2.2,10.2,1.13,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_3,Problematic: Few people can access results,TRUE,positive,300,36,12,88,22.2,26.9,26.3,-4.1,7.4,0.78,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_4,Problematic: Findings don't generalize,TRUE,positive,300,34,11.3,88.7,14.7,27.8,26.3,-11.6,6.6,0.45,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_5,Problematic: Studies fail to yield results,TRUE,positive,300,21,7,93,19,26.9,26.3,-7.3,8.9,0.64,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_6,Problematic: Research wastes money,TRUE,positive,300,45,15,85,31.1,25.5,26.3,4.8,7.4,1.32,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_7,Problematic: New tech eliminates jobs,TRUE,positive,300,84,28,72,22.6,27.8,26.3,-3.7,5.2,0.76,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_8,Problematic: New tech invades privacy,TRUE,negative,300,12,4,96,33.3,26,26.3,7,13.8,1.42,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_9,Problematic: Research creates dangerous technology,TRUE,negative,300,4,1.3,98.7,50,26,26.3,23.7,25.1,2.84,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_10,Problematic: Findings are misused,TRUE,positive,300,98,32.7,67.3,27.6,25.7,26.3,1.2,5.2,1.1,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.1_11,Problematic: Results reporting is biased by media,TRUE,positive,300,85,28.3,71.7,29.4,25.1,26.3,3.1,5.6,1.24,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_1,Neg. likelihood: Researchers make mistakes,TRUE,positive,300,45,15,85,20,27.5,26.3,-6.3,6.5,0.66,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_2,Neg. likelihood: Research is slow to have impact,TRUE,positive,300,76,25.3,74.7,26.3,26.3,26.3,-0,5.7,1,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_3,Neg. likelihood: Few people can access results,TRUE,positive,300,61,20.3,79.7,21.3,27.6,26.3,-5,5.8,0.71,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_4,Neg. likelihood: Findings don't generalize,TRUE,positive,300,69,23,77,27.5,26,26.3,1.2,5.9,1.08,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_5,Neg. likelihood: Studies fail to yield results,TRUE,positive,300,54,18,82,20.4,27.6,26.3,-6,6,0.67,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_6,Neg. likelihood: Research wastes money,TRUE,positive,300,50,16.7,83.3,14,28.8,26.3,-12.3,5.5,0.4,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_7,Neg. likelihood: New tech eliminates jobs,TRUE,positive,300,62,20.7,79.3,19.4,28.2,26.3,-7,5.6,0.61,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_8,Neg. likelihood: New tech invades privacy,TRUE,positive,300,85,28.3,71.7,23.5,27.4,26.3,-2.8,5.3,0.81,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_9,Neg. likelihood: Research creates dangerous technology,TRUE,positive,300,62,20.7,79.3,21,27.7,26.3,-5.4,5.8,0.69,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_10,Neg. likelihood: Findings are misused,TRUE,positive,300,60,20,80,20,27.9,26.3,-6.3,5.8,0.65,FALSE
+Perceived costs/risks of govt funding,Research Beliefs,research_6.2_11,Neg. likelihood: Results reporting is biased by media,TRUE,positive,300,83,27.7,72.3,25.3,26.7,26.3,-1,5.4,0.93,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_2,Govt investment is ESSENTIAL (vs. private sufficient),TRUE,negative,284,48,16.9,83.1,10.4,30.9,27.5,-17,5.1,0.26,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_3,Knowledge of funding cuts,TRUE,negative,300,56,18.7,81.3,12.5,29.5,26.3,-13.8,5.1,0.34,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_1,Perceived support: People who directly benefit,TRUE,negative,300,8,2.7,97.3,25,26.4,26.3,-1.3,15.5,0.93,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_2,Perceived support: Students at universities,TRUE,negative,300,9,3,97,22.2,26.5,26.3,-4.1,14.1,0.79,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_3,Perceived support: Scientists at universities,TRUE,negative,300,9,3,97,33.3,26.1,26.3,7,15.9,1.41,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_4,Perceived support: The general public,TRUE,negative,300,5,1.7,98.3,20,26.4,26.3,-6.3,18.1,0.7,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_5,Perceived support: People in the military,TRUE,positive,300,56,18.7,81.3,32.1,25,26.3,5.8,6.7,1.42,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_6,Perceived support: People who identify as liberals,TRUE,negative,300,14,4.7,95.3,35.7,25.9,26.3,9.4,13.1,1.59,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_7,Perceived support: People who identify as conservatives,TRUE,positive,300,25,8.3,91.7,40,25.1,26.3,13.7,10.1,1.99,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_8,Perceived support: People who favor minimal govt spending,TRUE,positive,300,19,6.3,93.7,26.3,26.3,26.3,-0,10.4,1,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_9,Perceived support: Politicians,TRUE,positive,300,32,10.7,89.3,21.9,26.9,26.3,-4.5,7.7,0.76,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_10,Perceived support: People who don't believe in mainstream science,TRUE,positive,300,14,4.7,95.3,42.9,25.5,26.3,16.5,13.5,2.19,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_11,Perceived support: Medical and mental health professionals,TRUE,negative,300,11,3.7,96.3,27.3,26.3,26.3,0.9,13.7,1.05,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_12,Perceived support: Pharmaceutical companies,TRUE,positive,300,132,44,56,30.3,23.2,26.3,4,4.7,1.44,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_4_13,Perceived support: Technology companies,TRUE,positive,300,116,38.7,61.3,30.2,23.9,26.3,3.8,5,1.37,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_5_1,Govt funding likelihood: Researchers have enough resources,TRUE,negative,300,10,3.3,96.7,50,25.5,26.3,23.7,16,2.92,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_5_2,Govt funding likelihood: Research can focus long-term,TRUE,negative,300,5,1.7,98.3,40,26.1,26.3,13.7,22.1,1.89,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_5_3,Govt funding likelihood: Exciting research is sped up,TRUE,negative,300,11,3.7,96.3,45.5,25.6,26.3,19.1,15.2,2.42,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_5_4,Govt funding likelihood: Results become publicly available,TRUE,negative,300,6,2,98,16.7,26.5,26.3,-9.7,15.4,0.55,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_5_5,Govt funding likelihood: Funded researchers held to higher standards,TRUE,negative,300,9,3,97,33.3,26.1,26.3,7,15.9,1.41,FALSE
+Perceived costs/risks of govt funding,Govt Funding,gotvfund_6_1,Rules should ensure govt-funded research is done well,TRUE,positive,300,165,55,45,26.7,25.9,26.3,0.3,4.3,1.04,FALSE
+Perceived costs/risks of govt funding,Govt Funding,gotvfund_6_2,Oversight committees protect against unethical research,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,gotvfund_6_3,Many everyday tools are the result of academic research,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,gotvfund_6_4,University research benefits lives in ways hard to see,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,gotvfund_6_5,University researchers motivated primarily by profit,TRUE,positive,300,22,7.3,92.7,4.5,28.1,26.3,-21.8,5.1,0.12,FALSE
+Perceived costs/risks of govt funding,Govt Funding,gotvfund_6_6,Private companies research primarily to benefit the public,TRUE,positive,300,23,7.7,92.3,26.1,26.4,26.3,-0.2,9.5,0.99,FALSE
+Perceived costs/risks of govt funding,Govt Funding,gotvfund_6_7,Govt-funded research is more objective than privately funded,TRUE,negative,300,5,1.7,98.3,20,26.4,26.3,-6.3,18.1,0.7,FALSE
+Perceived costs/risks of govt funding,Govt Funding,gotvfund_6_8,Private company research is biased toward company interests,TRUE,positive,300,96,32,68,24,27.5,26.3,-2.4,5,0.83,FALSE
+Perceived costs/risks of govt funding,Govt Funding,gotvfund_6_9,Results of private company research will become publicly accessible,TRUE,negative,300,24,8,92,29.2,26.1,26.3,2.8,9.6,1.17,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_7_1,Priority: Making a profit,TRUE,positive,300,45,15,85,11.1,29,26.3,-15.2,5.3,0.31,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_7_2,Priority: Advance knowledge and benefit society,TRUE,negative,300,4,1.3,98.7,0,26.7,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_7_3,Priority: Develop products that can be sold,TRUE,positive,300,47,15.7,84.3,23.4,26.9,26.3,-2.9,6.7,0.83,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_7_4,Priority: Serve interests of the government,TRUE,positive,300,73,24.3,75.7,11,31.3,26.3,-15.4,4.5,0.27,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_8_1,Tax investment: ...boosts the economy,TRUE,negative,300,6,2,98,0,26.9,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_8_2,Tax investment: ...improves health and saves lives,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_8_3,Tax investment: ...drives industry investment,TRUE,negative,300,3,1,99,33.3,26.3,26.3,7,27.3,1.4,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_8_4,Tax investment: ...makes America a leader,TRUE,negative,300,4,1.3,98.7,0,26.7,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_8_5,Tax investment: ...protects national security,TRUE,negative,300,4,1.3,98.7,25,26.4,26.3,-1.3,21.8,0.93,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_8_6,Tax investment: ...leads to scientific breakthroughs,TRUE,negative,300,7,2.3,97.7,14.3,26.6,26.3,-12,13.5,0.46,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_8_7,Tax investment: ...benefits people like you,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_9_1,Approve cuts to: Health research funding,TRUE,positive,300,7,2.3,97.7,0,27,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_9_2,Approve cuts to: Education funding,TRUE,positive,300,9,3,97,11.1,26.8,26.3,-15.2,10.8,0.34,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_9_3,Approve cuts to: Science funding,TRUE,positive,300,5,1.7,98.3,0,26.8,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_9_4,Approve cuts to: Arts funding,TRUE,positive,300,14,4.7,95.3,0,27.6,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govtfund_9_5,Approve cuts to: Humanities funding,TRUE,positive,300,11,3.7,96.3,0,27.3,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Govt Funding,govfund_10,Local area would be negatively impacted by cuts,TRUE,positive,300,8,2.7,97.3,50,25.7,26.3,23.7,17.9,2.89,FALSE
+Perceived costs/risks of govt funding,Past Engagement,past_engage_1,Conversations about science topics,TRUE,negative,300,34,11.3,88.7,20.6,27.1,26.3,-5.7,7.4,0.7,FALSE
+Perceived costs/risks of govt funding,Past Engagement,past_engage_2,Shared/commented social media posts about science,TRUE,positive,300,8,2.7,97.3,12.5,26.7,26.3,-13.8,12,0.39,FALSE
+Perceived costs/risks of govt funding,Past Engagement,past_engage_3,Attended rallies or protests about science,TRUE,positive,300,4,1.3,98.7,25,26.4,26.3,-1.3,21.8,0.93,FALSE
+Perceived costs/risks of govt funding,Past Engagement,past_engage_4,Shared info online about cuts to research funding,TRUE,negative,300,145,48.3,51.7,26.2,26.5,26.3,-0.1,4.5,0.99,FALSE
+Perceived costs/risks of govt funding,Past Engagement,past_engage_5,Talked to others about cuts to research funding,TRUE,negative,300,89,29.7,70.3,15.7,30.8,26.3,-10.6,4.6,0.42,FALSE
+Perceived costs/risks of govt funding,Past Engagement,past_engage_6,Contacted reps to oppose cuts to research funding,TRUE,positive,300,4,1.3,98.7,25,26.4,26.3,-1.3,21.8,0.93,FALSE
+Perceived costs/risks of govt funding,Past Engagement,past_engage_7,Contacted reps to support research funding,TRUE,positive,300,7,2.3,97.7,14.3,26.6,26.3,-12,13.5,0.46,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_1_1,Approval: Private colleges and universities,TRUE,negative,300,13,4.3,95.7,15.4,26.8,26.3,-10.9,10.3,0.5,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_1_2,Approval: State public university system,TRUE,negative,300,5,1.7,98.3,0,26.8,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_1_3,Approval: Local community college(s),TRUE,negative,300,3,1,99,33.3,26.3,26.3,7,27.3,1.4,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_2_1,Trust: Private colleges and universities,TRUE,negative,300,18,6,94,5.6,27.7,26.3,-20.8,6,0.15,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_2_2,Trust: State public university system,TRUE,negative,300,8,2.7,97.3,0,27.1,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_2_3,Trust: Local community college(s),TRUE,negative,300,5,1.7,98.3,0,26.8,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_3_1,Contribution to science: Private colleges and universities,TRUE,negative,283,22,7.8,92.2,13.6,28.4,27.2,-13.6,7.8,0.4,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_3_2,"Contribution to science: Private companies (pharma, tech)",TRUE,positive,285,110,38.6,61.4,28.2,26.9,27.4,0.8,5,1.07,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_3_3,Contribution to science: Federal government agencies,TRUE,negative,280,6,2.1,97.9,33.3,27,27.1,6.2,19.4,1.35,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_3_4,Contribution to science: Charitable foundations,TRUE,negative,280,8,2.9,97.1,25,27.9,27.9,-2.9,15.5,0.86,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_3_5,Contribution to science: State colleges and universities,TRUE,negative,284,9,3.2,96.8,0,27.6,26.8,-26.8,2.6,NA,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_3_6,Contribution to science: Community colleges,TRUE,negative,281,3,1.1,98.9,66.7,25.5,26,40.7,27.3,5.83,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_4_1,Proportion nonprofit: Private colleges and universities,TRUE,negative,275,102,37.1,62.9,25.5,28.3,27.3,-1.8,5.1,0.87,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_4_2,Proportion nonprofit: Public state colleges and universities,TRUE,negative,277,38,13.7,86.3,36.8,25.9,27.4,9.4,8.3,1.67,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_4_3,Proportion nonprofit: Community colleges,TRUE,negative,274,32,11.7,88.3,37.5,25.6,27,10.5,9,1.74,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_4_4,"Proportion nonprofit: Private companies (pharma, tech)",TRUE,negative,284,153,53.9,46.1,24.2,30.5,27.1,-2.9,4.4,0.73,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_4_5,Proportion nonprofit: Federal government agencies,TRUE,negative,273,55,20.1,79.9,23.6,28.4,27.5,-3.8,6.3,0.78,FALSE
+Perceived costs/risks of govt funding,Higher Education,highered_4_6,Proportion nonprofit: Charitable foundations,TRUE,negative,288,11,3.8,96.2,45.5,26.7,27.4,18,15.2,2.29,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_2_1,Univ. contributes to: Greater innovation,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_2_2,Univ. contributes to: Better jobs and career advancement,TRUE,negative,300,5,1.7,98.3,0,26.8,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_2_3,Univ. contributes to: Higher household incomes,TRUE,negative,300,6,2,98,0,26.9,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_2_4,Univ. contributes to: A more knowledgeable population,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_2_5,Univ. contributes to: US competitive advantage,TRUE,negative,300,5,1.7,98.3,0,26.8,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_2_6,Univ. contributes to: More entrepreneurship,TRUE,negative,300,6,2,98,0,26.9,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_2_7,Univ. contributes to: Increased compassion and tolerance,TRUE,negative,300,11,3.7,96.3,9.1,27,26.3,-17.2,9,0.27,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_2_8,Univ. contributes to: Overall economic growth,TRUE,negative,300,4,1.3,98.7,0,26.7,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_2_9,Univ. contributes to: Better international relations,TRUE,negative,300,5,1.7,98.3,40,26.1,26.3,13.7,22.1,1.89,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_2_10,Univ. contributes to: Benefits to local communities,TRUE,negative,300,4,1.3,98.7,25,26.4,26.3,-1.3,21.8,0.93,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_4_1,Universities discover new knowledge,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_4_2,Universities apply and connect knowledge,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_4_3,Universities apply knowledge-based solutions,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_5_1,Benefits: You personally,TRUE,negative,300,25,8.3,91.7,4,28.4,26.3,-22.3,4.7,0.11,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_5_2,Benefits: People you care about,TRUE,negative,300,17,5.7,94.3,5.9,27.6,26.3,-20.5,6.2,0.16,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_5_3,Benefits: Local communities,TRUE,negative,300,3,1,99,0,26.6,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_5_4,Benefits: Students who attend,TRUE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_5_5,Benefits: Students' families,TRUE,negative,300,9,3,97,0,27.1,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_5_6,Benefits: Employers and businesses,TRUE,negative,300,3,1,99,0,26.6,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,University Perceptions,univ_5_7,Benefits: Society as a whole,TRUE,negative,300,2,0.7,99.3,0,26.5,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Climate,climate_1,Believes global warming is happening,TRUE,negative,271,17,6.3,93.7,23.5,28,27.7,-4.1,10.6,0.79,FALSE
+Perceived costs/risks of govt funding,Climate,climate_2,Believes global warming is caused by humans,TRUE,negative,300,72,24,76,11.1,31.1,26.3,-15.2,4.5,0.28,FALSE
+Perceived costs/risks of govt funding,Climate,climate_3,Trust in climate scientists,TRUE,negative,300,12,4,96,0,27.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Climate,climate_4_1,Climate research importance: Climate science and earth systems,TRUE,negative,300,8,2.7,97.3,0,27.1,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Climate,climate_4_2,Climate research importance: Climate mitigation approaches,TRUE,negative,300,12,4,96,0,27.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Climate,climate_4_3,Climate research importance: Climate adaptation and resilience,TRUE,negative,300,9,3,97,0,27.1,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Climate,climate_4_4,"Climate research importance: Climate policy, economics, and human impact",TRUE,negative,300,16,5.3,94.7,6.2,27.5,26.3,-20.1,6.6,0.18,FALSE
+Perceived costs/risks of govt funding,Demographics,age,Age,FALSE,negative,300,1,0.3,99.7,0,26.4,26.3,-26.3,2.5,NA,FALSE
+Perceived costs/risks of govt funding,Demographics,ses_ladder,Subjective SES (ladder),FALSE,negative,300,6,2,98,33.3,26.2,26.3,7,19.4,1.41,FALSE
+Perceived costs/risks of govt funding,Demographics,politics_ideology,Political ideology (liberal → conservative),FALSE,positive,237,9,3.8,96.2,22.2,27.2,27,-4.8,14.2,0.76,FALSE
+Perceived costs/risks of govt funding,Demographics,ses_degree,Education level,FALSE,negative,237,3,1.3,98.7,66.7,26.9,27.4,39.2,27.4,5.43,FALSE
+Perceived costs/risks of govt funding,Demographics,ses_income,Household income,FALSE,negative,292,9,3.1,96.9,0,27.2,26.4,-26.4,2.6,NA,FALSE
+Perceived costs/risks of govt funding,Demographics,lgbtq,LGBTQ+ identity,FALSE,negative,293,231,78.8,21.2,25.5,30.6,26.6,-1.1,3.9,0.78,TRUE
+Trust in higher ed institutions,Research Beliefs,research_1,Knowledge of university research,TRUE,positive,300,29,9.7,90.3,27.6,9.2,11,16.6,8.5,3.75,FALSE
+Trust in higher ed institutions,Research Beliefs,research_2,Scientific methods are the best way to find truth,TRUE,positive,300,127,42.3,57.7,14.2,8.7,11,3.2,3.6,1.74,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_1,Effects on: You personally,TRUE,positive,300,68,22.7,77.3,25,6.9,11,14,5.6,4.5,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_2,Effects on: People you care about,TRUE,positive,300,66,22,78,27.3,6.4,11,16.3,5.8,5.47,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_3,Effects on: Local community,TRUE,positive,300,60,20,80,25,7.5,11,14,5.9,4.11,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_4,Effects on: People in the US,TRUE,positive,300,94,31.3,68.7,18.1,7.8,11,7.1,4.4,2.62,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_5,Effects on: Students at universities,TRUE,positive,300,128,42.7,57.3,19.5,4.7,11,8.5,3.9,4.98,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_6,Effects on: Scientists at universities,TRUE,positive,300,175,58.3,41.7,15.4,4.8,11,4.4,3.3,3.62,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_7,Effects on: Universities themselves,TRUE,positive,300,172,57.3,42.7,13.4,7.8,11,2.4,3.2,1.82,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_8,Effects on: Pharmaceutical companies,TRUE,positive,300,119,39.7,60.3,14.3,8.8,11,3.3,3.7,1.72,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_9,Effects on: Technology companies,TRUE,positive,300,126,42,58,15.1,8,11,4.1,3.7,2.03,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_10,Effects on: The military,TRUE,positive,300,66,22,78,21.2,8.1,11,10.2,5.3,3.05,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_11,Effects on: The US government,TRUE,positive,300,83,27.7,72.3,15.7,9.2,11,4.7,4.4,1.83,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_12,Effects on: Wealthy individuals,TRUE,positive,300,71,23.7,76.3,15.5,9.6,11,4.5,4.7,1.72,FALSE
+Trust in higher ed institutions,Research Beliefs,research_3_13,Effects on: Disadvantaged individuals,TRUE,positive,300,62,20.7,79.3,24.2,7.6,11,13.2,5.7,3.9,FALSE
+Trust in higher ed institutions,Research Beliefs,research_4_1,I usually understand academic research findings,TRUE,positive,300,75,25,75,20,8,11,9,5,2.88,FALSE
+Trust in higher ed institutions,Research Beliefs,research_4_2,I know where to look up academic research,TRUE,positive,300,97,32.3,67.7,18.6,7.4,11,7.6,4.3,2.86,FALSE
+Trust in higher ed institutions,Research Beliefs,research_4_3,Clear how to apply research findings in my life,TRUE,positive,300,50,16.7,83.3,16,10,11,5,5.5,1.71,FALSE
+Trust in higher ed institutions,Research Beliefs,research_4_4,I think about the impact of science on my daily life,TRUE,positive,300,58,19.3,80.7,25.9,7.4,11,14.9,6,4.34,FALSE
+Trust in higher ed institutions,Research Beliefs,research_4_5,Benefits of scientific research outweigh harms,TRUE,positive,300,96,32,68,18.8,7.4,11,7.8,4.4,2.91,FALSE
+Trust in higher ed institutions,Research Beliefs,research_4_6,Science makes our way of life change too fast,TRUE,positive,300,45,15,85,20,9.4,11,9,6.2,2.41,FALSE
+Trust in higher ed institutions,Research Beliefs,research_4_7,Scientific research will create opportunities for next generation,TRUE,positive,300,164,54.7,45.3,15.2,5.9,11,4.2,3.3,2.88,FALSE
+Trust in higher ed institutions,Research Beliefs,research_4_8,Research advancing knowledge is necessary even w/o immediate benefits,TRUE,positive,300,175,58.3,41.7,16,4,11,5,3.3,4.57,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_1,Importance: Advancing social science,TRUE,positive,300,145,48.3,51.7,14.5,7.7,11,3.5,3.4,2.02,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_2,Importance: Developing new medicines,TRUE,positive,300,229,76.3,23.7,12.7,5.6,11,1.7,2.8,2.43,TRUE
+Trust in higher ed institutions,Research Beliefs,research_5.1_3,Importance: Protecting the environment,TRUE,positive,300,185,61.7,38.3,14.1,6.1,11,3.1,3.1,2.52,TRUE
+Trust in higher ed institutions,Research Beliefs,research_5.1_4,Importance: Developing new energy technologies,TRUE,positive,300,130,43.3,56.7,16.9,6.5,11,5.9,3.8,2.94,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_5,Importance: Technologies for economic growth,TRUE,positive,300,100,33.3,66.7,20,6.5,11,9,4.4,3.6,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_6,Importance: Innovative manufacturing,TRUE,positive,300,58,19.3,80.7,24.1,7.9,11,13.1,5.9,3.73,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_7,Importance: Defense and national security technologies,TRUE,positive,300,75,25,75,18.7,8.4,11,7.7,4.8,2.49,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_8,Importance: AI and machine learning,TRUE,positive,300,60,20,80,23.3,7.9,11,12.3,5.8,3.54,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_9,Importance: Exploring space,TRUE,positive,300,54,18,82,13,10.6,11,2,4.9,1.26,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_10,Importance: Improving education systems,TRUE,positive,300,125,41.7,58.3,18.4,5.7,11,7.4,3.9,3.72,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_11,Importance: Better public policies,TRUE,positive,300,93,31,69,15.1,9.2,11,4.1,4.1,1.75,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_12,Importance: Helping individuals improve their lives,TRUE,positive,300,84,28,72,16.7,8.8,11,5.7,4.4,2.07,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.1_13,Importance: Awareness of others' experiences,TRUE,positive,300,72,24,76,19.4,8.3,11,8.4,5,2.66,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_1,Likelihood: Advancing social science,TRUE,positive,300,120,40,60,18.3,6.1,11,7.3,4,3.45,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_2,Likelihood: Developing new medicines,TRUE,positive,300,166,55.3,44.7,15.7,5.2,11,4.7,3.3,3.37,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_3,Likelihood: Protecting the environment,TRUE,positive,300,128,42.7,57.3,14.8,8.1,11,3.8,3.6,1.97,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_4,Likelihood: Developing new energy technologies,TRUE,positive,300,112,37.3,62.7,17.9,6.9,11,6.9,4,2.93,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_5,Likelihood: Technologies for economic growth,TRUE,positive,300,77,25.7,74.3,19.5,8.1,11,8.5,4.9,2.76,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_6,Likelihood: Innovative manufacturing,TRUE,positive,300,74,24.7,75.3,21.6,7.5,11,10.6,5.1,3.39,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_7,Likelihood: Defense and national security technologies,TRUE,positive,300,108,36,64,13.9,9.4,11,2.9,3.8,1.56,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_8,Likelihood: AI and machine learning,TRUE,positive,300,146,48.7,51.3,15.1,7.1,11,4.1,3.5,2.31,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_9,Likelihood: Exploring space,TRUE,positive,300,89,29.7,70.3,10.1,11.4,11,-0.9,3.7,0.88,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_10,Likelihood: Improving education systems,TRUE,positive,300,111,37,63,21.6,4.8,11,10.6,4.3,5.52,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_11,Likelihood: Better public policies,TRUE,positive,300,59,19.7,80.3,27.1,7.1,11,16.1,6.1,4.9,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_12,Likelihood: Helping individuals improve their lives,TRUE,positive,300,74,24.7,75.3,23,7.1,11,12,5.2,3.91,FALSE
+Trust in higher ed institutions,Research Beliefs,research_5.2_13,Likelihood: Awareness of others' experiences,TRUE,positive,300,70,23.3,76.7,17.1,9.1,11,6.1,4.9,2.06,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_1,Problematic: Researchers make mistakes,TRUE,positive,300,71,23.7,76.3,7,12.2,11,-4,3.5,0.54,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_2,Problematic: Research is slow to have impact,TRUE,positive,300,21,7,93,4.8,11.5,11,-6.2,5,0.39,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_3,Problematic: Few people can access results,TRUE,negative,300,17,5.7,94.3,17.6,10.6,11,6.6,9.4,1.81,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_4,Problematic: Findings don't generalize,TRUE,positive,300,34,11.3,88.7,14.7,10.5,11,3.7,6.3,1.47,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_5,Problematic: Studies fail to yield results,TRUE,positive,300,21,7,93,14.3,10.8,11,3.3,7.8,1.38,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_6,Problematic: Research wastes money,TRUE,negative,300,14,4.7,95.3,14.3,10.8,11,3.3,9.5,1.37,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_7,Problematic: New tech eliminates jobs,TRUE,negative,300,8,2.7,97.3,12.5,11,11,1.5,11.8,1.16,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_8,Problematic: New tech invades privacy,TRUE,positive,300,101,33.7,66.3,12.9,10.1,11,1.9,3.8,1.32,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_9,Problematic: Research creates dangerous technology,TRUE,positive,300,141,47,53,9.2,12.6,11,-1.8,3,0.71,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_10,Problematic: Findings are misused,TRUE,negative,300,5,1.7,98.3,20,10.8,11,9,18,2.05,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.1_11,Problematic: Results reporting is biased by media,TRUE,negative,300,8,2.7,97.3,12.5,11,11,1.5,11.8,1.16,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_1,Neg. likelihood: Researchers make mistakes,TRUE,negative,300,16,5.3,94.7,18.8,10.6,11,7.8,9.9,1.95,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_2,Neg. likelihood: Research is slow to have impact,TRUE,negative,300,9,3,97,44.4,10,11,33.4,16.7,7.23,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_3,Neg. likelihood: Few people can access results,TRUE,negative,300,13,4.3,95.7,23.1,10.5,11,12.1,11.8,2.57,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_4,Neg. likelihood: Findings don't generalize,TRUE,negative,300,11,3.7,96.3,27.3,10.4,11,16.3,13.5,3.24,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_5,Neg. likelihood: Studies fail to yield results,TRUE,negative,300,10,3.3,96.7,10,11,11,-1,9.7,0.9,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_6,Neg. likelihood: Research wastes money,TRUE,negative,300,24,8,92,20.8,10.1,11,9.8,8.5,2.33,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_7,Neg. likelihood: New tech eliminates jobs,TRUE,negative,300,19,6.3,93.7,10.5,11,11,-0.5,7.3,0.95,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_8,Neg. likelihood: New tech invades privacy,TRUE,negative,300,15,5,95,13.3,10.9,11,2.3,9,1.26,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_9,Neg. likelihood: Research creates dangerous technology,TRUE,negative,300,29,9.7,90.3,20.7,10,11,9.7,7.7,2.36,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_10,Neg. likelihood: Findings are misused,TRUE,negative,300,18,6,94,22.2,10.3,11,11.2,10,2.49,FALSE
+Trust in higher ed institutions,Research Beliefs,research_6.2_11,Neg. likelihood: Results reporting is biased by media,TRUE,negative,300,21,7,93,23.8,10,11,12.8,9.5,2.8,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_2,Govt investment is ESSENTIAL (vs. private sufficient),TRUE,positive,284,236,83.1,16.9,11.4,6.2,10.6,0.9,2.8,1.94,TRUE
+Trust in higher ed institutions,Govt Funding,govtfund_3,Knowledge of funding cuts,TRUE,positive,300,19,6.3,93.7,47.4,8.5,11,36.4,11.6,9.64,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_1,Perceived support: People who directly benefit,TRUE,positive,300,216,72,28,12,8.3,11,1,2.9,1.51,TRUE
+Trust in higher ed institutions,Govt Funding,govtfund_4_2,Perceived support: Students at universities,TRUE,positive,300,170,56.7,43.3,14.7,6.2,11,3.7,3.3,2.63,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_3,Perceived support: Scientists at universities,TRUE,positive,300,212,70.7,29.3,12.7,6.8,11,1.7,2.9,1.99,TRUE
+Trust in higher ed institutions,Govt Funding,govtfund_4_4,Perceived support: The general public,TRUE,positive,300,32,10.7,89.3,18.8,10.1,11,7.8,7.1,2.06,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_5,Perceived support: People in the military,TRUE,positive,300,56,18.7,81.3,17.9,9.4,11,6.9,5.4,2.09,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_6,Perceived support: People who identify as liberals,TRUE,positive,300,117,39,61,12.8,9.8,11,1.8,3.6,1.35,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_7,Perceived support: People who identify as conservatives,TRUE,positive,300,25,8.3,91.7,28,9.5,11,17,9.2,3.72,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_8,Perceived support: People who favor minimal govt spending,TRUE,positive,300,19,6.3,93.7,26.3,10,11,15.3,10.3,3.23,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_9,Perceived support: Politicians,TRUE,positive,300,32,10.7,89.3,15.6,10.4,11,4.6,6.7,1.59,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_10,Perceived support: People who don't believe in mainstream science,TRUE,positive,300,14,4.7,95.3,21.4,10.5,11,10.4,11.1,2.33,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_11,Perceived support: Medical and mental health professionals,TRUE,positive,300,178,59.3,40.7,14.6,5.7,11,3.6,3.2,2.81,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_12,Perceived support: Pharmaceutical companies,TRUE,positive,300,132,44,56,13.6,8.9,11,2.6,3.5,1.61,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_4_13,Perceived support: Technology companies,TRUE,positive,300,116,38.7,61.3,15.5,8.2,11,4.5,3.8,2.07,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_5_1,Govt funding likelihood: Researchers have enough resources,TRUE,positive,300,76,25.3,74.7,14.5,9.8,11,3.5,4.4,1.55,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_5_2,Govt funding likelihood: Research can focus long-term,TRUE,positive,300,105,35,65,20,6.2,11,9,4.3,3.81,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_5_3,Govt funding likelihood: Exciting research is sped up,TRUE,positive,300,66,22,78,18.2,9,11,7.2,5.1,2.25,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_5_4,Govt funding likelihood: Results become publicly available,TRUE,positive,300,74,24.7,75.3,25.7,6.2,11,14.7,5.4,5.23,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_5_5,Govt funding likelihood: Funded researchers held to higher standards,TRUE,positive,300,51,17,83,21.6,8.8,11,10.6,6,2.84,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_5_6,Govt funding likelihood: Money spent on less important things,TRUE,negative,300,43,14.3,85.7,25.6,8.6,11,14.6,6.9,3.67,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_5_7,Govt funding likelihood: Taxpayer money is wasted,TRUE,negative,300,57,19,81,22.8,8.2,11,11.8,5.8,3.29,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_5_8,Govt funding likelihood: Research delayed by oversight,TRUE,negative,300,9,3,97,55.6,9.6,11,44.6,16.7,11.74,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_5_9,Govt funding likelihood: Political agendas influence funding,TRUE,negative,300,7,2.3,97.7,42.9,10.2,11,31.9,18.8,6.58,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_5_10,Govt funding likelihood: Researchers lie to maintain funding,TRUE,negative,300,49,16.3,83.7,24.5,8.4,11,13.5,6.4,3.55,FALSE
+Trust in higher ed institutions,Govt Funding,gotvfund_6_1,Rules should ensure govt-funded research is done well,TRUE,positive,300,165,55,45,14.5,6.7,11,3.5,3.3,2.38,FALSE
+Trust in higher ed institutions,Govt Funding,gotvfund_6_2,Oversight committees protect against unethical research,TRUE,positive,300,96,32,68,20.8,6.4,11,9.8,4.5,3.87,FALSE
+Trust in higher ed institutions,Govt Funding,gotvfund_6_3,Many everyday tools are the result of academic research,TRUE,positive,300,128,42.7,57.3,16.4,7,11,5.4,3.7,2.62,FALSE
+Trust in higher ed institutions,Govt Funding,gotvfund_6_4,University research benefits lives in ways hard to see,TRUE,positive,300,100,33.3,66.7,14,9.5,11,3,3.9,1.55,FALSE
+Trust in higher ed institutions,Govt Funding,gotvfund_6_5,University researchers motivated primarily by profit,TRUE,negative,300,61,20.3,79.7,24.6,7.5,11,13.6,5.8,4,FALSE
+Trust in higher ed institutions,Govt Funding,gotvfund_6_6,Private companies research primarily to benefit the public,TRUE,positive,300,23,7.7,92.3,26.1,9.7,11,15.1,9.3,3.27,FALSE
+Trust in higher ed institutions,Govt Funding,gotvfund_6_7,Govt-funded research is more objective than privately funded,TRUE,positive,300,70,23.3,76.7,20,8.3,11,9,5.1,2.78,FALSE
+Trust in higher ed institutions,Govt Funding,gotvfund_6_8,Private company research is biased toward company interests,TRUE,negative,300,7,2.3,97.7,28.6,10.6,11,17.6,17.2,3.38,FALSE
+Trust in higher ed institutions,Govt Funding,gotvfund_6_9,Results of private company research will become publicly accessible,TRUE,positive,300,32,10.7,89.3,28.1,9,11,17.1,8.2,3.98,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_7_1,Priority: Making a profit,TRUE,negative,300,38,12.7,87.3,21.1,9.5,11,10.1,6.9,2.53,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_7_2,Priority: Advance knowledge and benefit society,TRUE,positive,300,164,54.7,45.3,16.5,4.4,11,5.5,3.4,4.27,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_7_3,Priority: Develop products that can be sold,TRUE,positive,300,47,15.7,84.3,21.3,9.1,11,10.3,6.2,2.7,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_7_4,Priority: Serve interests of the government,TRUE,negative,300,18,6,94,16.7,10.6,11,5.7,9,1.68,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_8_1,Tax investment: ...boosts the economy,TRUE,positive,300,98,32.7,67.3,24.5,4.5,11,13.5,4.7,6.95,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_8_2,Tax investment: ...improves health and saves lives,TRUE,positive,300,177,59,41,15.8,4.1,11,4.8,3.3,4.43,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_8_3,Tax investment: ...drives industry investment,TRUE,positive,300,107,35.7,64.3,18.7,6.7,11,7.7,4.2,3.18,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_8_4,Tax investment: ...makes America a leader,TRUE,positive,300,127,42.3,57.7,18.9,5.2,11,7.9,3.9,4.25,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_8_5,Tax investment: ...protects national security,TRUE,positive,300,99,33,67,21.2,6,11,10.2,4.5,4.24,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_8_6,Tax investment: ...leads to scientific breakthroughs,TRUE,positive,300,179,59.7,40.3,16.2,3.3,11,5.2,3.3,5.65,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_8_7,Tax investment: ...benefits people like you,TRUE,positive,300,135,45,55,17,6.1,11,6,3.7,3.18,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_9_1,Approve cuts to: Health research funding,TRUE,negative,300,203,67.7,32.3,12.8,7.2,11,1.8,3,1.89,TRUE
+Trust in higher ed institutions,Govt Funding,govtfund_9_2,Approve cuts to: Education funding,TRUE,negative,300,194,64.7,35.3,13.4,6.6,11,2.4,3,2.19,TRUE
+Trust in higher ed institutions,Govt Funding,govtfund_9_3,Approve cuts to: Science funding,TRUE,negative,300,176,58.7,41.3,14.8,5.6,11,3.8,3.2,2.9,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_9_4,Approve cuts to: Arts funding,TRUE,negative,300,109,36.3,63.7,16.5,7.9,11,5.5,4,2.32,FALSE
+Trust in higher ed institutions,Govt Funding,govtfund_9_5,Approve cuts to: Humanities funding,TRUE,negative,300,135,45,55,15.6,7.3,11,4.6,3.6,2.35,FALSE
+Trust in higher ed institutions,Govt Funding,govfund_10,Local area would be negatively impacted by cuts,TRUE,negative,300,86,28.7,71.3,24.4,5.6,11,13.4,5,5.44,FALSE
+Trust in higher ed institutions,Past Engagement,past_engage_1,Conversations about science topics,TRUE,positive,300,16,5.3,94.7,18.8,10.6,11,7.8,9.9,1.95,FALSE
+Trust in higher ed institutions,Past Engagement,past_engage_2,Shared/commented social media posts about science,TRUE,positive,300,8,2.7,97.3,37.5,10.3,11,26.5,17.2,5.24,FALSE
+Trust in higher ed institutions,Past Engagement,past_engage_3,Attended rallies or protests about science,TRUE,positive,300,4,1.3,98.7,50,10.5,11,39,25.1,8.55,FALSE
+Trust in higher ed institutions,Past Engagement,past_engage_4,Shared info online about cuts to research funding,TRUE,positive,300,6,2,98,33.3,10.5,11,22.3,19.3,4.24,FALSE
+Trust in higher ed institutions,Past Engagement,past_engage_5,Talked to others about cuts to research funding,TRUE,positive,300,9,3,97,33.3,10.3,11,22.3,15.8,4.35,FALSE
+Trust in higher ed institutions,Past Engagement,past_engage_6,Contacted reps to oppose cuts to research funding,TRUE,positive,300,4,1.3,98.7,50,10.5,11,39,25.1,8.55,FALSE
+Trust in higher ed institutions,Past Engagement,past_engage_7,Contacted reps to support research funding,TRUE,positive,300,7,2.3,97.7,42.9,10.2,11,31.9,18.8,6.58,FALSE
+Trust in higher ed institutions,Higher Education,highered_1_1,Approval: Private colleges and universities,TRUE,positive,300,79,26.3,73.7,35.4,2.3,11,24.4,5.7,23.72,FALSE
+Trust in higher ed institutions,Higher Education,highered_1_2,Approval: State public university system,TRUE,positive,300,119,39.7,60.3,26.9,0.6,11,15.9,4.4,66.21,FALSE
+Trust in higher ed institutions,Higher Education,highered_1_3,Approval: Local community college(s),TRUE,positive,300,142,47.3,52.7,21.8,1.3,11,10.8,3.9,21.78,FALSE
+Trust in higher ed institutions,Higher Education,highered_3_1,Contribution to science: Private colleges and universities,TRUE,positive,283,127,44.9,55.1,19.7,2.6,10.2,9.4,4,9.31,FALSE
+Trust in higher ed institutions,Higher Education,highered_3_2,"Contribution to science: Private companies (pharma, tech)",TRUE,positive,285,110,38.6,61.4,17.3,6.3,10.5,6.7,4,3.11,FALSE
+Trust in higher ed institutions,Higher Education,highered_3_3,Contribution to science: Federal government agencies,TRUE,positive,280,86,30.7,69.3,15.1,8.2,10.4,4.8,4.3,1.98,FALSE
+Trust in higher ed institutions,Higher Education,highered_3_4,Contribution to science: Charitable foundations,TRUE,positive,280,86,30.7,69.3,12.8,10.3,11.1,1.7,4.1,1.28,FALSE
+Trust in higher ed institutions,Higher Education,highered_3_5,Contribution to science: State colleges and universities,TRUE,positive,284,138,48.6,51.4,18.1,3.4,10.6,7.6,3.8,6.24,FALSE
+Trust in higher ed institutions,Higher Education,highered_3_6,Contribution to science: Community colleges,TRUE,positive,281,60,21.4,78.6,23.3,7.2,10.7,12.7,5.8,3.9,FALSE
+Trust in higher ed institutions,Higher Education,highered_4_1,Proportion nonprofit: Private colleges and universities,TRUE,positive,275,18,6.5,93.5,16.7,10.1,10.5,6.1,9,1.78,FALSE
+Trust in higher ed institutions,Higher Education,highered_4_2,Proportion nonprofit: Public state colleges and universities,TRUE,positive,277,58,20.9,79.1,15.5,8.7,10.1,5.4,5.1,1.93,FALSE
+Trust in higher ed institutions,Higher Education,highered_4_3,Proportion nonprofit: Community colleges,TRUE,positive,274,46,16.8,83.2,17.4,9.2,10.6,6.8,5.9,2.08,FALSE
+Trust in higher ed institutions,Higher Education,highered_4_4,"Proportion nonprofit: Private companies (pharma, tech)",TRUE,positive,284,14,4.9,95.1,21.4,10,10.6,10.9,11.1,2.45,FALSE
+Trust in higher ed institutions,Higher Education,highered_4_5,Proportion nonprofit: Federal government agencies,TRUE,positive,273,56,20.5,79.5,16.1,9.2,10.6,5.4,5.3,1.89,FALSE
+Trust in higher ed institutions,Higher Education,highered_4_6,Proportion nonprofit: Charitable foundations,TRUE,positive,288,100,34.7,65.3,10,11.7,11.1,-1.1,3.5,0.84,FALSE
+Trust in higher ed institutions,University Perceptions,univ_2_1,Univ. contributes to: Greater innovation,TRUE,positive,300,147,49,51,16.3,5.9,11,5.3,3.5,3.12,FALSE
+Trust in higher ed institutions,University Perceptions,univ_2_2,Univ. contributes to: Better jobs and career advancement,TRUE,positive,300,103,34.3,65.7,19.4,6.6,11,8.4,4.3,3.41,FALSE
+Trust in higher ed institutions,University Perceptions,univ_2_3,Univ. contributes to: Higher household incomes,TRUE,positive,300,85,28.3,71.7,20,7.4,11,9,4.7,3.11,FALSE
+Trust in higher ed institutions,University Perceptions,univ_2_4,Univ. contributes to: A more knowledgeable population,TRUE,positive,300,140,46.7,53.3,17.9,5,11,6.9,3.7,4.13,FALSE
+Trust in higher ed institutions,University Perceptions,univ_2_5,Univ. contributes to: US competitive advantage,TRUE,positive,300,115,38.3,61.7,18.3,6.5,11,7.3,4,3.22,FALSE
+Trust in higher ed institutions,University Perceptions,univ_2_6,Univ. contributes to: More entrepreneurship,TRUE,positive,300,89,29.7,70.3,18,8.1,11,7,4.5,2.5,FALSE
+Trust in higher ed institutions,University Perceptions,univ_2_7,Univ. contributes to: Increased compassion and tolerance,TRUE,positive,300,79,26.3,73.7,24.1,6.3,11,13.1,5.1,4.68,FALSE
+Trust in higher ed institutions,University Perceptions,univ_2_8,Univ. contributes to: Overall economic growth,TRUE,positive,300,99,33,67,23.2,5,11,12.2,4.6,5.78,FALSE
+Trust in higher ed institutions,University Perceptions,univ_2_9,Univ. contributes to: Better international relations,TRUE,positive,300,74,24.7,75.3,27,5.8,11,16,5.5,6.07,FALSE
+Trust in higher ed institutions,University Perceptions,univ_2_10,Univ. contributes to: Benefits to local communities,TRUE,positive,300,99,33,67,22.2,5.5,11,11.2,4.6,4.94,FALSE
+Trust in higher ed institutions,University Perceptions,univ_4_1,Universities discover new knowledge,TRUE,positive,300,150,50,50,18.7,3.3,11,7.7,3.7,6.66,FALSE
+Trust in higher ed institutions,University Perceptions,univ_4_2,Universities apply and connect knowledge,TRUE,positive,300,119,39.7,60.3,20.2,5,11,9.2,4.1,4.83,FALSE
+Trust in higher ed institutions,University Perceptions,univ_4_3,Universities apply knowledge-based solutions,TRUE,positive,300,115,38.3,61.7,23.5,3.2,11,12.5,4.3,9.15,FALSE
+Trust in higher ed institutions,University Perceptions,univ_5_1,Benefits: You personally,TRUE,positive,300,89,29.7,70.3,20.2,7.1,11,9.2,4.6,3.31,FALSE
+Trust in higher ed institutions,University Perceptions,univ_5_2,Benefits: People you care about,TRUE,positive,300,68,22.7,77.3,23.5,7.3,11,12.5,5.5,3.89,FALSE
+Trust in higher ed institutions,University Perceptions,univ_5_3,Benefits: Local communities,TRUE,positive,300,76,25.3,74.7,27.6,5.4,11,16.6,5.4,6.75,FALSE
+Trust in higher ed institutions,University Perceptions,univ_5_4,Benefits: Students who attend,TRUE,positive,300,134,44.7,55.3,20.1,3.6,11,9.1,3.9,6.73,FALSE
+Trust in higher ed institutions,University Perceptions,univ_5_5,Benefits: Students' families,TRUE,positive,300,72,24,76,23.6,7,11,12.6,5.3,4.1,FALSE
+Trust in higher ed institutions,University Perceptions,univ_5_6,Benefits: Employers and businesses,TRUE,positive,300,78,26,74,17.9,8.6,11,6.9,4.7,2.34,FALSE
+Trust in higher ed institutions,University Perceptions,univ_5_7,Benefits: Society as a whole,TRUE,positive,300,113,37.7,62.3,20.4,5.3,11,9.4,4.2,4.52,FALSE
+Trust in higher ed institutions,Climate,climate_1,Believes global warming is happening,TRUE,positive,271,254,93.7,6.3,11.4,5.9,11.1,0.3,2.8,2.06,TRUE
+Trust in higher ed institutions,Climate,climate_2,Believes global warming is caused by humans,TRUE,positive,300,228,76,24,12.7,5.6,11,1.7,2.9,2.48,TRUE
+Trust in higher ed institutions,Climate,climate_3,Trust in climate scientists,TRUE,positive,300,111,37,63,18.9,6.3,11,7.9,4.1,3.44,FALSE
+Trust in higher ed institutions,Climate,climate_4_1,Climate research importance: Climate science and earth systems,TRUE,positive,300,135,45,55,17,6.1,11,6,3.7,3.18,FALSE
+Trust in higher ed institutions,Climate,climate_4_2,Climate research importance: Climate mitigation approaches,TRUE,positive,300,148,49.3,50.7,15.5,6.6,11,4.5,3.5,2.61,FALSE
+Trust in higher ed institutions,Climate,climate_4_3,Climate research importance: Climate adaptation and resilience,TRUE,positive,300,140,46.7,53.3,16.4,6.2,11,5.4,3.6,2.95,FALSE
+Trust in higher ed institutions,Climate,climate_4_4,"Climate research importance: Climate policy, economics, and human impact",TRUE,positive,300,130,43.3,56.7,17.7,5.9,11,6.7,3.8,3.44,FALSE
+Trust in higher ed institutions,Demographics,age,Age,FALSE,positive,300,1,0.3,99.7,0,11,11,-11,1.8,NA,FALSE
+Trust in higher ed institutions,Demographics,ses_ladder,Subjective SES (ladder),FALSE,positive,300,7,2.3,97.7,14.3,10.9,11,3.3,13.3,1.36,FALSE
+Trust in higher ed institutions,Demographics,politics_ideology,Political ideology (liberal → conservative),FALSE,negative,237,48,20.3,79.7,14.6,11.6,12.2,2.3,5.5,1.3,FALSE
+Trust in higher ed institutions,Demographics,ses_degree,Education level,FALSE,positive,237,14,5.9,94.1,7.1,12.1,11.8,-4.7,7.2,0.56,FALSE
+Trust in higher ed institutions,Demographics,ses_income,Household income,FALSE,positive,292,23,7.9,92.1,21.7,10.4,11.3,10.4,8.8,2.39,FALSE
+Trust in higher ed institutions,Demographics,lgbtq,LGBTQ+ identity,FALSE,negative,293,231,78.8,21.2,11.3,11.3,11.3,-0,2.8,1,TRUE
+Tax investment benefits people like you,Research Beliefs,research_1,Knowledge of university research,TRUE,positive,300,29,9.7,90.3,65.5,42.8,45,20.5,9.3,2.54,FALSE
+Tax investment benefits people like you,Research Beliefs,research_2,Scientific methods are the best way to find truth,TRUE,positive,300,127,42.3,57.7,60.6,33.5,45,15.6,5.2,3.05,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_1,Effects on: You personally,TRUE,positive,300,68,22.7,77.3,69.1,37.9,45,24.1,6.3,3.66,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_2,Effects on: People you care about,TRUE,positive,300,66,22,78,75.8,36.3,45,30.8,6,5.48,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_3,Effects on: Local community,TRUE,positive,300,60,20,80,73.3,37.9,45,28.3,6.4,4.5,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_4,Effects on: People in the US,TRUE,positive,300,94,31.3,68.7,73.4,32,45,28.4,5.4,5.85,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_5,Effects on: Students at universities,TRUE,positive,300,128,42.7,57.3,59.4,34.3,45,14.4,5.2,2.8,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_6,Effects on: Scientists at universities,TRUE,positive,300,175,58.3,41.7,57.7,27.2,45,12.7,4.7,3.65,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_7,Effects on: Universities themselves,TRUE,positive,300,172,57.3,42.7,56.4,29.7,45,11.4,4.7,3.06,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_8,Effects on: Pharmaceutical companies,TRUE,positive,300,119,39.7,60.3,57.1,37,45,12.1,5.4,2.27,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_9,Effects on: Technology companies,TRUE,positive,300,126,42,58,57.1,36.2,45,12.1,5.3,2.35,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_10,Effects on: The military,TRUE,positive,300,66,22,78,63.6,39.7,45,18.6,6.6,2.65,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_11,Effects on: The US government,TRUE,positive,300,83,27.7,72.3,61.4,38.7,45,16.4,6.1,2.52,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_12,Effects on: Wealthy individuals,TRUE,positive,300,71,23.7,76.3,57.7,41,45,12.7,6.5,1.96,FALSE
+Tax investment benefits people like you,Research Beliefs,research_3_13,Effects on: Disadvantaged individuals,TRUE,positive,300,62,20.7,79.3,75.8,37,45,30.8,6.2,5.34,FALSE
+Tax investment benefits people like you,Research Beliefs,research_4_1,I usually understand academic research findings,TRUE,positive,300,75,25,75,61.3,39.6,45,16.3,6.3,2.42,FALSE
+Tax investment benefits people like you,Research Beliefs,research_4_2,I know where to look up academic research,TRUE,positive,300,97,32.3,67.7,60.8,37.4,45,15.8,5.7,2.59,FALSE
+Tax investment benefits people like you,Research Beliefs,research_4_3,Clear how to apply research findings in my life,TRUE,positive,300,50,16.7,83.3,62,41.6,45,17,7.4,2.29,FALSE
+Tax investment benefits people like you,Research Beliefs,research_4_4,I think about the impact of science on my daily life,TRUE,positive,300,58,19.3,80.7,65.5,40.1,45,20.5,6.9,2.84,FALSE
+Tax investment benefits people like you,Research Beliefs,research_4_5,Benefits of scientific research outweigh harms,TRUE,positive,300,96,32,68,67.7,34.3,45,22.7,5.6,4.01,FALSE
+Tax investment benefits people like you,Research Beliefs,research_4_6,Science makes our way of life change too fast,TRUE,negative,300,55,18.3,81.7,69.1,39.6,45,24.1,6.9,3.41,FALSE
+Tax investment benefits people like you,Research Beliefs,research_4_7,Scientific research will create opportunities for next generation,TRUE,positive,300,164,54.7,45.3,59.1,27.9,45,14.1,4.8,3.73,FALSE
+Tax investment benefits people like you,Research Beliefs,research_4_8,Research advancing knowledge is necessary even w/o immediate benefits,TRUE,positive,300,175,58.3,41.7,59.4,24.8,45,14.4,4.7,4.44,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_1,Importance: Advancing social science,TRUE,positive,300,145,48.3,51.7,61.4,29.7,45,16.4,5,3.77,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_2,Importance: Developing new medicines,TRUE,positive,300,229,76.3,23.7,48.5,33.8,45,3.5,4.4,1.84,TRUE
+Tax investment benefits people like you,Research Beliefs,research_5.1_3,Importance: Protecting the environment,TRUE,positive,300,185,61.7,38.3,56.2,27,45,11.2,4.6,3.48,TRUE
+Tax investment benefits people like you,Research Beliefs,research_5.1_4,Importance: Developing new energy technologies,TRUE,positive,300,130,43.3,56.7,60,33.5,45,15,5.2,2.97,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_5,Importance: Technologies for economic growth,TRUE,positive,300,100,33.3,66.7,51,42,45,6,5.8,1.44,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_6,Importance: Innovative manufacturing,TRUE,positive,300,58,19.3,80.7,56.9,42.1,45,11.9,7.1,1.81,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_7,Importance: Defense and national security technologies,TRUE,positive,300,75,25,75,54.7,41.8,45,9.7,6.4,1.68,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_8,Importance: AI and machine learning,TRUE,positive,300,60,20,80,58.3,41.7,45,13.3,7,1.96,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_9,Importance: Exploring space,TRUE,positive,300,54,18,82,70.4,39.4,45,25.4,6.8,3.65,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_10,Importance: Improving education systems,TRUE,positive,300,125,41.7,58.3,60.8,33.7,45,15.8,5.2,3.05,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_11,Importance: Better public policies,TRUE,positive,300,93,31,69,61.3,37.7,45,16.3,5.8,2.62,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_12,Importance: Helping individuals improve their lives,TRUE,positive,300,84,28,72,60.7,38.9,45,15.7,6.1,2.43,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.1_13,Importance: Awareness of others' experiences,TRUE,positive,300,72,24,76,69.4,37.3,45,24.4,6.1,3.82,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_1,Likelihood: Advancing social science,TRUE,positive,300,120,40,60,57.5,36.7,45,12.5,5.3,2.34,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_2,Likelihood: Developing new medicines,TRUE,positive,300,166,55.3,44.7,54.2,33.6,45,9.2,4.8,2.34,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_3,Likelihood: Protecting the environment,TRUE,positive,300,128,42.7,57.3,53.1,39,45,8.1,5.3,1.78,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_4,Likelihood: Developing new energy technologies,TRUE,positive,300,112,37.3,62.7,58,37.2,45,13,5.5,2.33,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_5,Likelihood: Technologies for economic growth,TRUE,positive,300,77,25.7,74.3,59.7,39.9,45,14.7,6.3,2.23,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_6,Likelihood: Innovative manufacturing,TRUE,positive,300,74,24.7,75.3,56.8,41.2,45,11.8,6.4,1.88,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_7,Likelihood: Defense and national security technologies,TRUE,positive,300,108,36,64,53.7,40.1,45,8.7,5.6,1.73,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_8,Likelihood: AI and machine learning,TRUE,positive,300,146,48.7,51.3,50.7,39.6,45,5.7,5,1.57,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_9,Likelihood: Exploring space,TRUE,positive,300,89,29.7,70.3,65.2,36.5,45,20.2,5.8,3.26,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_10,Likelihood: Improving education systems,TRUE,positive,300,111,37,63,61.3,35.4,45,16.3,5.4,2.88,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_11,Likelihood: Better public policies,TRUE,positive,300,59,19.7,80.3,61,41.1,45,16,7,2.25,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_12,Likelihood: Helping individuals improve their lives,TRUE,positive,300,74,24.7,75.3,60.8,39.8,45,15.8,6.4,2.34,FALSE
+Tax investment benefits people like you,Research Beliefs,research_5.2_13,Likelihood: Awareness of others' experiences,TRUE,positive,300,70,23.3,76.7,68.6,37.8,45,23.6,6.2,3.59,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_1,Problematic: Researchers make mistakes,TRUE,positive,300,71,23.7,76.3,53.5,42.4,45,8.5,6.6,1.57,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_2,Problematic: Research is slow to have impact,TRUE,negative,300,32,10.7,89.3,50,44.4,45,5,9.3,1.25,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_3,Problematic: Few people can access results,TRUE,positive,300,36,12,88,55.6,43.6,45,10.6,8.8,1.62,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_4,Problematic: Findings don't generalize,TRUE,positive,300,34,11.3,88.7,44.1,45.1,45,-0.9,9,0.96,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_5,Problematic: Studies fail to yield results,TRUE,negative,300,43,14.3,85.7,55.8,43.2,45,10.8,8.1,1.66,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_6,Problematic: Research wastes money,TRUE,negative,300,14,4.7,95.3,71.4,43.7,45,26.4,12.4,3.22,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_7,Problematic: New tech eliminates jobs,TRUE,positive,300,84,28,72,51.2,42.6,45,6.2,6.2,1.41,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_8,Problematic: New tech invades privacy,TRUE,positive,300,101,33.7,66.3,54.5,40.2,45,9.5,5.7,1.78,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_9,Problematic: Research creates dangerous technology,TRUE,positive,300,141,47,53,48.9,41.5,45,3.9,5.1,1.35,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_10,Problematic: Findings are misused,TRUE,positive,300,98,32.7,67.3,51,42.1,45,6,5.8,1.43,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.1_11,Problematic: Results reporting is biased by media,TRUE,positive,300,85,28.3,71.7,55.3,40.9,45,10.3,6.1,1.78,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_1,Neg. likelihood: Researchers make mistakes,TRUE,negative,300,16,5.3,94.7,56.2,44.4,45,11.2,12.7,1.61,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_2,Neg. likelihood: Research is slow to have impact,TRUE,positive,300,76,25.3,74.7,55.3,41.5,45,10.3,6.4,1.74,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_3,Neg. likelihood: Few people can access results,TRUE,negative,300,13,4.3,95.7,69.2,43.9,45,24.2,13.1,2.88,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_4,Neg. likelihood: Findings don't generalize,TRUE,positive,300,69,23,77,56.5,41.6,45,11.5,6.6,1.83,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_5,Neg. likelihood: Studies fail to yield results,TRUE,positive,300,54,18,82,46.3,44.7,45,1.3,7.4,1.07,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_6,Neg. likelihood: Research wastes money,TRUE,negative,300,24,8,92,45.8,44.9,45,0.8,10.6,1.04,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_7,Neg. likelihood: New tech eliminates jobs,TRUE,negative,300,19,6.3,93.7,52.6,44.5,45,7.6,11.8,1.39,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_8,Neg. likelihood: New tech invades privacy,TRUE,negative,300,15,5,95,60,44.2,45,15,13,1.89,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_9,Neg. likelihood: Research creates dangerous technology,TRUE,negative,300,29,9.7,90.3,62.1,43.2,45,17.1,9.5,2.15,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_10,Neg. likelihood: Findings are misused,TRUE,negative,300,18,6,94,72.2,43.3,45,27.2,10.9,3.41,FALSE
+Tax investment benefits people like you,Research Beliefs,research_6.2_11,Neg. likelihood: Results reporting is biased by media,TRUE,positive,300,83,27.7,72.3,48.2,43.8,45,3.2,6.2,1.19,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_2,Govt investment is ESSENTIAL (vs. private sufficient),TRUE,positive,284,236,83.1,16.9,51.3,25,46.8,4.4,4.4,3.16,TRUE
+Tax investment benefits people like you,Govt Funding,govtfund_3,Knowledge of funding cuts,TRUE,positive,300,19,6.3,93.7,78.9,42.7,45,33.9,9.8,5.03,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_1,Perceived support: People who directly benefit,TRUE,positive,300,216,72,28,47.7,38.1,45,2.7,4.4,1.48,TRUE
+Tax investment benefits people like you,Govt Funding,govtfund_4_2,Perceived support: Students at universities,TRUE,positive,300,170,56.7,43.3,51.8,36.2,45,6.8,4.8,1.9,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_3,Perceived support: Scientists at universities,TRUE,positive,300,212,70.7,29.3,47.6,38.6,45,2.6,4.5,1.45,TRUE
+Tax investment benefits people like you,Govt Funding,govtfund_4_4,Perceived support: The general public,TRUE,positive,300,32,10.7,89.3,56.2,43.7,45,11.2,9.2,1.66,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_5,Perceived support: People in the military,TRUE,positive,300,56,18.7,81.3,51.8,43.4,45,6.8,7.3,1.4,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_6,Perceived support: People who identify as liberals,TRUE,positive,300,117,39,61,58.1,36.6,45,13.1,5.4,2.4,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_7,Perceived support: People who identify as conservatives,TRUE,positive,300,25,8.3,91.7,76,42.2,45,31,9,4.34,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_8,Perceived support: People who favor minimal govt spending,TRUE,negative,300,137,45.7,54.3,47.4,42.9,45,2.4,5.1,1.2,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_9,Perceived support: Politicians,TRUE,positive,300,32,10.7,89.3,53.1,44,45,8.1,9.3,1.44,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_10,Perceived support: People who don't believe in mainstream science,TRUE,negative,300,159,53,47,50.3,39,45,5.3,4.9,1.58,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_11,Perceived support: Medical and mental health professionals,TRUE,positive,300,178,59.3,40.7,55.6,29.5,45,10.6,4.7,2.99,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_12,Perceived support: Pharmaceutical companies,TRUE,positive,300,132,44,56,53.8,38.1,45,8.8,5.2,1.89,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_4_13,Perceived support: Technology companies,TRUE,positive,300,116,38.7,61.3,51.7,40.8,45,6.7,5.5,1.56,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_5_1,Govt funding likelihood: Researchers have enough resources,TRUE,positive,300,76,25.3,74.7,68.4,37.1,45,23.4,6.1,3.68,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_5_2,Govt funding likelihood: Research can focus long-term,TRUE,positive,300,105,35,65,64.8,34.4,45,19.8,5.5,3.51,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_5_3,Govt funding likelihood: Exciting research is sped up,TRUE,positive,300,66,22,78,69.7,38,45,24.7,6.3,3.75,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_5_4,Govt funding likelihood: Results become publicly available,TRUE,positive,300,74,24.7,75.3,70.3,36.7,45,25.3,6,4.07,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_5_5,Govt funding likelihood: Funded researchers held to higher standards,TRUE,positive,300,51,17,83,58.8,42.2,45,13.8,7.5,1.96,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_5_6,Govt funding likelihood: Money spent on less important things,TRUE,negative,300,43,14.3,85.7,79.1,39.3,45,34.1,6.8,5.83,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_5_7,Govt funding likelihood: Taxpayer money is wasted,TRUE,negative,300,57,19,81,78.9,37,45,33.9,6.1,6.38,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_5_8,Govt funding likelihood: Research delayed by oversight,TRUE,negative,300,9,3,97,77.8,44,45,32.8,14.2,4.46,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_5_9,Govt funding likelihood: Political agendas influence funding,TRUE,negative,300,7,2.3,97.7,100,43.7,45,55,2.9,NA,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_5_10,Govt funding likelihood: Researchers lie to maintain funding,TRUE,negative,300,49,16.3,83.7,71.4,39.8,45,26.4,7.1,3.78,FALSE
+Tax investment benefits people like you,Govt Funding,gotvfund_6_1,Rules should ensure govt-funded research is done well,TRUE,positive,300,165,55,45,52.7,35.6,45,7.7,4.8,2.02,FALSE
+Tax investment benefits people like you,Govt Funding,gotvfund_6_2,Oversight committees protect against unethical research,TRUE,positive,300,96,32,68,71.9,32.4,45,26.9,5.4,5.34,FALSE
+Tax investment benefits people like you,Govt Funding,gotvfund_6_3,Many everyday tools are the result of academic research,TRUE,positive,300,128,42.7,57.3,68.8,27.3,45,23.8,5,5.85,FALSE
+Tax investment benefits people like you,Govt Funding,gotvfund_6_4,University research benefits lives in ways hard to see,TRUE,positive,300,100,33.3,66.7,77,29,45,32,5.1,8.2,FALSE
+Tax investment benefits people like you,Govt Funding,gotvfund_6_5,University researchers motivated primarily by profit,TRUE,negative,300,61,20.3,79.7,82,35.6,45,37,5.7,8.24,FALSE
+Tax investment benefits people like you,Govt Funding,gotvfund_6_6,Private companies research primarily to benefit the public,TRUE,positive,300,23,7.7,92.3,69.6,43,45,24.6,10,3.03,FALSE
+Tax investment benefits people like you,Govt Funding,gotvfund_6_7,Govt-funded research is more objective than privately funded,TRUE,positive,300,70,23.3,76.7,64.3,39.1,45,19.3,6.4,2.8,FALSE
+Tax investment benefits people like you,Govt Funding,gotvfund_6_8,Private company research is biased toward company interests,TRUE,positive,300,96,32,68,53.1,41.2,45,8.1,5.8,1.62,FALSE
+Tax investment benefits people like you,Govt Funding,gotvfund_6_9,Results of private company research will become publicly accessible,TRUE,positive,300,32,10.7,89.3,71.9,41.8,45,26.9,8.5,3.56,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_7_1,Priority: Making a profit,TRUE,negative,300,38,12.7,87.3,76.3,40.5,45,31.3,7.5,4.74,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_7_2,Priority: Advance knowledge and benefit society,TRUE,positive,300,164,54.7,45.3,62.8,23.5,45,17.8,4.7,5.49,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_7_3,Priority: Develop products that can be sold,TRUE,negative,300,21,7,93,71.4,43,45,26.4,10.3,3.31,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_7_4,Priority: Serve interests of the government,TRUE,negative,300,18,6,94,77.8,42.9,45,32.8,10.2,4.66,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_8_1,Tax investment: ...boosts the economy,TRUE,positive,300,98,32.7,67.3,75.5,30.2,45,30.5,5.2,7.13,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_8_2,Tax investment: ...improves health and saves lives,TRUE,positive,300,177,59,41,71.8,6.5,45,26.8,4.4,36.51,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_8_3,Tax investment: ...drives industry investment,TRUE,positive,300,107,35.7,64.3,74.8,28.5,45,29.8,5.1,7.43,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_8_4,Tax investment: ...makes America a leader,TRUE,positive,300,127,42.3,57.7,74,23.7,45,29,4.8,9.17,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_8_5,Tax investment: ...protects national security,TRUE,positive,300,99,33,67,71.7,31.8,45,26.7,5.4,5.43,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_8_6,Tax investment: ...leads to scientific breakthroughs,TRUE,positive,300,179,59.7,40.3,65.9,14,45,20.9,4.6,11.83,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_9_1,Approve cuts to: Health research funding,TRUE,negative,300,203,67.7,32.3,52.7,28.9,45,7.7,4.5,2.75,TRUE
+Tax investment benefits people like you,Govt Funding,govtfund_9_2,Approve cuts to: Education funding,TRUE,negative,300,194,64.7,35.3,56.7,23.6,45,11.7,4.6,4.24,TRUE
+Tax investment benefits people like you,Govt Funding,govtfund_9_3,Approve cuts to: Science funding,TRUE,negative,300,176,58.7,41.3,58.5,25.8,45,13.5,4.7,4.06,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_9_4,Approve cuts to: Arts funding,TRUE,negative,300,109,36.3,63.7,61.5,35.6,45,16.5,5.5,2.89,FALSE
+Tax investment benefits people like you,Govt Funding,govtfund_9_5,Approve cuts to: Humanities funding,TRUE,negative,300,135,45,55,59.3,33.3,45,14.3,5.1,2.91,FALSE
+Tax investment benefits people like you,Govt Funding,govfund_10,Local area would be negatively impacted by cuts,TRUE,negative,300,86,28.7,71.3,69.8,35,45,24.8,5.7,4.28,FALSE
+Tax investment benefits people like you,Past Engagement,past_engage_1,Conversations about science topics,TRUE,positive,300,16,5.3,94.7,50,44.7,45,5,12.8,1.24,FALSE
+Tax investment benefits people like you,Past Engagement,past_engage_2,Shared/commented social media posts about science,TRUE,positive,300,8,2.7,97.3,62.5,44.5,45,17.5,17.4,2.08,FALSE
+Tax investment benefits people like you,Past Engagement,past_engage_3,Attended rallies or protests about science,TRUE,negative,300,212,70.7,29.3,46.2,42,45,1.2,4.5,1.18,TRUE
+Tax investment benefits people like you,Past Engagement,past_engage_4,Shared info online about cuts to research funding,TRUE,positive,300,6,2,98,66.7,44.6,45,21.7,19.5,2.49,FALSE
+Tax investment benefits people like you,Past Engagement,past_engage_5,Talked to others about cuts to research funding,TRUE,positive,300,9,3,97,55.6,44.7,45,10.6,16.8,1.55,FALSE
+Tax investment benefits people like you,Past Engagement,past_engage_6,Contacted reps to oppose cuts to research funding,TRUE,negative,300,221,73.7,26.3,45.7,43,45,0.7,4.4,1.11,TRUE
+Tax investment benefits people like you,Past Engagement,past_engage_7,Contacted reps to support research funding,TRUE,negative,300,219,73,27,46.1,42,45,1.1,4.4,1.18,TRUE
+Tax investment benefits people like you,Higher Education,highered_1_1,Approval: Private colleges and universities,TRUE,positive,300,79,26.3,73.7,63.3,38.5,45,18.3,6.1,2.76,FALSE
+Tax investment benefits people like you,Higher Education,highered_1_2,Approval: State public university system,TRUE,positive,300,119,39.7,60.3,62.2,33.7,45,17.2,5.3,3.23,FALSE
+Tax investment benefits people like you,Higher Education,highered_1_3,Approval: Local community college(s),TRUE,positive,300,142,47.3,52.7,59.2,32.3,45,14.2,5,3.04,FALSE
+Tax investment benefits people like you,Higher Education,highered_2_1,Trust: Private colleges and universities,TRUE,positive,300,47,15.7,84.3,63.8,41.5,45,18.8,7.6,2.49,FALSE
+Tax investment benefits people like you,Higher Education,highered_2_2,Trust: State public university system,TRUE,positive,300,66,22,78,68.2,38.5,45,23.2,6.4,3.43,FALSE
+Tax investment benefits people like you,Higher Education,highered_2_3,Trust: Local community college(s),TRUE,positive,300,69,23,77,65.2,39,45,20.2,6.4,2.94,FALSE
+Tax investment benefits people like you,Higher Education,highered_3_1,Contribution to science: Private colleges and universities,TRUE,positive,283,127,44.9,55.1,51.2,37.8,43.8,7.4,5.3,1.72,FALSE
+Tax investment benefits people like you,Higher Education,highered_3_2,"Contribution to science: Private companies (pharma, tech)",TRUE,positive,285,110,38.6,61.4,41.8,46.3,44.6,-2.7,5.5,0.83,FALSE
+Tax investment benefits people like you,Higher Education,highered_3_3,Contribution to science: Federal government agencies,TRUE,positive,280,86,30.7,69.3,54.7,39.7,44.3,10.4,6.1,1.83,FALSE
+Tax investment benefits people like you,Higher Education,highered_3_4,Contribution to science: Charitable foundations,TRUE,positive,280,86,30.7,69.3,55.8,39.2,44.3,11.5,6.1,1.96,FALSE
+Tax investment benefits people like you,Higher Education,highered_3_5,Contribution to science: State colleges and universities,TRUE,positive,284,138,48.6,51.4,54.3,34.2,44,10.3,5.2,2.29,FALSE
+Tax investment benefits people like you,Higher Education,highered_3_6,Contribution to science: Community colleges,TRUE,positive,281,60,21.4,78.6,45,43,43.4,1.6,7.1,1.09,FALSE
+Tax investment benefits people like you,Higher Education,highered_4_1,Proportion nonprofit: Private colleges and universities,TRUE,negative,275,102,37.1,62.9,49,41.6,44.4,4.7,5.8,1.35,FALSE
+Tax investment benefits people like you,Higher Education,highered_4_2,Proportion nonprofit: Public state colleges and universities,TRUE,negative,277,38,13.7,86.3,57.9,43.1,45.1,12.8,8.5,1.82,FALSE
+Tax investment benefits people like you,Higher Education,highered_4_3,Proportion nonprofit: Community colleges,TRUE,negative,274,32,11.7,88.3,53.1,42.6,43.8,9.3,9.3,1.53,FALSE
+Tax investment benefits people like you,Higher Education,highered_4_4,"Proportion nonprofit: Private companies (pharma, tech)",TRUE,negative,284,153,53.9,46.1,47.7,40.5,44.4,3.3,5,1.34,FALSE
+Tax investment benefits people like you,Higher Education,highered_4_5,Proportion nonprofit: Federal government agencies,TRUE,positive,273,56,20.5,79.5,55.4,41,44,11.4,7.3,1.78,FALSE
+Tax investment benefits people like you,Higher Education,highered_4_6,Proportion nonprofit: Charitable foundations,TRUE,positive,288,100,34.7,65.3,61,36.7,45.1,15.9,5.7,2.7,FALSE
+Tax investment benefits people like you,University Perceptions,univ_2_1,Univ. contributes to: Greater innovation,TRUE,positive,300,147,49,51,63.9,26.8,45,18.9,4.9,4.84,FALSE
+Tax investment benefits people like you,University Perceptions,univ_2_2,Univ. contributes to: Better jobs and career advancement,TRUE,positive,300,103,34.3,65.7,63.1,35.5,45,18.1,5.6,3.1,FALSE
+Tax investment benefits people like you,University Perceptions,univ_2_3,Univ. contributes to: Higher household incomes,TRUE,positive,300,85,28.3,71.7,69.4,35.3,45,24.4,5.8,4.15,FALSE
+Tax investment benefits people like you,University Perceptions,univ_2_4,Univ. contributes to: A more knowledgeable population,TRUE,positive,300,140,46.7,53.3,68.6,24.4,45,23.6,4.9,6.77,FALSE
+Tax investment benefits people like you,University Perceptions,univ_2_5,Univ. contributes to: US competitive advantage,TRUE,positive,300,115,38.3,61.7,70.4,29.2,45,25.4,5.1,5.78,FALSE
+Tax investment benefits people like you,University Perceptions,univ_2_6,Univ. contributes to: More entrepreneurship,TRUE,positive,300,89,29.7,70.3,62.9,37.4,45,17.9,5.9,2.84,FALSE
+Tax investment benefits people like you,University Perceptions,univ_2_7,Univ. contributes to: Increased compassion and tolerance,TRUE,positive,300,79,26.3,73.7,74.7,34.4,45,29.7,5.7,5.63,FALSE
+Tax investment benefits people like you,University Perceptions,univ_2_8,Univ. contributes to: Overall economic growth,TRUE,positive,300,99,33,67,69.7,32.8,45,24.7,5.4,4.7,FALSE
+Tax investment benefits people like you,University Perceptions,univ_2_9,Univ. contributes to: Better international relations,TRUE,positive,300,74,24.7,75.3,77,34.5,45,32,5.7,6.36,FALSE
+Tax investment benefits people like you,University Perceptions,univ_2_10,Univ. contributes to: Benefits to local communities,TRUE,positive,300,99,33,67,66.7,34.3,45,21.7,5.5,3.83,FALSE
+Tax investment benefits people like you,University Perceptions,univ_4_1,Universities discover new knowledge,TRUE,positive,300,150,50,50,64,26,45,19,4.9,5.06,FALSE
+Tax investment benefits people like you,University Perceptions,univ_4_2,Universities apply and connect knowledge,TRUE,positive,300,119,39.7,60.3,67.2,30.4,45,22.2,5.2,4.7,FALSE
+Tax investment benefits people like you,University Perceptions,univ_4_3,Universities apply knowledge-based solutions,TRUE,positive,300,115,38.3,61.7,68.7,30.3,45,23.7,5.2,5.06,FALSE
+Tax investment benefits people like you,University Perceptions,univ_5_1,Benefits: You personally,TRUE,positive,300,89,29.7,70.3,69.7,34.6,45,24.7,5.7,4.34,FALSE
+Tax investment benefits people like you,University Perceptions,univ_5_2,Benefits: People you care about,TRUE,positive,300,68,22.7,77.3,79.4,34.9,45,34.4,5.7,7.19,FALSE
+Tax investment benefits people like you,University Perceptions,univ_5_3,Benefits: Local communities,TRUE,positive,300,76,25.3,74.7,72.4,35.7,45,27.4,5.9,4.71,FALSE
+Tax investment benefits people like you,University Perceptions,univ_5_4,Benefits: Students who attend,TRUE,positive,300,134,44.7,55.3,66.4,27.7,45,21.4,5,5.16,FALSE
+Tax investment benefits people like you,University Perceptions,univ_5_5,Benefits: Students' families,TRUE,positive,300,72,24,76,80.6,33.8,45,35.6,5.5,8.12,FALSE
+Tax investment benefits people like you,University Perceptions,univ_5_6,Benefits: Employers and businesses,TRUE,positive,300,78,26,74,61.5,39.2,45,16.5,6.2,2.48,FALSE
+Tax investment benefits people like you,University Perceptions,univ_5_7,Benefits: Society as a whole,TRUE,positive,300,113,37.7,62.3,71.7,28.9,45,26.7,5.1,6.23,FALSE
+Tax investment benefits people like you,Climate,climate_1,Believes global warming is happening,TRUE,positive,271,254,93.7,6.3,48.4,23.5,46.9,1.6,4.4,3.05,TRUE
+Tax investment benefits people like you,Climate,climate_2,Believes global warming is caused by humans,TRUE,positive,300,228,76,24,50.9,26.4,45,5.9,4.4,2.89,TRUE
+Tax investment benefits people like you,Climate,climate_3,Trust in climate scientists,TRUE,positive,300,111,37,63,68.5,31.2,45,23.5,5.3,4.78,FALSE
+Tax investment benefits people like you,Climate,climate_4_1,Climate research importance: Climate science and earth systems,TRUE,positive,300,135,45,55,66.7,27.3,45,21.7,5,5.33,FALSE
+Tax investment benefits people like you,Climate,climate_4_2,Climate research importance: Climate mitigation approaches,TRUE,positive,300,148,49.3,50.7,66.9,23.7,45,21.9,4.8,6.51,FALSE
+Tax investment benefits people like you,Climate,climate_4_3,Climate research importance: Climate adaptation and resilience,TRUE,positive,300,140,46.7,53.3,67.1,25.6,45,22.1,4.9,5.93,FALSE
+Tax investment benefits people like you,Climate,climate_4_4,"Climate research importance: Climate policy, economics, and human impact",TRUE,positive,300,130,43.3,56.7,67.7,27.6,45,22.7,5,5.48,FALSE
+Tax investment benefits people like you,Demographics,age,Age,FALSE,positive,300,1,0.3,99.7,100,44.8,45,55,2.9,NA,FALSE
+Tax investment benefits people like you,Demographics,ses_ladder,Subjective SES (ladder),FALSE,positive,300,7,2.3,97.7,57.1,44.7,45,12.1,18.9,1.65,FALSE
+Tax investment benefits people like you,Demographics,politics_ideology,Political ideology (liberal → conservative),FALSE,negative,237,48,20.3,79.7,62.5,42.9,46.8,15.7,7.7,2.22,FALSE
+Tax investment benefits people like you,Demographics,ses_degree,Education level,FALSE,positive,237,14,5.9,94.1,57.1,43,43.9,13.3,13.6,1.76,FALSE
+Tax investment benefits people like you,Demographics,ses_income,Household income,FALSE,positive,292,23,7.9,92.1,78.3,42.8,45.5,32.7,9.1,4.82,FALSE
+Tax investment benefits people like you,Demographics,lgbtq,LGBTQ+ identity,FALSE,positive,293,62,21.2,78.8,46.8,44.6,45.1,1.7,7,1.09,FALSE

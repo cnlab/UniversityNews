@@ -1,0 +1,496 @@
+---
+title: "Step 1: Correlations with Attitude toward Federal Research Funding"
+author: "Nicole Cooper"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 5)
+options(scipen = 999)
+```
+
+```{r packages}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, reactable, plotly)
+```
+
+```{r load-data}
+path <- "~/Documents/GitHub/UniversityNews"
+
+dir.create(file.path(path, "Output"), showWarnings = FALSE)
+
+data <- readRDS(sprintf("%s/Data/Cleaned/UnivNews_Step1_combined.rds", path))
+
+N <- nrow(data)
+```
+
+```{r scale-levels}
+lvl_know         <- c("None at all","A little","A moderate amount","A lot","A great deal")
+lvl_agree5       <- c("Strongly disagree","Somewhat disagree","Neither agree nor disagree",
+                      "Somewhat agree","Strongly agree")
+lvl_pos_neg      <- c("Extremely negative","Somewhat negative","Neither positive nor negative",
+                      "Somewhat positive","Extremely positive")
+lvl_importance   <- c("Not at all important","Slightly important","Moderately important",
+                      "Very important","Extremely important")
+lvl_likelihood_r <- c("Very unlikely","Somewhat unlikely","Neutral","Somewhat likely","Very likely")
+lvl_problematic  <- c("Not at all problematic","Slightly problematic","Moderately problematic",
+                      "Very problematic","Extremely problematic")
+lvl_approve4     <- c("Strongly disapprove","Somewhat disapprove","Somewhat approve","Strongly approve")
+lvl_approve5     <- c("Strongly disapprove","Somewhat disapprove","Neither approve nor disapprove",
+                      "Somewhat approve","Strongly approve")
+lvl_approve5_he  <- c("Strongly disapprove","Somewhat disapprove",
+                      "Neutral / neither approve nor disapprove","Somewhat approve","Strongly approve")
+lvl_likelihood_g <- c("Extremely unlikely","Somewhat unlikely","Neither likely nor unlikely",
+                      "Somewhat likely","Extremely likely")
+lvl_priority     <- c("Not a priority","Low priority","Somewhat priority",
+                      "Moderate priority","High priority")
+lvl_freq         <- c("Never","Once or twice a year","Once or twice a month",
+                      "Once or twice a week","Almost every day","Once or more per day")
+lvl_impact       <- c("Strong negative impact","Somewhat negative impact",
+                      "Neither positive nor negative impact",
+                      "Somewhat positive impact","Strong positive impact")
+lvl_climate_trust <- c("Not at all","Slightly","Moderately","Very strongly")
+lvl_proportion   <- c("None","Less than half","About half","Most","All")
+lvl_intent       <- c("Definitely will not","Probably will not","Maybe will not",
+                      "Unsure","Maybe will","Probably will","Definitely will")
+lvl_ideology     <- c("Extremely liberal","Liberal","Slightly liberal","Moderate",
+                      "Slightly conservative","Conservative","Extremely conservative")
+lvl_degree       <- c("No formal education","Did not complete high school",
+                      "High school graduate (diploma or GED)","Some college (1-4 years, no degree)",
+                      "Associate's degree","Bachelor's degree (BA, BS, etc.)",
+                      "Master's degree (MA, MS, MEng, MSW, etc.)",
+                      "Professional school degree (MD, JD, etc.)","Doctoral degree (PhD, EdD, etc.)")
+lvl_income       <- c("Less than $5,000","$5,000 through $11,999","$12,000 through $15,999",
+                      "$16,000 through $24,999","$25,000 through $34,999","$35,000 through $49,999",
+                      "$50,000 through $74,999","$75,000 through $99,999",
+                      "$100,000 through $149,999","$150,000 or greater",
+                      "Prefer not to say / I don't know")
+```
+
+```{r to-num}
+to_num <- function(x, levels) {
+  as.integer(factor(x, levels = levels, ordered = TRUE))
+}
+```
+
+```{r recode}
+d <- data |>
+  mutate(
+    research_1  = to_num(research_1, lvl_know),
+    research_2  = to_num(research_2, lvl_agree5),
+    across(paste0("research_3_",   1:13), \(x) to_num(x, lvl_pos_neg)),
+    across(paste0("research_4_",   1:8),  \(x) to_num(x, lvl_agree5)),
+    across(paste0("research_5.1_", 1:13), \(x) to_num(x, lvl_importance)),
+    across(paste0("research_5.2_", 1:13), \(x) to_num(x, lvl_likelihood_r)),
+    across(paste0("research_6.1_", 1:11), \(x) to_num(x, lvl_problematic)),
+    across(paste0("research_6.2_", 1:11), \(x) to_num(x, lvl_likelihood_r)),
+    govtfund_1 = to_num(govtfund_1, lvl_approve4),
+    govtfund_2 = case_when(
+      grepl("ESSENTIAL", govtfund_2) ~ 1L,
+      govtfund_2 == ""               ~ NA_integer_,
+      TRUE                           ~ 0L
+    ),
+    govtfund_3  = to_num(govtfund_3, lvl_know),
+    across(paste0("govtfund_4_", 1:13), \(x) to_num(x, lvl_approve5)),
+    across(paste0("govtfund_5_", 1:10), \(x) to_num(x, lvl_likelihood_g)),
+    across(paste0("gotvfund_6_", 1:9),  \(x) to_num(x, lvl_agree5)),
+    across(paste0("govtfund_7_", 1:4),  \(x) to_num(x, lvl_priority)),
+    across(paste0("govtfund_8_", 1:7),  \(x) to_num(x, lvl_agree5)),
+    across(paste0("govtfund_9_", 1:5),  \(x) to_num(x, lvl_approve5)),
+    govfund_10  = to_num(govfund_10, lvl_impact),
+    across(paste0("past_engage_", 1:7), \(x) to_num(x, lvl_freq)),
+    across(paste0("highered_1_", 1:3), \(x) to_num(x, lvl_approve5_he)),
+    across(paste0("highered_2_", 1:3), \(x) to_num(x, lvl_know)),
+    across(paste0("highered_3_", 1:6), \(x) to_num(x, lvl_know)),
+    across(paste0("highered_4_", 1:6), \(x) to_num(x, lvl_proportion)),
+    across(paste0("univ_2_", 1:10), \(x) to_num(x, lvl_agree5)),
+    across(paste0("univ_4_", 1:3),  \(x) to_num(x, lvl_agree5)),
+    across(paste0("univ_5_", 1:7),  \(x) to_num(x, lvl_know)),
+    climate_1 = case_when(climate_1 == "Yes" ~ 1L, climate_1 == "No" ~ 0L, TRUE ~ NA_integer_),
+    climate_2 = case_when(
+      grepl("humans", climate_2, ignore.case = TRUE) ~ 1L,
+      climate_2 == ""                                ~ NA_integer_,
+      TRUE                                           ~ 0L
+    ),
+    climate_3  = to_num(climate_3, lvl_climate_trust),
+    across(paste0("climate_4_", 1:4), \(x) to_num(x, lvl_importance)),
+    age               = as.numeric(age),
+    ses_ladder        = as.numeric(ses_ladder),
+    politics_ideology = to_num(politics_ideology, lvl_ideology),
+    ses_degree        = to_num(ses_degree, lvl_degree),
+    ses_income        = to_num(ses_income_household, lvl_income),
+    lgbtq             = case_when(LGBTQ == "Yes" ~ 1L, LGBTQ == "No" ~ 0L, TRUE ~ NA_integer_)
+  )
+```
+
+```{r registry}
+# govtfund_1 is the outcome here — excluded from predictors
+make_entries <- function(cols, labels, block) {
+  map2(cols, labels, \(c, l) list(col = c, label = l, block = block))
+}
+
+registry <- c(
+  list(list(col = "research_1", label = "Knowledge of university research", block = "Research Beliefs")),
+  list(list(col = "research_2", label = "Scientific methods are the best way to find truth", block = "Research Beliefs")),
+  make_entries(
+    paste0("research_3_", 1:13),
+    paste("Effects on:", c("You personally","People you care about","Local community","People in the US",
+                           "Students at universities","Scientists at universities","Universities themselves",
+                           "Pharmaceutical companies","Technology companies","The military",
+                           "The US government","Wealthy individuals","Disadvantaged individuals")),
+    "Research Beliefs"
+  ),
+  make_entries(
+    paste0("research_4_", 1:8),
+    c("I usually understand academic research findings",
+      "I know where to look up academic research",
+      "Clear how to apply research findings in my life",
+      "I think about the impact of science on my daily life",
+      "Benefits of scientific research outweigh harms",
+      "Science makes our way of life change too fast",
+      "Scientific research will create opportunities for next generation",
+      "Research advancing knowledge is necessary even w/o immediate benefits"),
+    "Research Beliefs"
+  ),
+  make_entries(
+    paste0("research_5.1_", 1:13),
+    paste("Importance:", c("Advancing social science","Developing new medicines",
+                           "Protecting the environment","Developing new energy technologies",
+                           "Technologies for economic growth","Innovative manufacturing",
+                           "Defense and national security technologies","AI and machine learning",
+                           "Exploring space","Improving education systems",
+                           "Better public policies","Helping individuals improve their lives",
+                           "Awareness of others' experiences")),
+    "Research Beliefs"
+  ),
+  make_entries(
+    paste0("research_5.2_", 1:13),
+    paste("Likelihood:", c("Advancing social science","Developing new medicines",
+                           "Protecting the environment","Developing new energy technologies",
+                           "Technologies for economic growth","Innovative manufacturing",
+                           "Defense and national security technologies","AI and machine learning",
+                           "Exploring space","Improving education systems",
+                           "Better public policies","Helping individuals improve their lives",
+                           "Awareness of others' experiences")),
+    "Research Beliefs"
+  ),
+  make_entries(
+    paste0("research_6.1_", 1:11),
+    paste("Problematic:", c("Researchers make mistakes","Research is slow to have impact",
+                            "Few people can access results","Findings don't generalize",
+                            "Studies fail to yield results","Research wastes money",
+                            "New tech eliminates jobs","New tech invades privacy",
+                            "Research creates dangerous technology","Findings are misused",
+                            "Results reporting is biased by media")),
+    "Research Beliefs"
+  ),
+  make_entries(
+    paste0("research_6.2_", 1:11),
+    paste("Neg. likelihood:", c("Researchers make mistakes","Research is slow to have impact",
+                                "Few people can access results","Findings don't generalize",
+                                "Studies fail to yield results","Research wastes money",
+                                "New tech eliminates jobs","New tech invades privacy",
+                                "Research creates dangerous technology","Findings are misused",
+                                "Results reporting is biased by media")),
+    "Research Beliefs"
+  ),
+  # govtfund_1 excluded (outcome)
+  list(list(col = "govtfund_2",  label = "Govt investment is ESSENTIAL (vs. private sufficient)", block = "Govt Funding")),
+  list(list(col = "govtfund_3",  label = "Knowledge of funding cuts",                             block = "Govt Funding")),
+  make_entries(
+    paste0("govtfund_4_", 1:13),
+    paste("Perceived support:", c("People who directly benefit","Students at universities",
+                                  "Scientists at universities","The general public","People in the military",
+                                  "People who identify as liberals","People who identify as conservatives",
+                                  "People who favor minimal govt spending","Politicians",
+                                  "People who don't believe in mainstream science",
+                                  "Medical and mental health professionals",
+                                  "Pharmaceutical companies","Technology companies")),
+    "Govt Funding"
+  ),
+  make_entries(
+    paste0("govtfund_5_", 1:10),
+    paste("Govt funding likelihood:", c("Researchers have enough resources","Research can focus long-term",
+                                        "Exciting research is sped up","Results become publicly available",
+                                        "Funded researchers held to higher standards",
+                                        "Money spent on less important things","Taxpayer money is wasted",
+                                        "Research delayed by oversight","Political agendas influence funding",
+                                        "Researchers lie to maintain funding")),
+    "Govt Funding"
+  ),
+  make_entries(
+    paste0("gotvfund_6_", 1:9),
+    c("Rules should ensure govt-funded research is done well",
+      "Oversight committees protect against unethical research",
+      "Many everyday tools are the result of academic research",
+      "University research benefits lives in ways hard to see",
+      "University researchers motivated primarily by profit",
+      "Private companies research primarily to benefit the public",
+      "Govt-funded research is more objective than privately funded",
+      "Private company research is biased toward company interests",
+      "Results of private company research will become publicly accessible"),
+    "Govt Funding"
+  ),
+  make_entries(
+    paste0("govtfund_7_", 1:4),
+    paste("Priority:", c("Making a profit","Advance knowledge and benefit society",
+                         "Develop products that can be sold","Serve interests of the government")),
+    "Govt Funding"
+  ),
+  make_entries(
+    paste0("govtfund_8_", 1:7),
+    paste("Tax investment:", c("...boosts the economy","...improves health and saves lives",
+                               "...drives industry investment","...makes America a leader",
+                               "...protects national security","...leads to scientific breakthroughs",
+                               "...benefits people like you")),
+    "Govt Funding"
+  ),
+  make_entries(
+    paste0("govtfund_9_", 1:5),
+    paste("Approve cuts to:", c("Health research funding","Education funding","Science funding",
+                                "Arts funding","Humanities funding")),
+    "Govt Funding"
+  ),
+  list(list(col = "govfund_10", label = "Local area would be negatively impacted by cuts", block = "Govt Funding")),
+  make_entries(
+    paste0("past_engage_", 1:7),
+    c("Conversations about science topics","Shared/commented social media posts about science",
+      "Attended rallies or protests about science",
+      "Shared info online about cuts to research funding",
+      "Talked to others about cuts to research funding",
+      "Contacted reps to oppose cuts to research funding",
+      "Contacted reps to support research funding"),
+    "Past Engagement"
+  ),
+  make_entries(
+    paste0("highered_1_", 1:3),
+    paste("Approval:", c("Private colleges and universities","State public university system",
+                         "Local community college(s)")),
+    "Higher Education"
+  ),
+  make_entries(
+    paste0("highered_2_", 1:3),
+    paste("Trust:", c("Private colleges and universities","State public university system",
+                      "Local community college(s)")),
+    "Higher Education"
+  ),
+  make_entries(
+    paste0("highered_3_", 1:6),
+    paste("Contribution to science:", c("Private colleges and universities",
+                                        "Private companies (pharma, tech)","Federal government agencies",
+                                        "Charitable foundations","State colleges and universities",
+                                        "Community colleges")),
+    "Higher Education"
+  ),
+  make_entries(
+    paste0("highered_4_", 1:6),
+    paste("Proportion nonprofit:", c("Private colleges and universities",
+                                     "Public state colleges and universities","Community colleges",
+                                     "Private companies (pharma, tech)","Federal government agencies",
+                                     "Charitable foundations")),
+    "Higher Education"
+  ),
+  make_entries(
+    paste0("univ_2_", 1:10),
+    paste("Univ. contributes to:", c("Greater innovation","Better jobs and career advancement",
+                                     "Higher household incomes","A more knowledgeable population",
+                                     "US competitive advantage","More entrepreneurship",
+                                     "Increased compassion and tolerance","Overall economic growth",
+                                     "Better international relations","Benefits to local communities")),
+    "University Perceptions"
+  ),
+  make_entries(
+    paste0("univ_4_", 1:3),
+    c("Universities discover new knowledge","Universities apply and connect knowledge",
+      "Universities apply knowledge-based solutions"),
+    "University Perceptions"
+  ),
+  make_entries(
+    paste0("univ_5_", 1:7),
+    paste("Benefits:", c("You personally","People you care about","Local communities",
+                         "Students who attend","Students' families","Employers and businesses",
+                         "Society as a whole")),
+    "University Perceptions"
+  ),
+  list(list(col = "climate_1", label = "Believes global warming is happening",        block = "Climate")),
+  list(list(col = "climate_2", label = "Believes global warming is caused by humans", block = "Climate")),
+  list(list(col = "climate_3", label = "Trust in climate scientists",                 block = "Climate")),
+  make_entries(
+    paste0("climate_4_", 1:4),
+    paste("Climate research importance:", c("Climate science and earth systems",
+                                            "Climate mitigation approaches",
+                                            "Climate adaptation and resilience",
+                                            "Climate policy, economics, and human impact")),
+    "Climate"
+  ),
+  list(list(col = "age",               label = "Age",                                         block = "Demographics")),
+  list(list(col = "ses_ladder",        label = "Subjective SES (ladder)",                     block = "Demographics")),
+  list(list(col = "politics_ideology", label = "Political ideology (liberal → conservative)", block = "Demographics")),
+  list(list(col = "ses_degree",        label = "Education level",                             block = "Demographics")),
+  list(list(col = "ses_income",        label = "Household income",                            block = "Demographics")),
+  list(list(col = "lgbtq",             label = "LGBTQ+ identity",                             block = "Demographics"))
+)
+```
+
+```{r correlations}
+cor_results <- map_dfr(registry, function(entry) {
+  x       <- d[[entry$col]]
+  y       <- d$govtfund_1
+  ct      <- suppressWarnings(cor.test(x, y, method = "spearman", exact = FALSE))
+  n_pairs <- sum(!is.na(x) & !is.na(y))
+  se      <- sqrt((1 - ct$estimate^2) / max(n_pairs - 2, 1))
+  tibble(
+    variable = entry$col,
+    label    = entry$label,
+    block    = entry$block,
+    r        = round(ct$estimate, 3),
+    p        = round(ct$p.value, 3),
+    se       = round(se, 3)
+  )
+})
+
+results <- cor_results |>
+  mutate(abs_r = abs(r)) |>
+  arrange(desc(abs_r))
+```
+
+```{r save-csv}
+write_csv(
+  results |> select(-abs_r),
+  file.path(path, "Output", "06_correlations_attitude.csv")
+)
+```
+
+**N = `r N`** (Cohorts 1–3 combined). Spearman correlations between all predictor variables and `govtfund_1`: approval of federal funding for university research (1 = Strongly disapprove → 4 = Strongly approve). Sorted by |r|. p-values are exploratory only.
+
+---
+
+# Results {.tabset}
+
+```{r split-results}
+beliefs_results <- results |> filter(block != "Past Engagement")
+past_results    <- results |> filter(block == "Past Engagement")
+
+block_colors <- c(
+  "Research Beliefs"       = "#4E79A7",
+  "Govt Funding"           = "#F28E2B",
+  "Higher Education"       = "#59A14F",
+  "University Perceptions" = "#76B7B2",
+  "Climate"                = "#EDC948",
+  "Demographics"           = "#B07AA1",
+  "Past Engagement"        = "#BAB0AC"
+)
+
+make_top20_plot <- function(df, x_label) {
+  top20 <- df |>
+    arrange(desc(abs_r)) |>
+    slice_head(n = 20)
+
+  p <- top20 |>
+    mutate(
+      label_wrap = fct_reorder(str_wrap(label, width = 42), r),
+      r_lo     = r - se,
+      r_hi     = r + se,
+      sig      = case_when(p < .001 ~ "***", p < .01 ~ "**", p < .05 ~ "*", TRUE ~ ""),
+      tip_text = paste0(
+        "<b>", label, "</b><br>",
+        "Block: ", block, "<br>",
+        "r = ", r, " ± ", se, " SE",
+        "  (p = ", p, ")", sig
+      )
+    ) |>
+    ggplot(aes(x = r, y = label_wrap, color = block, text = tip_text)) +
+    geom_segment(aes(x = 0, xend = r, yend = label_wrap),
+                 color = "gray82", linewidth = 0.6) +
+    geom_errorbarh(aes(xmin = r_lo, xmax = r_hi),
+                   height = 0.3, linewidth = 0.5, color = "gray55") +
+    geom_point(size = 3.5) +
+    scale_color_manual(values = block_colors, name = NULL) +
+    scale_x_continuous(
+      limits = c(
+        floor(min(c(top20$r_lo, 0), na.rm = TRUE) * 10) / 10,
+        ceiling(max(c(top20$r_hi, 0), na.rm = TRUE) * 10) / 10
+      ),
+      breaks = \(lims) pretty(lims, n = 8)
+    ) +
+    geom_vline(xintercept = 0, color = "gray60", linewidth = 0.4) +
+    labs(x = x_label, y = NULL,
+         caption = "Error bars = ±1 SE. Sorted by |r|; negative r = belief is associated with less approval. Past Engagement excluded. * p<.05  ** p<.01  *** p<.001") +
+    theme_minimal(base_size = 11) +
+    theme(
+      legend.position    = "bottom",
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor   = element_blank(),
+      axis.text.y        = element_text(size = 9, lineheight = 1.2),
+      axis.text.x        = element_text(size = 10),
+      axis.title.x       = element_text(size = 10, margin = margin(t = 8))
+    )
+
+  ggplotly(p, tooltip = "text") |>
+    layout(
+      legend = list(orientation = "h", y = -0.12),
+      margin = list(l = 220, b = 60),
+      xaxis  = list(tickfont = list(size = 12), title = list(font = list(size = 12)))
+    )
+}
+
+cor_table <- function(df) {
+  df |>
+    select(block, label, r, p, se) |>
+    rename(
+      Block     = block,
+      Predictor = label,
+      `r`       = r,
+      `p`       = p,
+      `SE`      = se
+    ) |>
+    reactable(
+      filterable      = TRUE,
+      sortable        = TRUE,
+      striped         = TRUE,
+      compact         = TRUE,
+      defaultPageSize = 25,
+      columns = list(
+        Predictor = colDef(minWidth = 260),
+        r = colDef(
+          style = function(value) {
+            color <- if (is.numeric(value) && value > 0) "#2166ac"
+                     else if (is.numeric(value) && value < 0) "#d6604d"
+                     else "black"
+            list(color = color, fontWeight = "bold")
+          }
+        )
+      )
+    )
+}
+```
+
+## All beliefs
+
+### Top 20 predictors {-}
+
+```{r top20, fig.height=9, fig.width=10}
+make_top20_plot(beliefs_results, "Spearman r  (approval of federal research funding)")
+```
+
+### All items {-}
+
+```{r beliefs-table}
+cor_table(beliefs_results)
+```
+
+## Past Engagement
+
+Included for reference. These items reflect prior behavior rather than modifiable beliefs.
+
+```{r past-table}
+cor_table(past_results)
+```

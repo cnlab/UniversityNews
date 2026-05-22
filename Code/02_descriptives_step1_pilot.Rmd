@@ -1,0 +1,908 @@
+---
+title: "Step 1 Pilot: Descriptive Analysis"
+author: "Nicole Cooper"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 5)
+options(scipen = 999)
+```
+
+```{r packages}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, reactable, scales, RColorBrewer)
+```
+
+```{r aesthetics}
+plot_aes <- theme_minimal() +
+  theme(
+    legend.position    = "bottom",
+    legend.text        = element_text(size = 9),
+    text               = element_text(size = 12),
+    axis.text          = element_text(color = "black"),
+    axis.ticks.y       = element_blank(),
+    panel.grid.major.y = element_blank()
+  )
+
+palette_main <- "#197278"
+```
+
+```{r scale-levels}
+# ── Amount / knowledge (None at all → A great deal) ─────────────────────────
+lvl_know    <- c("None at all", "A little", "A moderate amount", "A lot", "A great deal")
+lvl_know_ns <- c(lvl_know, "Not sure")
+
+# ── Agree / disagree (5-point, Somewhat variant) ────────────────────────────
+lvl_agree5 <- c("Strongly disagree", "Somewhat disagree", "Neither agree nor disagree",
+                "Somewhat agree", "Strongly agree")
+
+# ── Positive / negative effect ───────────────────────────────────────────────
+lvl_pos_neg <- c("Extremely negative", "Somewhat negative", "Neither positive nor negative",
+                 "Somewhat positive", "Extremely positive")
+
+# ── Importance ───────────────────────────────────────────────────────────────
+lvl_importance <- c("Not at all important", "Slightly important", "Moderately important",
+                    "Very important", "Extremely important")
+
+# ── Likelihood: research_5#2 and research_6#2 (Very unlikely → Very likely) ─
+lvl_likelihood_res <- c("Very unlikely", "Somewhat unlikely", "Neutral",
+                        "Somewhat likely", "Very likely")
+
+# ── Likelihood: govtfund_5 (Extremely unlikely → Extremely likely) ───────────
+lvl_likelihood_gov <- c("Extremely unlikely", "Somewhat unlikely", "Neither likely nor unlikely",
+                        "Somewhat likely", "Extremely likely")
+
+# ── Problematic ──────────────────────────────────────────────────────────────
+lvl_problematic <- c("Not at all problematic", "Slightly problematic", "Moderately problematic",
+                     "Very problematic", "Extremely problematic")
+
+# ── Approve / disapprove (4-point, no midpoint) ─────────────────────────────
+lvl_approve4 <- c("Strongly disapprove", "Somewhat disapprove",
+                  "Somewhat approve", "Strongly approve")
+
+# ── Approve / disapprove (5-point, "Neither approve nor disapprove") ─────────
+# Used for govtfund_4, govtfund_9
+lvl_approve5 <- c("Strongly disapprove", "Somewhat disapprove",
+                  "Neither approve nor disapprove",
+                  "Somewhat approve", "Strongly approve")
+
+# ── Approve / disapprove (5-point, "Neutral / neither…" wording) ─────────────
+# Used for highered_1
+lvl_approve5_he <- c("Strongly disapprove", "Somewhat disapprove",
+                     "Neutral / neither approve nor disapprove",
+                     "Somewhat approve", "Strongly approve")
+
+# ── Priority ─────────────────────────────────────────────────────────────────
+lvl_priority <- c("Not a priority", "Low priority", "Somewhat priority",
+                  "Moderate priority", "High priority")
+
+# ── Frequency (past engagement) ──────────────────────────────────────────────
+lvl_freq <- c("Never", "Once or twice a year", "Once or twice a month",
+              "Once or twice a week", "Almost every day", "Once or more per day")
+
+# ── Behavioral intention (7-point, includes "Unsure") ────────────────────────
+lvl_intent <- c("Definitely will not", "Probably will not", "Maybe will not",
+                "Unsure", "Maybe will", "Probably will", "Definitely will")
+
+# ── Local impact of cuts ─────────────────────────────────────────────────────
+lvl_impact <- c("Strong negative impact", "Somewhat negative impact",
+                "Neither positive nor negative impact",
+                "Somewhat positive impact", "Strong positive impact")
+
+# ── Climate scientist trust ──────────────────────────────────────────────────
+lvl_climate_trust <- c("Not at all", "Slightly", "Moderately", "Very strongly")
+
+# ── Proportion nonprofit ─────────────────────────────────────────────────────
+lvl_proportion <- c("None", "Less than half", "About half", "Most", "All", "Not sure")
+
+# ── Education ────────────────────────────────────────────────────────────────
+lvl_degree <- c("No formal education", "Did not complete high school",
+                "High school graduate (diploma)", "High school graduate (GED)",
+                "Some college (1-4 years, no degree)",
+                "Associate's degree (including occupational or academic degrees)",
+                "Bachelor's degree (BA, BS, etc.)",
+                "Master's degree (MA, MS, MEng, MSW, etc.)",
+                "Professional school degree (MD, JD, etc.)", "Doctoral degree (PhD, EdD, etc.)")
+
+# ── Income ───────────────────────────────────────────────────────────────────
+lvl_income <- c("Less than $5,000", "$5,000 through $11,999", "$12,000 through $15,999",
+                "$16,000 through $24,999", "$25,000 through $34,999", "$35,000 through $49,999",
+                "$50,000 through $74,999", "$75,000 through $99,999",
+                "$100,000 through $149,999", "$150,000 or greater",
+                "Prefer not to say / I don't know")
+
+# ── Political ideology ───────────────────────────────────────────────────────
+lvl_ideology <- c("Extremely liberal", "Liberal", "Slightly liberal",
+                  "Moderate / middle of the road",
+                  "Slightly conservative", "Conservative", "Extremely conservative")
+```
+
+```{r helpers}
+# Frequency table for a single column
+freq_tab <- function(data, col, levels = NULL) {
+  df <- data %>%
+    filter(!is.na(.data[[col]]), .data[[col]] != "") %>%
+    count(Response = .data[[col]], name = "n") %>%
+    mutate(Pct = round(100 * n / sum(n), 1))
+  if (!is.null(levels)) {
+    present <- intersect(levels, df$Response)
+    df <- df %>% mutate(Response = factor(Response, levels = present)) %>% arrange(Response)
+  } else {
+    df <- df %>% arrange(desc(n))
+  }
+  df %>% reactable(striped = TRUE, compact = TRUE, defaultPageSize = 15)
+}
+
+# Bar chart for a single item
+bar_single <- function(data, col, title = "", levels = NULL, fill = palette_main) {
+  df <- data %>%
+    filter(!is.na(.data[[col]]), .data[[col]] != "") %>%
+    count(response = .data[[col]])
+  if (!is.null(levels)) {
+    present <- intersect(levels, df$response)
+    df <- df %>% mutate(response = factor(response, levels = present))
+  } else {
+    df <- df %>% mutate(response = fct_reorder(response, n))
+  }
+  ggplot(df, aes(x = response, y = n)) +
+    geom_col(fill = fill) +
+    geom_text(aes(label = n), hjust = -0.2, size = 3.5) +
+    coord_flip() +
+    expand_limits(y = max(df$n) * 1.15) +
+    labs(x = "", y = "Count", title = title) +
+    plot_aes
+}
+
+# Stacked proportional bar chart for a matrix question
+bar_matrix <- function(data, cols, item_labels, title = "", scale_levels = NULL,
+                       pal = "RdYlGn", pal_dir = 1, legend_rows = 2, fig_height = NULL) {
+  df <- data %>%
+    select(all_of(cols)) %>%
+    rename_with(~ item_labels) %>%
+    pivot_longer(everything(), names_to = "item", values_to = "response") %>%
+    filter(!is.na(response), response != "")
+  if (!is.null(scale_levels)) {
+    present <- intersect(scale_levels, unique(df$response))
+    df <- df %>% mutate(response = factor(response, levels = present))
+  }
+  df %>%
+    count(item, response) %>%
+    group_by(item) %>%
+    mutate(pct = n / sum(n),
+           item = factor(item, levels = rev(item_labels))) %>%
+    ggplot(aes(x = item, y = pct, fill = response)) +
+    geom_col(position = "fill", width = 0.7) +
+    coord_flip() +
+    scale_y_continuous(labels = percent_format(accuracy = 1)) +
+    scale_fill_brewer(palette = pal, direction = pal_dir) +
+    labs(x = "", y = "Proportion", fill = "", title = title) +
+    plot_aes +
+    guides(fill = guide_legend(reverse = TRUE, nrow = legend_rows))
+}
+
+# Frequency table for a matrix question
+freq_matrix <- function(data, cols, item_labels, scale_levels = NULL) {
+  df <- data %>%
+    select(all_of(cols)) %>%
+    rename_with(~ item_labels) %>%
+    pivot_longer(everything(), names_to = "Item", values_to = "Response") %>%
+    filter(!is.na(Response), Response != "") %>%
+    count(Item, Response) %>%
+    group_by(Item) %>%
+    mutate(Pct = round(100 * n / sum(n), 1))
+  if (!is.null(scale_levels)) {
+    present <- intersect(scale_levels, unique(df$Response))
+    df <- df %>% mutate(Response = factor(Response, levels = present)) %>% arrange(Item, Response)
+  }
+  df %>%
+    reactable(groupBy = "Item", striped = TRUE, compact = TRUE, filterable = TRUE,
+              defaultPageSize = 20,
+              columns = list(Item = colDef(minWidth = 250)))
+}
+```
+
+```{r load-data}
+path <- "~/Documents/GitHub/UniversityNews"
+
+data <- readRDS(sprintf("%s/Data/Cleaned/UnivNews_Step1_combined.rds", path)) %>%
+  arrange(StartDate)
+
+N <- nrow(data)
+```
+
+**N = `r N`** (Cohorts 1 + 2 combined; all responses retained, no exclusions applied).
+
+Sections follow the order questions appeared in the survey.
+
+---
+
+# 1. University Research Beliefs {.tabset}
+
+## Knowledge & Science Attitude {.unnumbered}
+
+**research_1**: How much do you, personally, know about research at colleges and universities?
+
+```{r r1}
+bar_single(data, "research_1", title = "Self-rated knowledge of university research", levels = lvl_know)
+freq_tab(data, "research_1", levels = lvl_know)
+```
+
+**research_2**: "Scientific research methods are the best way to find out if something is true or false."
+
+```{r r2}
+bar_single(data, "research_2", title = "Scientific methods are the best way to find truth",
+           levels = lvl_agree5)
+freq_tab(data, "research_2", levels = lvl_agree5)
+```
+
+## Effects of Research on Groups (research_3) {.unnumbered}
+
+To what extent has research at colleges and universities had a positive or negative effect on each of the following?
+
+```{r r3, fig.height=7}
+r3_cols   <- paste0("research_3_", 1:13)
+r3_labels <- c("You personally", "People you care about", "People in your local community",
+               "People in the United States", "Students at universities",
+               "Scientists at universities", "Universities themselves",
+               "Pharmaceutical companies", "Technology companies",
+               "The military", "The US government",
+               "Wealthy individuals", "Disadvantaged individuals")
+
+bar_matrix(data, r3_cols, r3_labels,
+           title        = "Effects of university research on groups",
+           scale_levels = lvl_pos_neg,
+           pal = "RdYlGn", pal_dir = 1, legend_rows = 2, fig_height = 7)
+freq_matrix(data, r3_cols, r3_labels, scale_levels = lvl_pos_neg)
+```
+
+## Research Literacy & Attitudes (research_4) {.unnumbered}
+
+Rate your agreement with the following statements:
+
+```{r r4, fig.height=6}
+r4_cols   <- paste0("research_4_", 1:8)
+r4_labels <- c("I usually understand research findings discussed in the news",
+               "I know where to look up info about academic research",
+               "It's clear how to apply research findings in my own life",
+               "I often think about the impact of science on my everyday life",
+               "The benefits of scientific research outweigh harmful results",
+               "Science makes our way of life change too fast",
+               "Because of scientific research, there will be more opportunities for the next generation",
+               "Research advancing knowledge is necessary, even w/o immediate benefits")
+
+bar_matrix(data, r4_cols, r4_labels,
+           title        = "Research literacy and attitudes",
+           scale_levels = lvl_agree5,
+           pal = "RdYlBu", pal_dir = 1, legend_rows = 2, fig_height = 6)
+freq_matrix(data, r4_cols, r4_labels, scale_levels = lvl_agree5)
+```
+
+## Research Importance (research_5) {.unnumbered}
+
+For each research area/outcome, how important is it for the public good?
+
+```{r r5-imp, fig.height=8}
+r5_imp_cols <- paste0("research_5.1_", 1:13)
+r5_labels <- c("Advancing social science (behavior, mental health, poverty, misinformation)",
+               "Developing new medicines (cancer, heart disease, dementia)",
+               "Protecting the environment and ensuring clean air and water",
+               "Developing new energy technologies",
+               "Developing advanced technologies to drive economic growth",
+               "Developing innovative manufacturing processes",
+               "Developing new defense and national security technologies",
+               "Advancing AI and machine learning",
+               "Exploring space",
+               "Improving education systems",
+               "Developing better public policies",
+               "Helping individuals understand how to improve their lives",
+               "Increasing awareness of others' experiences and perspectives")
+
+bar_matrix(data, r5_imp_cols, r5_labels,
+           title        = "Importance of research areas for the public good",
+           scale_levels = lvl_importance,
+           pal = "Blues", pal_dir = 1, legend_rows = 2, fig_height = 8)
+freq_matrix(data, r5_imp_cols, r5_labels, scale_levels = lvl_importance)
+```
+
+## Research Likelihood (research_5) {.unnumbered}
+
+For each research area/outcome, how likely is academic research to produce it?
+
+```{r r5-lik, fig.height=8}
+r5_lik_cols <- paste0("research_5.2_", 1:13)
+
+bar_matrix(data, r5_lik_cols, r5_labels,
+           title        = "Likelihood that academic research produces each outcome",
+           scale_levels = lvl_likelihood_res,
+           pal = "Blues", pal_dir = 1, legend_rows = 2, fig_height = 8)
+freq_matrix(data, r5_lik_cols, r5_labels, scale_levels = lvl_likelihood_res)
+```
+
+## Negative Outcomes: Problematic (research_6) {.unnumbered}
+
+For each potential negative outcome of academic research, how problematic would it be?
+
+```{r r6-prob, fig.height=7}
+r6_prob_cols <- paste0("research_6.1_", 1:11)
+r6_labels <- c("Researchers make mistakes and results are incorrect",
+               "Research is slow to have an impact",
+               "Few people can access or understand results",
+               "Findings don't generalize across groups",
+               "Studies fail to yield impactful results",
+               "Research is conducted inefficiently and wastes money",
+               "New technology resulting from research eliminates jobs",
+               "New technology resulting from research invades privacy",
+               "Research creates technology that causes widespread damage",
+               "Research findings are misused",
+               "Results reporting is biased by news outlets")
+
+bar_matrix(data, r6_prob_cols, r6_labels,
+           title        = "How problematic are potential negative outcomes of academic research?",
+           scale_levels = lvl_problematic,
+           pal = "Reds", pal_dir = 1, legend_rows = 2, fig_height = 7)
+freq_matrix(data, r6_prob_cols, r6_labels, scale_levels = lvl_problematic)
+```
+
+## Negative Outcomes: Likelihood (research_6) {.unnumbered}
+
+How likely is academic research to produce each negative outcome?
+
+```{r r6-lik, fig.height=7}
+r6_lik_cols <- paste0("research_6.2_", 1:11)
+
+bar_matrix(data, r6_lik_cols, r6_labels,
+           title        = "Likelihood that academic research produces each negative outcome",
+           scale_levels = lvl_likelihood_res,
+           pal = "Blues", pal_dir = 1, legend_rows = 2, fig_height = 7)
+freq_matrix(data, r6_lik_cols, r6_labels, scale_levels = lvl_likelihood_res)
+```
+
+---
+
+# 2. Government Funding Attitudes {.tabset}
+
+## Overall Approval & Knowledge {.unnumbered}
+
+**govtfund_1**: Do you approve or disapprove of the federal government using taxpayer funds to invest in scientific research at colleges and universities?
+
+```{r gf1}
+bar_single(data, "govtfund_1",
+           title  = "Approval of federal funding for university research",
+           levels = lvl_approve4)
+freq_tab(data, "govtfund_1", levels = lvl_approve4)
+```
+
+**govtfund_2**: Which statement comes closer to your view?
+
+```{r gf2}
+bar_single(data, "govtfund_2",
+           title = "Government funding: essential vs. private investment sufficient")
+freq_tab(data, "govtfund_2")
+```
+
+**govtfund_3**: How much do you currently know about cuts to government funding for academic research?
+
+```{r gf3}
+bar_single(data, "govtfund_3",
+           title  = "Knowledge of funding cuts to academic research",
+           levels = lvl_know)
+freq_tab(data, "govtfund_3", levels = lvl_know)
+```
+
+## Perceived Group Support (govtfund_4) {.unnumbered}
+
+How do you think each of these groups feel about the government financially supporting academic research?
+
+```{r gf4, fig.height=8}
+gf4_cols   <- paste0("govtfund_4_", 1:13)
+gf4_labels <- c("People who will directly benefit from the research",
+                "Students at universities",
+                "Scientists at universities",
+                "The general public",
+                "People in the military",
+                "People who identify as liberals",
+                "People who identify as conservatives",
+                "People who favor minimal government spending",
+                "Politicians",
+                "People who don't believe in mainstream science",
+                "Medical and mental health professionals",
+                "Pharmaceutical companies",
+                "Technology companies")
+
+bar_matrix(data, gf4_cols, gf4_labels,
+           title        = "Perceived group support for government funding of academic research",
+           scale_levels = lvl_approve5,
+           pal = "RdYlGn", pal_dir = 1, legend_rows = 2, fig_height = 8)
+freq_matrix(data, gf4_cols, gf4_labels, scale_levels = lvl_approve5)
+```
+
+## Likelihood of Outcomes (govtfund_5) {.unnumbered}
+
+How likely is it that these things happen when the government funds academic research?
+
+```{r gf5, fig.height=7}
+gf5_cols   <- paste0("govtfund_5_", 1:10)
+gf5_labels <- c("Researchers have enough resources to explore ideas",
+                "Research can focus on long-term projects",
+                "Exciting research is sped up",
+                "Results become publicly available",
+                "Government-funded researchers are held to higher standards",
+                "Money is spent on less important things",
+                "Taxpayer money is wasted",
+                "Research is delayed by government oversight",
+                "Political agendas influence what research gets funded",
+                "Researchers lie about results to maintain funding")
+
+bar_matrix(data, gf5_cols, gf5_labels,
+           title        = "Likelihood of outcomes when government funds academic research",
+           scale_levels = lvl_likelihood_gov,
+           pal = "Blues", pal_dir = 1, legend_rows = 2, fig_height = 7)
+freq_matrix(data, gf5_cols, gf5_labels, scale_levels = lvl_likelihood_gov)
+```
+
+## Agreement: Research Governance (gotvfund_6) {.unnumbered}
+
+Rate your agreement with the following statements:
+
+```{r gf6, fig.height=7}
+gf6_cols   <- paste0("gotvfund_6_", 1:9)
+gf6_labels <- c("Rules should ensure government-funded research is done well",
+                "Oversight committees protect against unethical research",
+                "Many everyday tools are the result of academic research",
+                "University research benefits day-to-day lives in ways hard to see",
+                "University researchers are motivated primarily by profit",
+                "Private companies conduct research primarily to benefit the public",
+                "Govt-funded research is more objective than privately funded research",
+                "Private company research is more likely to be biased toward company interests",
+                "Results of private company research will become publicly accessible")
+
+bar_matrix(data, gf6_cols, gf6_labels,
+           title        = "Agreement: research governance and objectivity",
+           scale_levels = lvl_agree5,
+           pal = "RdYlBu", pal_dir = 1, legend_rows = 2, fig_height = 7)
+freq_matrix(data, gf6_cols, gf6_labels, scale_levels = lvl_agree5)
+```
+
+## Research Priorities (govtfund_7) {.unnumbered}
+
+What are the priorities of government-funded research at colleges and universities?
+
+```{r gf7, fig.height=4}
+gf7_cols   <- paste0("govtfund_7_", 1:4)
+gf7_labels <- c("Making a profit",
+                "Advance knowledge and benefit society",
+                "Develop products that can be sold",
+                "Serve the interests of the government")
+
+bar_matrix(data, gf7_cols, gf7_labels,
+           title        = "Perceived priorities of government-funded university research",
+           scale_levels = lvl_priority,
+           pal = "Blues", pal_dir = 1, legend_rows = 1, fig_height = 4)
+freq_matrix(data, gf7_cols, gf7_labels, scale_levels = lvl_priority)
+```
+
+## Benefits of Tax Investment (govtfund_8) {.unnumbered}
+
+Rate your agreement: "Investing tax dollars in academic research..."
+
+```{r gf8, fig.height=5}
+gf8_cols   <- paste0("govtfund_8_", 1:7)
+gf8_labels <- c("...boosts the economy",
+                "...improves health and saves lives",
+                "...drives industry investment",
+                "...makes America a leader",
+                "...protects national security",
+                "...leads to scientific breakthroughs",
+                "...benefits people like you")
+
+bar_matrix(data, gf8_cols, gf8_labels,
+           title        = "Agreement: benefits of investing tax dollars in academic research",
+           scale_levels = lvl_agree5,
+           pal = "RdYlBu", pal_dir = 1, legend_rows = 2, fig_height = 5)
+freq_matrix(data, gf8_cols, gf8_labels, scale_levels = lvl_agree5)
+```
+
+## Approval of Funding Cuts (govtfund_9) {.unnumbered}
+
+Would you approve or disapprove if the federal government took the following actions?
+
+```{r gf9, fig.height=4}
+gf9_cols   <- paste0("govtfund_9_", 1:5)
+gf9_labels <- c("Cutting funding for health research",
+                "Cutting funding for education",
+                "Cutting funding for science",
+                "Cutting funding for the arts",
+                "Cutting funding for the humanities")
+
+bar_matrix(data, gf9_cols, gf9_labels,
+           title        = "Approval of federal cuts to research and education funding",
+           scale_levels = lvl_approve5,
+           pal = "RdYlGn", pal_dir = -1, legend_rows = 2, fig_height = 4)
+freq_matrix(data, gf9_cols, gf9_labels, scale_levels = lvl_approve5)
+```
+
+**govfund_10**: Do you think your local area would be positively or negatively impacted by cuts to funding for scientific research?
+
+```{r gf10}
+bar_single(data, "govfund_10",
+           title  = "Perceived local impact of cuts to scientific research funding",
+           levels = lvl_impact)
+freq_tab(data, "govfund_10", levels = lvl_impact)
+```
+
+---
+
+# 3. Behavioral Intentions {.tabset}
+
+## Intent to Act {.unnumbered}
+
+```{r intent, fig.height=4}
+intent_cols   <- paste0("X", 1:4, "_intent")
+intent_labels <- c("Contact reps to oppose cuts to university research funding",
+                   "Talk to others about cuts to federal scientific research funding",
+                   "Share information online about cuts to scientific research funding",
+                   "Contact reps to support federal funding for university research")
+
+bar_matrix(data, intent_cols, intent_labels,
+           title        = "Behavioral intentions",
+           scale_levels = lvl_intent,
+           pal = "Blues", pal_dir = 1, legend_rows = 2, fig_height = 4)
+freq_matrix(data, intent_cols, intent_labels, scale_levels = lvl_intent)
+```
+
+---
+
+# 4. Past Engagement {.tabset}
+
+## Science Engagement (past_engage) {.unnumbered}
+
+Over the past 12 months, how often have you done the following?
+
+```{r past-engage, fig.height=6}
+pe_cols   <- paste0("past_engage_", 1:7)
+pe_labels <- c("Conversations about science-related topics",
+               "Shared or commented on social media posts about science",
+               "Attended public rallies or protests related to science",
+               "Shared info online about cuts to federal research funding",
+               "Talked to others about cuts to federal research funding",
+               "Contacted reps to oppose cuts to federal research funding",
+               "Contacted reps to support federal funding for research")
+
+bar_matrix(data, pe_cols, pe_labels,
+           title        = "Past science engagement behaviors (past 12 months)",
+           scale_levels = lvl_freq,
+           pal = "Blues", pal_dir = 1, legend_rows = 2, fig_height = 6)
+freq_matrix(data, pe_cols, pe_labels, scale_levels = lvl_freq)
+```
+
+---
+
+# 5. Higher Education Attitudes {.tabset}
+
+## Approval (highered_1) {.unnumbered}
+
+Overall, how much do you approve or disapprove of:
+
+```{r he1, fig.height=3.5}
+he1_cols   <- paste0("highered_1_", 1:3)
+he1_labels <- c("Private colleges and universities in the US",
+                "Your state's public university system",
+                "Your local community college(s)")
+
+bar_matrix(data, he1_cols, he1_labels,
+           title        = "Approval of higher education institutions",
+           scale_levels = lvl_approve5_he,
+           pal = "RdYlGn", pal_dir = 1, legend_rows = 2, fig_height = 3.5)
+freq_matrix(data, he1_cols, he1_labels, scale_levels = lvl_approve5_he)
+```
+
+## Trust (highered_2) {.unnumbered}
+
+How much do you trust each type of institution to do what is right?
+
+```{r he2, fig.height=3.5}
+he2_cols   <- paste0("highered_2_", 1:3)
+
+bar_matrix(data, he2_cols, he1_labels,
+           title        = "Trust in higher education institutions",
+           scale_levels = lvl_know,
+           pal = "Blues", pal_dir = 1, legend_rows = 1, fig_height = 3.5)
+freq_matrix(data, he2_cols, he1_labels, scale_levels = lvl_know)
+```
+
+## Contribution to Scientific Achievements (highered_3) {.unnumbered}
+
+How much do each of the following contribute to scientific achievements in the US?
+
+```{r he3, fig.height=4.5}
+he3_cols   <- paste0("highered_3_", 1:6)
+he3_labels <- c("Private colleges and universities",
+                "Private companies (pharma, tech, etc.)",
+                "Federal government agencies",
+                "Charitable foundations",
+                "State colleges and universities",
+                "Community colleges")
+
+bar_matrix(data, he3_cols, he3_labels,
+           title        = "Contribution to scientific achievements in the US",
+           scale_levels = lvl_know_ns,
+           pal = "Blues", pal_dir = 1, legend_rows = 1, fig_height = 4.5)
+freq_matrix(data, he3_cols, he3_labels, scale_levels = lvl_know_ns)
+```
+
+## Proportion Nonprofit (highered_4) {.unnumbered}
+
+What proportion of each type of institution do you think is nonprofit?
+
+```{r he4, fig.height=4.5}
+he4_cols   <- paste0("highered_4_", 1:6)
+he4_labels <- c("Private colleges and universities",
+                "Public state colleges and universities",
+                "Community colleges",
+                "Private companies (e.g., pharma and tech)",
+                "Federal government agencies",
+                "Charitable foundations")
+
+bar_matrix(data, he4_cols, he4_labels,
+           title        = "Estimated proportion nonprofit by institution type",
+           scale_levels = lvl_proportion,
+           pal = "Blues", pal_dir = 1, legend_rows = 1, fig_height = 4.5)
+freq_matrix(data, he4_cols, he4_labels, scale_levels = lvl_proportion)
+```
+
+---
+
+# 6. University Perceptions {.tabset}
+
+## Outcomes (univ_2) {.unnumbered}
+
+To what extent do you agree or disagree that colleges and universities contribute to each of the following outcomes in the US?
+
+```{r univ2, fig.height=7}
+u2_cols   <- paste0("univ_2_", 1:10)
+u2_labels <- c("Greater innovation (scientific, medical, technological discoveries)",
+               "Better jobs, promotions, and career advancement",
+               "Higher household incomes",
+               "A more knowledgeable population",
+               "A competitive advantage for the US over other countries",
+               "More entrepreneurship and business creation",
+               "Increased compassion for and tolerance of others",
+               "Overall economic growth",
+               "Better relationships with other countries",
+               "Benefits to surrounding communities")
+
+bar_matrix(data, u2_cols, u2_labels,
+           title        = "Agreement: universities contribute to these US outcomes",
+           scale_levels = lvl_agree5,
+           pal = "RdYlBu", pal_dir = 1, legend_rows = 2, fig_height = 7)
+freq_matrix(data, u2_cols, u2_labels, scale_levels = lvl_agree5)
+```
+
+## Knowledge Functions (univ_4) {.unnumbered}
+
+Do you agree or disagree that colleges and universities:
+
+```{r univ4, fig.height=3.5}
+u4_cols   <- paste0("univ_4_", 1:3)
+u4_labels <- c("Discover new knowledge through original research",
+               "Apply existing knowledge and connect ideas across contexts",
+               "Apply knowledge-based solutions to society's needs")
+
+bar_matrix(data, u4_cols, u4_labels,
+           title        = "Agreement: university knowledge functions",
+           scale_levels = lvl_agree5,
+           pal = "RdYlBu", pal_dir = 1, legend_rows = 1, fig_height = 3.5)
+freq_matrix(data, u4_cols, u4_labels, scale_levels = lvl_agree5)
+```
+
+## Who Benefits (univ_5) {.unnumbered}
+
+How much do each of the following people benefit from colleges and universities?
+
+```{r univ5, fig.height=5}
+u5_cols   <- paste0("univ_5_", 1:7)
+u5_labels <- c("You personally",
+               "People you care about",
+               "Local communities",
+               "Students who attend",
+               "Students' families",
+               "Employers and businesses",
+               "Society as a whole")
+
+bar_matrix(data, u5_cols, u5_labels,
+           title        = "Who benefits from colleges and universities?",
+           scale_levels = lvl_know,
+           pal = "Blues", pal_dir = 1, legend_rows = 1, fig_height = 5)
+freq_matrix(data, u5_cols, u5_labels, scale_levels = lvl_know)
+```
+
+---
+
+# 7. Climate Attitudes {.tabset}
+
+## Global Warming Beliefs {.unnumbered}
+
+**climate_1**: Do you think global warming is happening?
+
+```{r clim1}
+bar_single(data, "climate_1", title = "Global warming is happening")
+freq_tab(data, "climate_1")
+```
+
+**climate_2**: Assuming global warming is happening, do you think it is...
+
+```{r clim2}
+bar_single(data, "climate_2", title = "Cause of global warming")
+freq_tab(data, "climate_2")
+```
+
+**climate_3**: To what extent do you trust scientists who work on climate change?
+
+```{r clim3}
+bar_single(data, "climate_3",
+           title  = "Trust in climate scientists",
+           levels = lvl_climate_trust)
+freq_tab(data, "climate_3", levels = lvl_climate_trust)
+```
+
+## Climate Research Priorities {.unnumbered}
+
+How important is it for colleges and universities to do research on the following climate-related topics?
+
+```{r clim4, fig.height=5}
+c4_cols   <- paste0("climate_4_", 1:4)
+c4_labels <- c("Climate science and earth systems\n(greenhouse gases, sea levels, past climate cycles)",
+               "Climate mitigation approaches\n(renewable energy, carbon capture, sustainable agriculture)",
+               "Climate adaptation and resilience\n(urban infrastructure, ecosystem management)",
+               "Climate policy, economics, and human impact\n(environmental justice, climate finance, psychology)")
+
+bar_matrix(data, c4_cols, c4_labels,
+           title        = "Importance of university climate research topics",
+           scale_levels = lvl_importance,
+           pal = "Blues", pal_dir = 1, legend_rows = 1, fig_height = 5)
+freq_matrix(data, c4_cols, c4_labels, scale_levels = lvl_importance)
+```
+
+---
+
+# 8. Demographics {.tabset}
+
+## Age {.unnumbered}
+
+```{r demo-age}
+data %>%
+  mutate(age = as.numeric(age)) %>%
+  summarise(M = round(mean(age, na.rm = TRUE), 1), SD = round(sd(age, na.rm = TRUE), 1),
+            Min = min(age, na.rm = TRUE), Max = max(age, na.rm = TRUE)) %>%
+  reactable(compact = TRUE)
+
+ggplot(data %>% mutate(age = as.numeric(age)), aes(x = age)) +
+  geom_histogram(binwidth = 5, fill = palette_main, color = "white") +
+  labs(x = "Age", y = "Count", title = "Age distribution") +
+  plot_aes
+```
+
+## Gender {.unnumbered}
+
+```{r demo-gender}
+bar_single(data, "gender", title = "Gender identity")
+freq_tab(data, "gender")
+```
+
+## Race / Ethnicity {.unnumbered}
+
+```{r demo-race}
+bar_single(data, "race", title = "Race / ethnicity")
+freq_tab(data, "race")
+```
+
+## LGBTQ+ {.unnumbered}
+
+```{r demo-lgbtq}
+bar_single(data, "LGBTQ", title = "LGBTQ+ identity")
+freq_tab(data, "LGBTQ")
+```
+
+## Education {.unnumbered}
+
+```{r demo-edu}
+bar_single(data, "ses_degree", title = "Highest education level", levels = lvl_degree)
+freq_tab(data, "ses_degree", levels = lvl_degree)
+```
+
+## Income {.unnumbered}
+
+```{r demo-income}
+bar_single(data, "ses_income_household", title = "Household income", levels = lvl_income)
+freq_tab(data, "ses_income_household", levels = lvl_income)
+```
+
+## Subjective SES {.unnumbered}
+
+MacArthur ladder (1 = bottom, 10 = top): relative standing in the US by money, education, and job prestige.
+
+```{r demo-ses-ladder}
+data %>%
+  filter(!is.na(ses_ladder)) %>%
+  summarise(M = round(mean(ses_ladder), 1), SD = round(sd(ses_ladder), 1),
+            Min = min(ses_ladder), Max = max(ses_ladder)) %>%
+  reactable(compact = TRUE)
+
+ggplot(data %>% filter(!is.na(ses_ladder)), aes(x = factor(ses_ladder))) +
+  geom_bar(fill = palette_main) +
+  labs(x = "Ladder rung", y = "Count", title = "Subjective SES (MacArthur ladder)") +
+  plot_aes
+```
+
+## Political Ideology {.unnumbered}
+
+```{r demo-ideology}
+bar_single(data, "politics_ideology", title = "Political ideology", levels = lvl_ideology)
+freq_tab(data, "politics_ideology", levels = lvl_ideology)
+```
+
+## Urbanicity {.unnumbered}
+
+```{r demo-urban}
+bar_single(data, "urbanicity", title = "Urbanicity")
+freq_tab(data, "urbanicity")
+```
+
+## University Affiliation {.unnumbered}
+
+```{r demo-affil}
+bar_single(data, "univ_affiliate", title = "Current university affiliation")
+freq_tab(data, "univ_affiliate")
+```
+
+---
+
+# 9. Open-Ended Responses {.tabset}
+
+## Effects of Research on You (research_3b) {.unnumbered}
+
+"Please describe the positive or negative effects that academic research has had on you personally."
+
+```{r oe-r3b}
+data %>%
+  select(PROLIFIC_PID, research_3b) %>%
+  filter(!is.na(research_3b), !research_3b %in% c("", "n/a", "N/A", "None", "none", "NA")) %>%
+  rename(`Prolific ID` = PROLIFIC_PID, Response = research_3b) %>%
+  reactable(striped = TRUE, filterable = TRUE,
+            columns = list(Response = colDef(minWidth = 400)))
+```
+
+## Views on Federal Funding (govtfund_1b) {.unnumbered}
+
+"Please describe your viewpoint on federal funding of academic research — why do you approve or disapprove?"
+
+```{r oe-gf1b}
+data %>%
+  select(PROLIFIC_PID, govtfund_1b) %>%
+  filter(!is.na(govtfund_1b), !govtfund_1b %in% c("", "n/a", "N/A", "None", "none", "NA")) %>%
+  rename(`Prolific ID` = PROLIFIC_PID, Response = govtfund_1b) %>%
+  reactable(striped = TRUE, filterable = TRUE,
+            columns = list(Response = colDef(minWidth = 400)))
+```
+
+## End-of-Survey Feedback {.unnumbered}
+
+"Please type below any comments or suggestions you might have for the research team."
+
+```{r oe-feedback}
+data %>%
+  select(PROLIFIC_PID, end_feedback) %>%
+  filter(!is.na(end_feedback), !end_feedback %in% c("", "n/a", "N/A", "None", "none", "NA")) %>%
+  rename(`Prolific ID` = PROLIFIC_PID, Response = end_feedback) %>%
+  reactable(striped = TRUE, filterable = TRUE,
+            columns = list(Response = colDef(minWidth = 400)))
+```

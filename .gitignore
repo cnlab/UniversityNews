@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# Qualtrics raw exports with PII (zip archives)
+Data/Raw/*.zip
+
+# Code archive (historical scratch scripts)
+Code/archive/
+
+# Large HTML renders (regenerate from .Rmd)
+Code/*.html

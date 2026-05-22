@@ -1,0 +1,261 @@
+---
+title: "Step 1 survey analyses"
+author: "Nicole Cooper"
+date: "5/05/2026"
+output:
+  html_document:
+    code_folding: show
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+  pdf_document:
+    toc: yes
+---
+
+# Overview
+
+**Pilot**: 10 adults (9 female, 1 male; Mean age = 38, SD = 9) were recruited on Prolific to complete the Step 1 survey in the pilot (Cohort 1).
+
+**Cohort 2** 103 (??) adults (53 female, 49 male; Mean age = 39, SD = 13) were recruited on Prolific to complete the Step 1 survey.
+
+**Inclusion criteria**: Adults who reside in the U.S., are fluent English speakers, who have completed at least 50 studies on Prolific, who have an approval rate 95-100, and who have not participated in previous pilot studies. 
+
+
+```{r setup, include=FALSE,warning=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+```{r, echo = F, messages = F, warnings = F, include = F}
+# Clear global environment
+remove(list=ls())
+
+# Open libraries
+library("tidyverse")
+library("tidytext")
+library("ggwordcloud")
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+library("wesanderson")
+library("tidytext")
+library("topicmodels")
+library("reactable")
+library("grid")
+library("gridExtra")
+
+# Set global ggplot theme
+theme_set(theme_bw() +
+            theme(plot.title = element_text(size=14),
+                  axis.text=element_text(size=12),
+                  axis.title=element_text(size=14),
+                  axis.line = element_line(colour = "gray"),
+                  panel.border = element_rect(colour = "gray"),
+                  panel.grid.minor = element_blank(),
+                  panel.grid.major = element_blank()))
+
+# Set global theme and colors 
+palette = c("#772e25", "#c44536", "#ee9b00", "#6F99ADFF", "#197278", "#283d3b")
+condition_colors <- c("Gen Persp" = "#772e25", 
+                      "Gen Mind" = "#ee9b00", 
+                      "Alc Persp" = "#6F99ADFF",
+                      "Alc Mind" = "#197278",
+                      "Control" = "#283d3b")
+palette_sentiment = c(palette[2], palette[5])
+palette_schedule = palette[c(1,2,3,6)]
+plot_aes = theme_minimal() +
+  theme(legend.position = "top",
+        legend.text = element_text(size = 8),
+        text = element_text(size = 12),
+        axis.text = element_text(color = "black"),
+        axis.ticks.y = element_blank())
+```
+
+```{r, echo = F, messages = F, warnings = F, include = F}
+# Define data path
+path <- "~/Documents/GitHub/UniversityNews"
+```
+
+```{r, echo = F, messages = F, warnings = F, include = F}
+# Define cohort
+cohort <- 2
+```
+
+```{r, echo = F, messages = F, warnings = F, include = F}
+# Open Prolific demographics file
+d_demo <- read.csv(sprintf("%s/Data/Raw/UnivNews_Step1_Prolific_Cohort%s.csv", path, cohort)) %>%
+  select(Participant.id, Age, Sex, Completion.code, Authenticity.check..QID444, Authenticity.check..Bots) %>%
+  rename(PROLIFIC_PID = Participant.id,
+         age = Age,
+         sex = Sex, 
+         prolific_check_llm = Authenticity.check..QID444, 
+         prolific_check_bot = Authenticity.check..Bots) 
+
+# Open Qualtrics survey dataset
+data <- read.csv(sprintf("%s/Data/Raw/UnivNews_Step1_Cohort%s.csv", path, cohort)) %>%
+  tail(-2) %>% # remove subtitles
+  filter(!(Status == "Survey Preview")) %>% # remove test sessions
+  filter(consent == "I agree to participate in this study.") %>%
+  plyr::join(d_demo) %>%
+  arrange(StartDate) 
+
+# Check participants' gender distribution
+data %>%
+  group_by(sex) %>%
+  tally()
+
+# Check participants' age distribution
+data %>%
+  summarize(mean_age = mean(as.numeric(age)),
+           sd_age = round(sd(as.numeric(age)),2))
+ 
+```
+
+# Feedback {.tabset}
+
+## Open-ended Feedback {.unnumbered}
+
+<p>&nbsp;</p>
+
+`Open-Ended Feedback`: "Please type below any comments or suggestions you might have for the research team."
+
+```{r, echo = F, messages = F, warnings = F}
+data %>%
+  select( end_feedback) %>%
+  filter(!(is.na(end_feedback) | end_feedback == "" | end_feedback == "n/a" |
+             end_feedback == "N/A" | end_feedback == "None" |
+           end_feedback == "none"))  %>%
+  reactable(striped = TRUE,
+            filterable = TRUE)
+```
+
+# Study Duration {.tabset}
+
+## Total study duration {.unnumbered}
+
+<p>&nbsp;</p>
+
+Below see the study duration (as calculated by Qualtrics) separately for each condition.
+
+<p>&nbsp;</p>
+
+```{r, echo = F, messages = F, warnings = F, fig.align='center'}
+d3 <- data %>%
+  mutate(time_list = strsplit(as.character(worktimeArray), ","),
+         time_numeric = lapply(time_list, function(x) as.numeric(gsub("[^0-9.-]", "", x))),
+         true_total_on_task_sec = sapply(time_numeric, function(x) sum(x[x > 0], na.rm = TRUE)),
+         true_on_task_min = round(true_total_on_task_sec / 60, 2),
+         true_total_off_task_sec = sapply(time_numeric, function(x) sum(abs(x[x < 0]), na.rm = TRUE)),
+         true_off_task_min = round(true_total_off_task_sec / 60, 2),
+         study_duration_min = round(as.numeric(`Duration..in.seconds.`) / 60, 2)) %>%
+  select(PROLIFIC_PID, study_duration_min, true_on_task_min, true_off_task_min)
+
+d3 %>%
+  summarize(`duration (mins)` = round(mean(study_duration_min, na.rm = TRUE),2)) %>%
+  arrange(desc(`duration (mins)`)) %>%
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+## On Task Time {.unnumbered}
+
+<p>&nbsp;</p>
+
+Below see the time spent on task separately for each condition.
+
+<p>&nbsp;</p>
+
+```{r, echo = F, messages = F, warnings = F, fig.align='center'}
+d3 %>%
+  summarize(`on task time (mins)` = round(mean(true_on_task_min, na.rm = TRUE),2)) %>%
+  arrange(desc(`on task time (mins)`)) %>%
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+
+## Off Task Time {.unnumbered}
+
+<p>&nbsp;</p>
+
+Below see the amount of time participants spent off task; separate by condition.
+
+<p>&nbsp;</p>
+
+```{r, echo = F, messages = F, warnings = F, fig.align='center'}
+d3 %>%
+  summarize(`off task time (mins)` = round(mean(true_off_task_min, na.rm = TRUE),2)) %>%
+  arrange(desc(`off task time (mins)`)) %>%
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+# Quality Checks {.tabset}
+
+## Qualtrics reCAPTCHA {.unnumbered}
+
+Qualtrics calculates  one value per participant, Q_RecaptchaScore, which measures bot likelihood (from 0 to 1) using Google reCAPTCHA v3. A score below 0.5 indicates a high likelihood of a bot, while 0.5 or higher suggests a human.
+
+```{r, echo = F, messages = F, warnings = F, fig.align='center'}
+data %>%
+  group_by(Q_RecaptchaScore)  %>%
+  mutate(Q_RecaptchaScore = round(as.numeric(Q_RecaptchaScore), 
+                                  2)) %>%
+  tally() %>%
+  arrange(desc(Q_RecaptchaScore)) %>%
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+## Prolific LLM Check {.unnumbered}
+
+Prolific computes LLM authenticity checks which identify when participants are using LLMs (like ChatGPT) to answer free-text questions. These look for suspicious behaviors like copy-pasting and tab-switching on free-text questions only.
+```{r, echo = F, messages = F, warnings = F, fig.align='center'}
+data %>%
+  group_by(prolific_check_llm)  %>%
+  tally() %>%
+  arrange(desc(n)) %>%
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+## Prolific Both Check {.unnumbered}
+
+Prolific performs bot checks to identify when AI agents or fully automated bots are answering the study. These look for non-human or scripted behaviour across all question types.
+```{r, echo = F, messages = F, warnings = F, fig.align='center'}
+data %>%
+  group_by(prolific_check_bot)  %>%
+  tally() %>%
+  arrange(desc(n)) %>%
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+## Attention Check 1 {.unnumbered}
+
+Prolific performs bot checks to identify when AI agents or fully automated bots are answering the study. These look for non-human or scripted behaviour across all question types.
+```{r, echo = F, messages = F, warnings = F, fig.align='center'}
+data %>%
+  group_by(attention_1)  %>%
+  tally() %>%
+  arrange(desc(n)) %>%
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+## Attention Check 2 {.unnumbered}
+
+Prolific performs bot checks to identify when AI agents or fully automated bots are answering the study. These look for non-human or scripted behaviour across all question types.
+```{r, echo = F, messages = F, warnings = F, fig.align='center'}
+data %>%
+  group_by(attention_2)  %>%
+  tally() %>%
+  arrange(desc(n)) %>%
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+## Attention Check 3 {.unnumbered}
+
+Prolific performs bot checks to identify when AI agents or fully automated bots are answering the study. These look for non-human or scripted behaviour across all question types.
+```{r, echo = F, messages = F, warnings = F, fig.align='center'}
+data %>%
+  group_by(attention_3)  %>%
+  tally() %>%
+  arrange(desc(n)) %>%
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+

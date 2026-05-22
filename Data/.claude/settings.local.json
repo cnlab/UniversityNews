@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(textutil -convert txt \"OVPR Project proposal with budget.docx\" -output /tmp/ovpr_proposal.txt)",
+      "Bash(textutil -convert txt \"Project outline.docx\" -output /tmp/project_outline.txt)",
+      "Bash(python3 *)",
+      "Bash(textutil -convert txt \"/Users/nicolecooper/Desktop/UniversityNews/SurveyDrafts/UnivNews_Survey_Reformatted_v4_ef.docx\" -output /tmp/survey_draft.txt)",
+      "Bash(Rscript -e \"rmarkdown::render\\('Code/02_descriptives_step1_pilot.Rmd', output_dir = 'Code'\\)\")",
+      "Bash(pandoc --version)",
+      "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"rmarkdown::render\\('Code/02_descriptives_step1_pilot.Rmd', output_dir = 'Code'\\)\")",
+      "Bash(Rscript Code/03_correlations_intent.R)",
+      "Bash(brew install *)",
+      "Bash(pip3 install *)",
+      "Bash(Rscript Code/04_promising_beliefs.R)",
+      "Bash(Rscript -e ' *)",
+      "Bash(Rscript -)",
+      "Bash(Rscript -e \"rmarkdown::render\\('03_correlations_intent.Rmd'\\)\")",
+      "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/resources/pandoc\" Rscript -e \"rmarkdown::render\\('03_correlations_intent.Rmd'\\)\")",
+      "Read(//Applications/RStudio.app/**)",
+      "Read(//opt/homebrew/**)",
+      "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"rmarkdown::render\\('03_correlations_intent.Rmd'\\)\")",
+      "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript *)"
+    ]
+  }
+}
