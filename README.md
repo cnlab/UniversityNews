@@ -213,9 +213,13 @@ UniversityNews/
 ## Team
 
 Nicole Cooper, Managing Director of Research 
+
 Ally Paul, Associate Director of Research
+
 Omaya Torres, Senior Research Coordinator
+
 Mandira Banerjee, Senior Director of Marketing & Communications
+
 Emily Falk, Professor of Communication, Psychology, Marketing, and OID 
 
 Communication Neuroscience Lab, Annenberg School for Communication, University of Pennsylvania
