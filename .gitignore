@@ -15,9 +15,10 @@ Data/Raw/*.zip
 # Code archive (historical scratch scripts)
 Code/archive/
 
-# Large HTML renders (regenerate from .Rmd)
-Code/*.html
 
 # Internal working documents
 Communication white paper .docx
 Ideation exercise, EF.docx
+
+# Older scripts that cannot re-render against de-identified data
+Code/UN_Step1.html

@@ -874,9 +874,9 @@ freq_tab(data, "univ_affiliate")
 
 ```{r oe-r3b}
 data %>%
-  select(PROLIFIC_PID, research_3b) %>%
+  select(research_3b) %>%
   filter(!is.na(research_3b), !research_3b %in% c("", "n/a", "N/A", "None", "none", "NA")) %>%
-  rename(`Prolific ID` = PROLIFIC_PID, Response = research_3b) %>%
+  rename(Response = research_3b) %>%
   reactable(striped = TRUE, filterable = TRUE,
             columns = list(Response = colDef(minWidth = 400)))
 ```
@@ -887,9 +887,9 @@ data %>%
 
 ```{r oe-gf1b}
 data %>%
-  select(PROLIFIC_PID, govtfund_1b) %>%
+  select(govtfund_1b) %>%
   filter(!is.na(govtfund_1b), !govtfund_1b %in% c("", "n/a", "N/A", "None", "none", "NA")) %>%
-  rename(`Prolific ID` = PROLIFIC_PID, Response = govtfund_1b) %>%
+  rename(Response = govtfund_1b) %>%
   reactable(striped = TRUE, filterable = TRUE,
             columns = list(Response = colDef(minWidth = 400)))
 ```
@@ -900,9 +900,9 @@ data %>%
 
 ```{r oe-feedback}
 data %>%
-  select(PROLIFIC_PID, end_feedback) %>%
+  select(end_feedback) %>%
   filter(!is.na(end_feedback), !end_feedback %in% c("", "n/a", "N/A", "None", "none", "NA")) %>%
-  rename(`Prolific ID` = PROLIFIC_PID, Response = end_feedback) %>%
+  rename(Response = end_feedback) %>%
   reactable(striped = TRUE, filterable = TRUE,
             columns = list(Response = colDef(minWidth = 400)))
 ```
