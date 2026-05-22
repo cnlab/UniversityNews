@@ -389,6 +389,50 @@ write_csv(
 
 ---
 
+# Outcome measures
+
+```{r intent-corr-table}
+intent_labels_short <- c("Oppose cuts", "Talk to others", "Share online", "Support funding")
+
+intent_cor <- d |>
+  select(all_of(intent_cols)) |>
+  setNames(intent_labels_short) |>
+  cor(method = "spearman", use = "pairwise.complete.obs") |>
+  round(2) |>
+  as.data.frame() |>
+  tibble::rownames_to_column("Outcome")
+
+intent_desc <- d |>
+  select(all_of(intent_cols)) |>
+  setNames(intent_labels_short) |>
+  summarise(across(everything(), list(
+    Mean = \(x) round(mean(x, na.rm = TRUE), 2),
+    SD   = \(x) round(sd(x,   na.rm = TRUE), 2)
+  ))) |>
+  tidyr::pivot_longer(everything(), names_to = c("Outcome", ".value"), names_sep = "_")
+
+intent_cor |>
+  left_join(intent_desc, by = "Outcome") |>
+  reactable(
+    striped    = TRUE,
+    compact    = TRUE,
+    pagination = FALSE,
+    columns    = list(
+      Outcome        = colDef(minWidth = 160, style = list(fontWeight = "bold")),
+      `Talk to others`   = colDef(width = 110, align = "center"),
+      `Share online`     = colDef(width = 110, align = "center"),
+      `Oppose cuts`      = colDef(width = 110, align = "center"),
+      `Support funding`  = colDef(width = 120, align = "center"),
+      Mean = colDef(width = 70,  align = "center"),
+      SD   = colDef(width = 70,  align = "center")
+    )
+  )
+```
+
+Spearman correlations among the four behavioral intention outcomes (N = `r N`). Scale: 1 = *Definitely will not*, 7 = *Definitely will*. The Oppose ↔ Support pairing is the strongest (r = `r intent_cor |> filter(Outcome == "Oppose cuts") |> pull("Support funding")`), consistent with both being representative-contact behaviors. Talk to others is the most distinct from the other three.
+
+---
+
 # Results {.tabset}
 
 ```{r split-results}
