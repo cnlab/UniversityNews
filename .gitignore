@@ -17,3 +17,7 @@ Code/archive/
 
 # Large HTML renders (regenerate from .Rmd)
 Code/*.html
+
+# Internal working documents
+Communication white paper .docx
+Ideation exercise, EF.docx
