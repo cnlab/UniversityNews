@@ -47,6 +47,8 @@ We fielded a 30-minute cross-sectional survey with **300 U.S. adults** recruited
 
 The goal was to identify which beliefs are most strongly associated with supportive attitudes and intentions — the psychological leverage points most worth targeting in Step 2 messaging.
 
+→ *Full survey items list:* [UnivNews_Step1_Survey_Reference.html](UnivNews_Step1_Survey_Reference.html) · [.Rmd](UnivNews_Step1_Survey_Reference.Rmd)
+
 ---
 
 ### Sample Description
@@ -60,7 +62,7 @@ The goal was to identify which beliefs are most strongly associated with support
 | Education | 61% bachelor's degree or higher |
 | Political ideology | 45% liberal leaning, 20% moderate, 34% conservative leaning |
 
-The sample overrepresents women and college-educated adults relative to the U.S. population, consistent with typical Prolific samples. Political ideology skews more liberal than the national average.
+The sample overrepresents women and college-educated adults relative to the U.S. population, consistent with typical Prolific samples. Political ideology skews more liberal than the national average, but consistent with Prolific samples and with the likely readership of Penn communications.
 
 → *Full descriptives:* [02_descriptives_step1_pilot.html](Code/02_descriptives_step1_pilot.html) · [.Rmd](Code/02_descriptives_step1_pilot.Rmd)
 
@@ -160,6 +162,23 @@ Step 2 will develop and test message frames built around these clusters, applied
 
 ---
 
+
+## Progress on Structural Goals 
+
+### Collaborations at Penn 
+
+We have worked closely with the Annenberg Communications Office team, creating a database of Annenberg News stories from the past year. The database includes the stories with their headlines, email ledes (from the email newsletter), social media ledes (if selected for highlighting on social media), and website ledes (as hosted in full on the ASC website), as well as metrics like email click-through-rates, shares and likes on social media, and website views. 
+
+We have begun conversations with other potential collaborators include the office of the Vice Provost for Climate, and the newly founded Penn Climate initiative.
+
+### Future Funding Opportunities
+
+In addition to supporting initial results and staff research time, this seed funding supported the writeup of project proposals for additional funding. Our team received $50,000 from the office of the Vice Provost for Research at Penn in April. Moving forward, we plan to use pilot work as proof of concept in other grant proposals, including Penn Climate's seed projects application due this summer. 
+
+---
+
+
+
 ## Analysis Files
 
 > **Note:** HTML files can be downloaded and opened in any browser. Click a filename in the `Code/` folder, then click **Download**.
@@ -189,21 +208,6 @@ UniversityNews/
 ├── SurveyDrafts/       # Survey instrument documents
 └── Background/         # Supporting literature and reference materials
 ```
-
----
-
-## Progress on Structural Goals 
-
-### Collaborations at Penn 
-
-We have worked closely with the Annenberg Communications Office team, creating a database of Annenberg News stories from the past year. The database includes the stories with their headlines, email ledes (from the email newsletter), social media ledes (if selected for highlighting on social media), and website ledes (as hosted in full on the ASC website), as well as metrics like email click-through-rates, shares and likes on social media, and website views. 
-
-We have begun conversations with other potential collaborators include the office of the Vice Provost for Climate, and the newly founded Penn Climate initiative.
-
-### Future Funding Opportunities
-
-In addition to supporting initial results and staff research time, this seed funding supported the writeup of project proposals for additional funding. Our team received $50,000 from the office of the Vice Provost for Research at Penn in April. Moving forward, we plan to use pilot work as proof of concept in other grant proposals, including Penn Climate's seed projects application due this summer. 
-
 ---
 
 ## Team
