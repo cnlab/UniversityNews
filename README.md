@@ -212,15 +212,29 @@ UniversityNews/
 
 ## Team
 
-Nicole Cooper, Managing Director of Research 
-
-Ally Paul, Associate Director of Research
-
-Omaya Torres, Senior Research Coordinator
-
-Mandira Banerjee, Senior Director of Marketing & Communications
-
-Emily Falk, Professor of Communication, Psychology, Marketing, and OID 
+- Nicole Cooper, Managing Director of Research 
+- Ally Paul, Associate Director of Research
+- Omaya Torres, Senior Research Coordinator
+- Mandira Banerjee, Senior Director of Marketing & Communications
+- Emily Falk, Professor of Communication, Psychology, Marketing, and OID 
 
 Communication Neuroscience Lab, Annenberg School for Communication, University of Pennsylvania
 Climate Communication Division, Annenberg Public Policy Center, University of Pennsylvania
+
+---
+
+## Disclosure of Delegation to Generative AI
+
+The authors declare the use of generative AI in the research and writing process. According to the GAIDeT taxonomy (2025), the following tasks were delegated to GAI tools under full human supervision:
+
+- Code generation
+- Data cleaning
+- Data curation and organization
+- Data analysis
+- Visualization
+- Text generation
+
+The GAI tool used was: Claude Sonnet 4.6
+Responsibility for the final manuscript lies entirely with the authors.
+GAI tools are not listed as authors and do not bear responsibility for the final outcomes.
+Declaration submitted by: Nicole Cooper
