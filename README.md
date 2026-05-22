@@ -21,8 +21,8 @@ The work is designed to lay the groundwork for a broader campus-wide initiative 
 
 | Step | Description | Timeline | Status |
 |------|-------------|----------|--------|
-| **Step 0** | Formative survey: open-ended beliefs and experiences with academic research and government funding | Early 2026 | ✅ Complete |
-| **Step 1** | Cross-sectional survey to map public beliefs and identify attitudes most amenable to change | End of April 2026 | ✅ Complete |
+| **Step 0** | Formative survey: open-ended beliefs and experiences with academic research and government funding | April 2026 | ✅ Complete |
+| **Step 1** | Cross-sectional survey to map public beliefs and identify attitudes most amenable to change | April-May 2026 | ✅ Complete |
 | **Step 2** | A/B testing of message frames using real ASC/APPC research stories; up to 10 frames tested with ~3,000 participants | TBD | 🔄 In preparation |
 | **Step 3** | Real-world deployment of top-performing frames in ASC newsletter; post-publication engagement tracking | TBD | ⏳ Pending |
 
@@ -30,9 +30,7 @@ The work is designed to lay the groundwork for a broader campus-wide initiative 
 
 ## Step 0: Formative Survey
 
-*[Placeholder — details to be added.]*
-
-Step 0 was a formative survey collecting open-ended responses about people's beliefs and experiences with academic research and government funding of research. Findings informed the belief constructs and item wording used in the Step 1 survey instrument.
+Step 0 was a formative survey on Prolific (**40 US adults**) collecting open-ended responses about people's beliefs and experiences with academic research and government funding of research. Findings informed the belief constructs and item wording used in the Step 1 survey instrument. For example, many of the items related researcher integrity, potential undesirable research outcomes, and public accessibility of research outcomes were inspired by the open ended responses.
 
 ---
 
@@ -158,7 +156,7 @@ Combining PTG and network centrality, beliefs fall into two tiers. Tier 1 target
 | **Tier 2** | Researcher integrity | Strong for sharing and talking | Moderate |
 | **Tier 2** | Science salience | Top for representative contact | Moderate |
 
-Step 2 will develop and test up to 10 message frames built around these clusters, applied to real climate research stories from ASC and APPC.
+Step 2 will develop and test message frames built around these clusters, applied to real climate-related and other research stories from ASC and APPC.
 
 ---
 
@@ -194,9 +192,17 @@ UniversityNews/
 
 ---
 
-## Future Funding Opportunities
+## Progress on Structural Goals 
 
-*[Placeholder — to be filled in.]*
+### Collaborations at Penn 
+
+We have worked closely with the Annenberg Communications Office team, creating a database of Annenberg News stories from the past year. The database includes the stories with their headlines, email ledes (from the email newsletter), social media ledes (if selected for highlighting on social media), and website ledes (as hosted in full on the ASC website), as well as metrics like email click-through-rates, shares and likes on social media, and website views. 
+
+We have begun conversations with other potential collaborators include the office of the Vice Provost for Climate, and the newly founded Penn Climate initiative.
+
+### Future Funding Opportunities
+
+In addition to supporting initial results and staff research time, this seed funding supported the writeup of project proposals for additional funding. Our team received $50,000 from the office of the Vice Provost for Research at Penn in April. Moving forward, we plan to use pilot work as proof of concept in other grant proposals, including Penn Climate's seed projects application due this summer. 
 
 ---
 
