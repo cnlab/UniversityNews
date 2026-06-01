@@ -1,5 +1,5 @@
 # Step 2 Stimulus Frames — Self-Relevance Theme (v2)
-**Date:** 2026-06-01
+**Date:** 2026-06-01 (tone calibrated to Annenberg Now newsletter style)
 **Theme:** Self-relevance — two sub-types: Relevance (how research affects you/community) and Action (what you can do)
 **Constraint:** Headlines and ledes may be edited; article body content is fixed
 **Status:** Draft — under review by Nicole Cooper
@@ -26,30 +26,30 @@
 ---
 
 ### Relevance A
-**Headline:** See What Proposed Federal Research Cuts Would Cost Your Community
+**Headline:** How Proposed Federal Research Cuts Would Affect Communities Like Yours, Mapped
 
 **Lede:** Proposed cuts to federal health research funding won't play out in Washington alone — they'll hit counties like yours. Penn and University of Maryland researchers built an interactive map showing how reduced NIH funding would affect local economies, with projected losses of $16 billion and 68,000 jobs spread across communities nationwide, including your own.
 
 ---
 
 ### Relevance B
-**Headline:** Federal Research Cuts Have a Local Price Tag — and Part of It May Be Yours
+**Headline:** Federal Research Cuts Carry a Local Price Tag. Penn Researchers Show What's at Stake in Your County.
 
 **Lede:** Federal investment in health research supports jobs and economic activity in communities across the country, including yours. A new mapping project from Penn and the University of Maryland shows the estimated economic loss and job cuts that would hit your county if proposed reductions to NIH funding go through.
 
 ---
 
 ### Action A
-**Headline:** Look Up How Federal Research Cuts Would Hit Your County — Then Share What You Find
+**Headline:** A New Penn Tool Lets You Look Up the Local Economic Impact of Federal Research Cuts
 
-**Lede:** Penn researchers built a tool to put the stakes of federal health research funding in your hands. The Science & Community Impacts Mapping Project lets you enter your county and see the projected job and economic losses if NIH funding is cut — information you can use to understand the debate and engage with the people who make these decisions.
+**Lede:** Penn and University of Maryland researchers built a tool that shows you the local stakes of federal health research funding. The Science & Community Impacts Mapping Project lets you enter your county and see the projected job and economic losses if NIH funding is cut — information you can use to understand the debate and engage with the people who make these decisions.
 
 ---
 
 ### Action B
-**Headline:** Penn Built a Map So You Can See — and Show Others — What's at Stake in Your Community
+**Headline:** Penn Researchers Built an Interactive Map Showing What Federal Research Cuts Would Mean for Your Community
 
-**Lede:** Want to know what proposed cuts to federal health research funding would actually mean for your area? Penn and University of Maryland researchers built an interactive map so you can look it up and make the case to others. With $16 billion in economic losses and 68,000 jobs at stake nationwide, it puts local, shareable evidence in your hands.
+**Lede:** Want to know what proposed cuts to federal health research funding would actually mean for your area? Penn and University of Maryland researchers built an interactive map so you can look it up. With $16 billion in economic losses and 68,000 jobs at stake nationwide, it gives you and your neighbors access to local evidence.
 
 ---
 
@@ -102,9 +102,9 @@
 ---
 
 ### Relevance A
-**Headline:** Misinformation About Health and Climate Is Shaping Decisions You and Your Family Make Every Day
+**Headline:** How Misinformation About Health and Climate Affects the Decisions People Like You Make
 
-**Lede:** False and misleading information about health and climate isn't just an abstract problem — it affects the choices you and the people around you make every day. Penn researchers studied what gets people to share accurate information instead, finding that a simple act of reflection can shift what flows through your social networks.
+**Lede:** False and misleading information about health and climate isn't just an abstract problem — it shapes the choices people like you and those around you make every day. Penn researchers studied what gets people to share accurate information instead, finding that a simple act of reflection can shift what flows through your social networks.
 
 ---
 
@@ -116,7 +116,7 @@
 ---
 
 ### Action A
-**Headline:** You Have More Power Over Misinformation Than You Think — Here's the Simple Step Penn Researchers Found
+**Headline:** Penn Researchers Found That People Like You Have More Power Over Misinformation Than Expected
 
 **Lede:** Penn researchers discovered that one of the most effective tools against misinformation is already in your hands. When people pause to reflect on why a news story matters to them or to people they care about, they become far more likely to share accurate information — turning individual awareness into a community-level defense against false content.
 
@@ -156,9 +156,9 @@
 ---
 
 ### Action A
-**Headline:** Penn Research Says Sharing Climate News With Skeptics Works Better Than You Think — So Try It
+**Headline:** Penn Research Finds That Sharing Climate News With Skeptics Is More Effective Than Most People Expect
 
-**Lede:** A new Penn study found that exposing climate skeptics to news articles significantly increased their climate concerns — more than most people would have predicted. If you've held back from sharing climate information with skeptical friends, family, or neighbors, the research suggests those conversations are more likely to land than you'd expect.
+**Lede:** A new Penn study found that exposing climate skeptics to news articles significantly increased their climate concerns — more than most people would have predicted. If you've held back from sharing climate information with skeptical friends, family, or neighbors, the research suggests those conversations are more likely to shift views than most people would predict.
 
 ---
 
@@ -203,7 +203,7 @@
 ---
 
 ### Action B
-**Headline:** Penn Research Found a Better Way to Counter Vaccine Misinformation — and You Can Use It
+**Headline:** Penn Research Found a Better Way to Counter Vaccine Misinformation. It's Simple Enough for Anyone to Use.
 
 **Lede:** Sharing accurate information about mRNA vaccines works better when it explains the science visually. Penn researchers found that simple graphics and short animations showing how the vaccines work — rather than just correcting false claims — were more effective at reducing susceptibility to misinformation, and practical enough for anyone to use in conversation or on social media.
 
