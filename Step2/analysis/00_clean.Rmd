@@ -47,11 +47,16 @@ Raw data: **`r nrow(raw)` rows**, **`r ncol(raw)` columns**.
 ```{r exclusions}
 n_raw <- nrow(raw)
 
-d <- raw |>
-  filter(DistributionChannel != "preview") |>
-  filter(Finished == TRUE)
+PILOT_START <- as.POSIXct("2026-06-03 16:00:00", tz = "America/New_York")
 
-# Only apply Prolific PID filter when data contains actual PIDs (not test exports)
+d <- raw |>
+  # Keep only real Prolific responses (anonymous link); removes preview, test, and imported
+  filter(DistributionChannel == "anonymous") |>
+  filter(Finished == TRUE) |>
+  # Remove responses recorded before pilot launch
+  filter(RecordedDate >= PILOT_START)
+
+# Remove unfilled Prolific PID template rows (only relevant if PIDs are present)
 if (any(!is.na(raw$PROLIFIC_PID))) {
   d <- d |>
     filter(PROLIFIC_PID != "{{%PROLIFIC_PID%}}", !is.na(PROLIFIC_PID))
@@ -63,8 +68,9 @@ n_final <- nrow(d)
 | Step | N |
 |------|---|
 | Raw | `r n_raw` |
-| After removing previews | `r nrow(filter(raw, DistributionChannel != "preview"))` |
-| After removing unfinished | `r nrow(filter(raw, DistributionChannel != "preview", Finished == TRUE))` |
+| Anonymous channel only | `r nrow(filter(raw, DistributionChannel == "anonymous"))` |
+| Finished | `r nrow(filter(raw, DistributionChannel == "anonymous", Finished == TRUE))` |
+| After pilot start cutoff (≥ 4pm ET 2026-06-03) | `r nrow(filter(raw, DistributionChannel == "anonymous", Finished == TRUE, RecordedDate >= PILOT_START))` |
 | After Prolific PID filter (if applicable) | `r n_final` |
 
 ## Rename variables

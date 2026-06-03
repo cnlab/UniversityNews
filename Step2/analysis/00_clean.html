@@ -1588,17 +1588,23 @@ border-radius: 0px;
 } else {
   raw &lt;- read_survey(LOCAL_DATA_PATH)
 }</code></pre>
-<p>Raw data: <strong>15 rows</strong>, <strong>196 columns</strong>.</p>
+<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</code></pre>
+<p>Raw data: <strong>45 rows</strong>, <strong>242 columns</strong>.</p>
 </div>
 <div id="exclusions" class="section level2">
 <h2>Exclusions</h2>
 <pre class="r"><code>n_raw &lt;- nrow(raw)
 
-d &lt;- raw |&gt;
-  filter(DistributionChannel != &quot;preview&quot;) |&gt;
-  filter(Finished == TRUE)
+PILOT_START &lt;- as.POSIXct(&quot;2026-06-03 16:00:00&quot;, tz = &quot;America/New_York&quot;)
 
-# Only apply Prolific PID filter when data contains actual PIDs (not test exports)
+d &lt;- raw |&gt;
+  # Keep only real Prolific responses (anonymous link); removes preview, test, and imported
+  filter(DistributionChannel == &quot;anonymous&quot;) |&gt;
+  filter(Finished == TRUE) |&gt;
+  # Remove responses recorded before pilot launch
+  filter(RecordedDate &gt;= PILOT_START)
+
+# Remove unfilled Prolific PID template rows (only relevant if PIDs are present)
 if (any(!is.na(raw$PROLIFIC_PID))) {
   d &lt;- d |&gt;
     filter(PROLIFIC_PID != &quot;{{%PROLIFIC_PID%}}&quot;, !is.na(PROLIFIC_PID))
@@ -1615,19 +1621,23 @@ n_final &lt;- nrow(d)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Raw</td>
-<td>15</td>
+<td>45</td>
 </tr>
 <tr class="even">
-<td>After removing previews</td>
-<td>15</td>
+<td>Anonymous channel only</td>
+<td>36</td>
 </tr>
 <tr class="odd">
-<td>After removing unfinished</td>
-<td>15</td>
+<td>Finished</td>
+<td>36</td>
 </tr>
 <tr class="even">
+<td>After pilot start cutoff (≥ 4pm ET 2026-06-03)</td>
+<td>30</td>
+</tr>
+<tr class="odd">
 <td>After Prolific PID filter (if applicable)</td>
-<td>15</td>
+<td>30</td>
 </tr>
 </tbody>
 </table>
@@ -1689,15 +1699,15 @@ participant.</p>
 <tbody>
 <tr class="odd">
 <td align="left">control</td>
-<td align="right">5</td>
+<td align="right">10</td>
 </tr>
 <tr class="even">
 <td align="left">relevance</td>
-<td align="right">1</td>
+<td align="right">10</td>
 </tr>
 <tr class="odd">
 <td align="left">action</td>
-<td align="right">1</td>
+<td align="right">10</td>
 </tr>
 </tbody>
 </table>
@@ -1732,63 +1742,63 @@ d &lt;- d |&gt;
 <tbody>
 <tr class="odd">
 <td align="left">share_direct</td>
-<td align="right">3</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">share_social</td>
-<td align="right">3</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">read_more</td>
-<td align="right">4</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">article_agree_1</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">article_agree_2</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">govtfund_general</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">govtfund_cuts</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">behavior_intent_1</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">behavior_intent_2</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">behavior_intent_3</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">climate_1</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">climate_2</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">climate_3_1</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">climate_3_2</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">climate_3_3</td>
-<td align="right">7</td>
+<td align="right">0</td>
 </tr>
 </tbody>
 </table>
@@ -1798,7 +1808,7 @@ d &lt;- d |&gt;
 <pre class="r"><code>saveRDS(d, CLEANED_RDS)</code></pre>
 <p>Cleaned data saved to
 /Users/nicolecooper/Documents/GitHub/UniversityNews/Step2/analysis/step2_clean.rds.
-<strong>Final N = 15</strong>.</p>
+<strong>Final N = 30</strong>.</p>
 </div>
 
 
