@@ -42,65 +42,71 @@ if (USE_API) {
 
 Raw data: **`r nrow(raw)` rows**, **`r ncol(raw)` columns**.
 
-### Column names
-
-```{r colnames}
-names(raw)
-```
-
 ## Exclusions
 
 ```{r exclusions}
+n_raw <- nrow(raw)
+
 d <- raw |>
-  filter(Status == 0 | is.na(Status)) |>
-  filter(Finished == TRUE | Finished == 1) |>
-  filter(PROLIFIC_PID != "{{%PROLIFIC_PID%}}", !is.na(PROLIFIC_PID))
+  filter(DistributionChannel != "preview") |>
+  filter(Finished == TRUE)
+
+# Only apply Prolific PID filter when data contains actual PIDs (not test exports)
+if (any(!is.na(raw$PROLIFIC_PID))) {
+  d <- d |>
+    filter(PROLIFIC_PID != "{{%PROLIFIC_PID%}}", !is.na(PROLIFIC_PID))
+}
+
+n_final <- nrow(d)
 ```
 
 | Step | N |
 |------|---|
-| Raw | `r nrow(raw)` |
-| After removing previews / non-finished | `r nrow(filter(raw, Status == 0 | is.na(Status), Finished == TRUE | Finished == 1))` |
-| After removing test Prolific PIDs | `r nrow(d)` |
+| Raw | `r n_raw` |
+| After removing previews | `r nrow(filter(raw, DistributionChannel != "preview"))` |
+| After removing unfinished | `r nrow(filter(raw, DistributionChannel != "preview", Finished == TRUE))` |
+| After Prolific PID filter (if applicable) | `r n_final` |
 
 ## Rename variables
+
+Column names in this export use custom export tags. Mapping to analysis-ready names:
 
 ```{r rename}
 d <- d |>
   rename(
-    share_direct      = matches("^Q1319"),
-    share_social      = matches("^Q1320"),
-    read_more_rel     = matches("^Q1321"),
-    read_more_act     = matches("^Q1322"),
-    read_more_con     = matches("^Q1325"),
-    govtfund_general  = matches("^Q1108"),
-    govtfund_cuts     = matches("^Q1301"),
-    behavior_intent   = matches("^Q1124"),
-    climate_1         = matches("^Q1142"),
-    climate_2         = matches("^Q1188"),
-    climate_3         = matches("^Q1114"),
-    climate_4         = matches("^Q1189"),
-    climate_5         = matches("^Q1115"),
-    climate_6         = matches("^Q1190"),
-    climate_7         = matches("^Q1298"),
-    climate_8         = matches("^Q1300")
+    # ArticleRate block
+    share_direct    = rate_1_1,
+    share_social    = rate_2_1,
+    article_agree_1 = rate_3_1,
+    article_agree_2 = rate_3_2,
+    # GovtFunding block
+    govtfund_general = govtfund_1,
+    govtfund_cuts    = govtfund_2,
+    # BehaviorIntentions block (3 items shown via loop)
+    behavior_intent_1 = `2_behavint_1`,
+    behavior_intent_2 = `3_behavint_1`,
+    behavior_intent_3 = `4_behavint_1`
+    # climate_1, climate_2, climate_3_1/2/3 already named correctly
   )
 ```
 
-## Coalesce condition-specific items
+## Coalesce read_more
 
-The "want to read more" slider lives in three separate question IDs depending on condition (QID1321/1322/1325). These are coalesced into a single `read_more` column.
+The "want to read more" slider is split across condition-specific columns (one per loop row per condition). Only one will be non-NA per participant.
 
 ```{r coalesce}
 d <- d |>
   mutate(
     read_more = coalesce(
-      as.numeric(read_more_rel),
-      as.numeric(read_more_act),
-      as.numeric(read_more_con)
+      as.numeric(`1_relevance_1_1`),
+      as.numeric(`2_relevance_1_1`),
+      as.numeric(`3_relevance_1_1`),
+      as.numeric(`1_action_1_1`),
+      as.numeric(`2_action_1_1`),
+      as.numeric(`3_action_1_1`),
+      as.numeric(`1_control_1_1`)
     )
-  ) |>
-  select(-read_more_rel, -read_more_act, -read_more_con)
+  )
 ```
 
 ## Condition factor
@@ -117,30 +123,27 @@ d |>
   kable(col.names = c("Condition", "N"))
 ```
 
-## Numeric coercion and climate composite
+## Numeric coercion
 
 ```{r numeric}
 outcome_vars <- c(
   "share_direct", "share_social", "read_more",
-  "govtfund_general", "govtfund_cuts", "behavior_intent",
-  "climate_1", "climate_2", "climate_3", "climate_4",
-  "climate_5", "climate_6", "climate_7", "climate_8"
+  "article_agree_1", "article_agree_2",
+  "govtfund_general", "govtfund_cuts",
+  "behavior_intent_1", "behavior_intent_2", "behavior_intent_3",
+  "climate_1", "climate_2",
+  "climate_3_1", "climate_3_2", "climate_3_3"
 )
 
 d <- d |>
-  mutate(across(all_of(outcome_vars), as.numeric)) |>
-  mutate(
-    climate_composite = rowMeans(pick(climate_1:climate_8), na.rm = TRUE)
-  )
+  mutate(across(all_of(outcome_vars), as.numeric))
 ```
-
-> **Note:** Confirm item directions before using `climate_composite`. Reverse-score any negatively-worded items before this step.
 
 ## Missing data
 
 ```{r missing}
 d |>
-  summarise(across(all_of(c(outcome_vars, "climate_composite")), ~sum(is.na(.)))) |>
+  summarise(across(all_of(outcome_vars), ~sum(is.na(.)))) |>
   pivot_longer(everything(), names_to = "Variable", values_to = "N missing") |>
   kable()
 ```
@@ -151,4 +154,4 @@ d |>
 saveRDS(d, CLEANED_RDS)
 ```
 
-Cleaned data saved to `r CLEANED_RDS`. **Final N = `r nrow(d)`**.
+Cleaned data saved to `r CLEANED_RDS`. **Final N = `r n_final`**.

@@ -23,18 +23,29 @@ d <- readRDS(CLEANED_RDS)
 
 outcome_vars <- c(
   "share_direct", "share_social", "read_more",
-  "govtfund_general", "govtfund_cuts", "behavior_intent",
-  "climate_composite"
+  "article_agree_1", "article_agree_2",
+  "govtfund_general", "govtfund_cuts",
+  "behavior_intent_1", "behavior_intent_2", "behavior_intent_3",
+  "climate_1", "climate_2",
+  "climate_3_1", "climate_3_2", "climate_3_3"
 )
 
 outcome_labels <- c(
   share_direct      = "Share directly",
   share_social      = "Share on social media",
   read_more         = "Want to read more",
-  govtfund_general  = "Govt funding attitude (general)",
+  article_agree_1   = "Article agreement (1)",
+  article_agree_2   = "Article agreement (2)",
+  govtfund_general  = "Govt funding (general)",
   govtfund_cuts     = "Disapprove of funding cuts",
-  behavior_intent   = "Behavioral intention",
-  climate_composite = "Climate beliefs (composite)"
+  behavior_intent_1 = "Behavioral intention (1)",
+  behavior_intent_2 = "Behavioral intention (2)",
+  behavior_intent_3 = "Behavioral intention (3)",
+  climate_1         = "Climate belief (1)",
+  climate_2         = "Climate belief (2)",
+  climate_3_1       = "Climate belief (3a)",
+  climate_3_2       = "Climate belief (3b)",
+  climate_3_3       = "Climate belief (3c)"
 )
 
 condition_colors <- c(control = "#888888", relevance = "#011F5B", action = "#990000")
@@ -60,29 +71,31 @@ d |>
 ## Means and SDs by condition
 
 ```{r means-table}
-d |>
-  group_by(condition) |>
-  summarise(across(
-    all_of(outcome_vars),
-    list(M = ~round(mean(., na.rm = TRUE), 2),
-         SD = ~round(sd(., na.rm = TRUE), 2)),
-    .names = "{.col}__{.fn}"
-  )) |>
-  pivot_longer(-condition, names_to = c("variable", "stat"), names_sep = "__") |>
-  pivot_wider(names_from = stat, values_from = value) |>
-  mutate(variable = outcome_labels[variable]) |>
-  arrange(variable) |>
-  kable(col.names = c("Condition", "Outcome", "M", "SD"))
+map_dfr(outcome_vars, function(var) {
+  d |>
+    group_by(condition) |>
+    summarise(
+      M  = round(mean(.data[[var]], na.rm = TRUE), 2),
+      SD = round(sd(.data[[var]],   na.rm = TRUE), 2),
+      .groups = "drop"
+    ) |>
+    mutate(Outcome = outcome_labels[[var]])
+}) |>
+  select(Outcome, condition, M, SD) |>
+  arrange(Outcome, condition) |>
+  kable()
 ```
 
 ## Distributions by outcome
 
 ```{r distributions, fig.height=4, fig.width=8, results='asis'}
 for (var in outcome_vars) {
-  p <- ggplot(d, aes(x = .data[[var]], fill = condition)) +
+  plot_data <- d |> filter(!is.na(.data[[var]]), !is.na(condition))
+  if (nrow(plot_data) == 0) next
+  p <- ggplot(plot_data, aes(x = .data[[var]], fill = condition)) +
     geom_histogram(bins = 15, alpha = 0.8, position = "identity") +
     facet_wrap(~condition, ncol = 3) +
-    scale_fill_manual(values = condition_colors) +
+    scale_fill_manual(values = condition_colors, drop = FALSE) +
     labs(title = outcome_labels[[var]], x = NULL, y = "Count") +
     theme_minimal(base_size = 11) +
     theme(legend.position = "none")
@@ -92,18 +105,19 @@ for (var in outcome_vars) {
 
 ## Means plot
 
-```{r means-plot, fig.height=7, fig.width=10}
-means_df <- d |>
-  group_by(condition) |>
-  summarise(across(
-    all_of(outcome_vars),
-    list(mean = ~mean(., na.rm = TRUE),
-         se   = ~sd(., na.rm = TRUE) / sqrt(sum(!is.na(.))))
-  ), .groups = "drop") |>
-  pivot_longer(-condition, names_to = c("variable", "stat"), names_sep = "__") |>
-  pivot_wider(names_from = stat, values_from = value) |>
-  mutate(variable = factor(variable, levels = outcome_vars,
-                           labels = outcome_labels[outcome_vars]))
+```{r means-plot, fig.height=10, fig.width=10}
+means_df <- map_dfr(outcome_vars, function(var) {
+  d |>
+    group_by(condition) |>
+    summarise(
+      mean = mean(.data[[var]], na.rm = TRUE),
+      se   = sd(.data[[var]], na.rm = TRUE) / sqrt(sum(!is.na(.data[[var]]))),
+      .groups = "drop"
+    ) |>
+    mutate(variable = outcome_labels[[var]])
+}) |>
+  filter(!is.na(mean), is.finite(mean)) |>
+  mutate(variable = factor(variable, levels = unname(outcome_labels)))
 
 ggplot(means_df, aes(x = condition, y = mean, fill = condition)) +
   geom_col(width = 0.6, alpha = 0.9) +
@@ -118,7 +132,7 @@ ggplot(means_df, aes(x = condition, y = mean, fill = condition)) +
 
 ## Outcome correlations
 
-```{r correlations, fig.height=6, fig.width=7}
+```{r correlations, fig.height=8, fig.width=9}
 cor_mat <- d |>
   select(all_of(outcome_vars)) |>
   cor(use = "pairwise.complete.obs") |>
@@ -134,18 +148,10 @@ cor_df <- as.data.frame(cor_mat) |>
 
 ggplot(cor_df, aes(x = var1, y = var2, fill = r)) +
   geom_tile() +
-  geom_text(aes(label = r), size = 3) +
+  geom_text(aes(label = r), size = 2.5) +
   scale_fill_gradient2(low = "#990000", mid = "white", high = "#011F5B",
                        midpoint = 0, limits = c(-1, 1)) +
   labs(x = NULL, y = NULL, fill = "r") +
-  theme_minimal(base_size = 10) +
-  theme(axis.text.x = element_text(angle = 35, hjust = 1))
-```
-
-```{r cor-table}
-as.data.frame(cor_mat) |>
-  rownames_to_column("Variable") |>
-  mutate(Variable = outcome_labels[Variable]) |>
-  rename_with(~outcome_labels[.], -Variable) |>
-  kable()
+  theme_minimal(base_size = 9) +
+  theme(axis.text.x = element_text(angle = 40, hjust = 1))
 ```

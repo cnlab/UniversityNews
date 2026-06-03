@@ -28,10 +28,18 @@ outcomes <- c(
   share_direct      = "Share directly",
   share_social      = "Share on social media",
   read_more         = "Want to read more",
-  govtfund_general  = "Govt funding attitude (general)",
+  article_agree_1   = "Article agreement (1)",
+  article_agree_2   = "Article agreement (2)",
+  govtfund_general  = "Govt funding (general)",
   govtfund_cuts     = "Disapprove of funding cuts",
-  behavior_intent   = "Behavioral intention",
-  climate_composite = "Climate beliefs (composite)"
+  behavior_intent_1 = "Behavioral intention (1)",
+  behavior_intent_2 = "Behavioral intention (2)",
+  behavior_intent_3 = "Behavioral intention (3)",
+  climate_1         = "Climate belief (1)",
+  climate_2         = "Climate belief (2)",
+  climate_3_1       = "Climate belief (3a)",
+  climate_3_2       = "Climate belief (3b)",
+  climate_3_3       = "Climate belief (3c)"
 )
 
 condition_colors <- c(control = "#888888", relevance = "#011F5B", action = "#990000")
@@ -39,7 +47,7 @@ condition_colors <- c(control = "#888888", relevance = "#011F5B", action = "#990
 
 ## Design
 
-Between-subjects, 3 conditions. Reference level: **control**. For each outcome, a separate linear model estimates the contrasts:
+Between-subjects, 3 conditions. Reference level: **control**. For each outcome, a separate linear model estimates:
 
 - **Relevance vs Control** (`conditionrelevance`)
 - **Action vs Control** (`conditionaction`)
@@ -50,15 +58,24 @@ Between-subjects, 3 conditions. Reference level: **control**. For each outcome, 
 
 ```{r models}
 models <- map(names(outcomes), function(var) {
-  lm(as.formula(paste(var, "~ condition")), data = d)
+  tryCatch(
+    lm(as.formula(paste(var, "~ condition")), data = d |> filter(!is.na(.data[[var]]))),
+    error = function(e) NULL
+  )
 }) |>
   set_names(names(outcomes))
+
+skipped <- names(Filter(is.null, models))
+if (length(skipped) > 0) {
+  cat("Skipped (insufficient data):", paste(skipped, collapse = ", "), "\n")
+}
+models <- Filter(Negate(is.null), models)
 ```
 
 ## Contrasts vs Control
 
 ```{r contrasts}
-results <- map_dfr(names(outcomes), function(var) {
+results <- map_dfr(names(models), function(var) {
   tidy(models[[var]], conf.int = TRUE) |>
     filter(term %in% c("conditionrelevance", "conditionaction")) |>
     mutate(
@@ -91,7 +108,7 @@ results |>
 ## Effect sizes (Cohen's *d*)
 
 ```{r cohens-d}
-cohens_d_results <- map_dfr(names(outcomes), function(var) {
+cohens_d_results <- map_dfr(names(models), function(var) {
   bind_rows(
     cohens_d(as.formula(paste(var, "~ condition")),
              data = d |> filter(condition %in% c("control", "relevance"))) |>
@@ -111,7 +128,7 @@ cohens_d_results |>
 ## Omnibus F-tests
 
 ```{r omnibus}
-map_dfr(names(outcomes), function(var) {
+map_dfr(names(models), function(var) {
   glance(models[[var]]) |>
     mutate(outcome = outcomes[[var]])
 }) |>
@@ -140,7 +157,7 @@ results |>
 
 ## Coefficient plot
 
-```{r coef-plot, fig.height=6, fig.width=8}
+```{r coef-plot, fig.height=8, fig.width=9}
 results |>
   mutate(
     outcome  = factor(outcome, levels = rev(unname(outcomes))),
@@ -149,7 +166,7 @@ results |>
   ggplot(aes(x = estimate, y = outcome, color = contrast,
              xmin = conf.low, xmax = conf.high)) +
   geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
-  geom_pointrange(position = position_dodge(width = 0.5), size = 0.6) +
+  geom_pointrange(position = position_dodge(width = 0.5), size = 0.5) +
   scale_color_manual(values = c(relevance = "#011F5B", action = "#990000"),
                      labels = c(relevance = "Relevance vs Control",
                                 action    = "Action vs Control")) +
@@ -162,10 +179,10 @@ results |>
 
 ```{r save}
 results_out <- list(
-  models   = models,
+  models    = models,
   contrasts = results,
   cohens_d  = cohens_d_results,
-  omnibus   = map_dfr(names(outcomes), ~glance(models[[.x]]) |> mutate(outcome = .x))
+  omnibus   = map_dfr(names(models), ~glance(models[[.x]]) |> mutate(outcome = .x))
 )
 
 saveRDS(results_out, RESULTS_RDS)
