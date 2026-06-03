@@ -1725,6 +1725,176 @@ participant.</p>
 d &lt;- d |&gt;
   mutate(across(all_of(outcome_vars), as.numeric))</code></pre>
 </div>
+<div id="bot-detection-and-data-quality-flags" class="section level2">
+<h2>Bot detection and data quality flags</h2>
+<p>Flags are added as columns — <strong>not applied as exclusions
+here</strong>. Review before deciding whether to exclude; confirm
+against pre-registration criteria.</p>
+<pre class="r"><code>OFF_TASK_THRESHOLD &lt;- 900   # 15 minutes in seconds
+RECAPTCHA_THRESHOLD &lt;- 0.5
+
+d &lt;- d |&gt;
+  mutate(
+    flag_offtask   = totalOffTask &gt; OFF_TASK_THRESHOLD,
+    flag_recaptcha = Q_RecaptchaScore &lt; RECAPTCHA_THRESHOLD,
+    flag_any       = flag_offtask | flag_recaptcha
+  )</code></pre>
+<pre class="r"><code>d |&gt;
+  summarise(
+    `Off-task &gt; 15 min`   = sum(flag_offtask,   na.rm = TRUE),
+    `reCAPTCHA &lt; 0.5`     = sum(flag_recaptcha, na.rm = TRUE),
+    `Either flag`         = sum(flag_any,        na.rm = TRUE)
+  ) |&gt;
+  kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Off-task &gt; 15 min</th>
+<th align="right">reCAPTCHA &lt; 0.5</th>
+<th align="right">Either flag</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">6</td>
+<td align="right">1</td>
+<td align="right">7</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>d |&gt;
+  filter(flag_any) |&gt;
+  select(ResponseId, PROLIFIC_PID, condition, variant_seen,
+         totalOffTask, Q_RecaptchaScore, flag_offtask, flag_recaptcha) |&gt;
+  mutate(totalOffTask = round(totalOffTask / 60, 1)) |&gt;
+  rename(`Off-task (min)` = totalOffTask) |&gt;
+  kable()</code></pre>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="19%" />
+<col width="7%" />
+<col width="10%" />
+<col width="11%" />
+<col width="13%" />
+<col width="10%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">ResponseId</th>
+<th align="left">PROLIFIC_PID</th>
+<th align="left">condition</th>
+<th align="left">variant_seen</th>
+<th align="right">Off-task (min)</th>
+<th align="right">Q_RecaptchaScore</th>
+<th align="left">flag_offtask</th>
+<th align="left">flag_recaptcha</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">R_5w03Gbwk3hKrr26</td>
+<td align="left">67191eac7e29fe765781a851</td>
+<td align="left">control</td>
+<td align="left">control</td>
+<td align="right">36.4</td>
+<td align="right">0.8</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">R_62Xhcz0D5RpUGLV</td>
+<td align="left">6a01f40d1499bfa74069d4c6</td>
+<td align="left">relevance</td>
+<td align="left">relevance2</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">R_6fe48tb26Mz6M38</td>
+<td align="left">5bef41fa54277d000114d6ad</td>
+<td align="left">relevance</td>
+<td align="left">relevance3</td>
+<td align="right">54.4</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">R_38Dr96DLE1NRAOt</td>
+<td align="left">659aaea375eef229eb250614</td>
+<td align="left">relevance</td>
+<td align="left">relevance2</td>
+<td align="right">69.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">R_3fJmLSA7CKQpTJR</td>
+<td align="left">69e0064bf31fa2eb5621347e</td>
+<td align="left">control</td>
+<td align="left">control</td>
+<td align="right">36.2</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">R_5ifI2a6pmI4AbX5</td>
+<td align="left">5e076480c4e1550e2114f006</td>
+<td align="left">control</td>
+<td align="left">control</td>
+<td align="right">54.4</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">R_7R8hnOVeOSaPxNG</td>
+<td align="left">69d67e558286a0e5a947c5e4</td>
+<td align="left">action</td>
+<td align="left">action2</td>
+<td align="right">47.7</td>
+<td align="right">0.9</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Decision point:</strong> Exclude flagged participants? If
+yes, rerun after adding <code>filter(!flag_any)</code> before the Save
+step. Pre-registered threshold for off-task is 15 minutes.</p>
+</blockquote>
+</div>
+<div id="prolific-participant-data" class="section level2">
+<h2>Prolific participant data</h2>
+<pre class="r"><code># TODO: export participant data from Prolific dashboard and set path below.
+# Prolific export: Study → Download data → Participant export (.csv)
+# Merge on PROLIFIC_PID to bring in Prolific&#39;s own bot/fraud flags,
+# time-taken, and approval status.
+
+PROLIFIC_EXPORT &lt;- here(&quot;data&quot;, &quot;raw&quot;, &quot;UnivNews_Step2_prolific.csv&quot;)  # TODO: update filename
+
+if (file.exists(PROLIFIC_EXPORT)) {
+  prolific &lt;- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |&gt;
+    rename(PROLIFIC_PID = `Participant id`) |&gt;
+    select(PROLIFIC_PID, Status, `Time taken`, `Completion code`,
+           any_of(c(&quot;Fraud score&quot;, &quot;Is Fraudulent&quot;)))
+
+  d &lt;- d |&gt; left_join(prolific, by = &quot;PROLIFIC_PID&quot;)
+
+  cat(&quot;Prolific merge complete. Status counts:\n&quot;)
+  print(table(d$Status, useNA = &quot;ifany&quot;))
+} else {
+  message(&quot;Prolific export not found at &quot;, PROLIFIC_EXPORT,
+          &quot; — skipping merge. Download from Prolific dashboard and update path.&quot;)
+}</code></pre>
+</div>
 <div id="missing-data" class="section level2">
 <h2>Missing data</h2>
 <pre class="r"><code>d |&gt;

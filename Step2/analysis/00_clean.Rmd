@@ -144,6 +144,70 @@ d <- d |>
   mutate(across(all_of(outcome_vars), as.numeric))
 ```
 
+## Bot detection and data quality flags
+
+Flags are added as columns — **not applied as exclusions here**. Review before deciding whether to exclude; confirm against pre-registration criteria.
+
+```{r flags}
+OFF_TASK_THRESHOLD <- 900   # 15 minutes in seconds
+RECAPTCHA_THRESHOLD <- 0.5
+
+d <- d |>
+  mutate(
+    flag_offtask   = totalOffTask > OFF_TASK_THRESHOLD,
+    flag_recaptcha = Q_RecaptchaScore < RECAPTCHA_THRESHOLD,
+    flag_any       = flag_offtask | flag_recaptcha
+  )
+```
+
+```{r flag-summary}
+d |>
+  summarise(
+    `Off-task > 15 min`   = sum(flag_offtask,   na.rm = TRUE),
+    `reCAPTCHA < 0.5`     = sum(flag_recaptcha, na.rm = TRUE),
+    `Either flag`         = sum(flag_any,        na.rm = TRUE)
+  ) |>
+  kable()
+```
+
+```{r flag-detail}
+d |>
+  filter(flag_any) |>
+  select(ResponseId, PROLIFIC_PID, condition, variant_seen,
+         totalOffTask, Q_RecaptchaScore, flag_offtask, flag_recaptcha) |>
+  mutate(totalOffTask = round(totalOffTask / 60, 1)) |>
+  rename(`Off-task (min)` = totalOffTask) |>
+  kable()
+```
+
+> **Decision point:** Exclude flagged participants? If yes, rerun after adding `filter(!flag_any)` before the Save step. Pre-registered threshold for off-task is 15 minutes.
+
+## Prolific participant data
+
+```{r prolific-merge}
+# TODO: export participant data from Prolific dashboard and set path below.
+# Prolific export: Study → Download data → Participant export (.csv)
+# Merge on PROLIFIC_PID to bring in Prolific's own bot/fraud flags,
+# time-taken, and approval status.
+
+PROLIFIC_EXPORT <- here("data", "raw", "UnivNews_Step2_prolific.csv")  # TODO: update filename
+
+if (file.exists(PROLIFIC_EXPORT)) {
+  prolific <- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |>
+    rename(PROLIFIC_PID = `Participant id`) |>
+    select(PROLIFIC_PID, Status, `Time taken`, `Completion code`,
+           any_of(c("Fraud score", "Is Fraudulent")))
+
+  d <- d |> left_join(prolific, by = "PROLIFIC_PID")
+
+  cat("Prolific merge complete. Status counts:\n")
+  print(table(d$Status, useNA = "ifany"))
+} else {
+  message("Prolific export not found at ", PROLIFIC_EXPORT,
+          " — skipping merge. Download from Prolific dashboard and update path.")
+}
+```
+
 ## Missing data
 
 ```{r missing}
