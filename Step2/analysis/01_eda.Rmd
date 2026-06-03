@@ -1,23 +1,21 @@
 ---
 title: "Step 2 — Exploratory Data Analysis"
-date: today
-format:
-  html:
-    embed-resources: true
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: true
     toc: true
-    toc-depth: 2
-    code-fold: true
-execute:
-  echo: true
-  warning: false
-  message: false
+    toc_depth: 2
+    toc_float: true
+    code_folding: hide
 ---
 
-```{r setup}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
 library(tidyverse)
 library(here)
 library(knitr)
-library(patchwork)
 
 source(here("Step2", "analysis", "config.R"))
 
@@ -79,10 +77,8 @@ d |>
 
 ## Distributions by outcome
 
-```{r distributions, fig.height=4, fig.width=8}
-#| fig-cap: "Distribution of each outcome by condition"
-
-walk(outcome_vars, function(var) {
+```{r distributions, fig.height=4, fig.width=8, results='asis'}
+for (var in outcome_vars) {
   p <- ggplot(d, aes(x = .data[[var]], fill = condition)) +
     geom_histogram(bins = 15, alpha = 0.8, position = "identity") +
     facet_wrap(~condition, ncol = 3) +
@@ -91,14 +87,12 @@ walk(outcome_vars, function(var) {
     theme_minimal(base_size = 11) +
     theme(legend.position = "none")
   print(p)
-})
+}
 ```
 
 ## Means plot
 
 ```{r means-plot, fig.height=7, fig.width=10}
-#| fig-cap: "Outcome means by condition (error bars = ±1 SE)"
-
 means_df <- d |>
   group_by(condition) |>
   summarise(across(
@@ -106,11 +100,7 @@ means_df <- d |>
     list(mean = ~mean(., na.rm = TRUE),
          se   = ~sd(., na.rm = TRUE) / sqrt(sum(!is.na(.))))
   ), .groups = "drop") |>
-  pivot_longer(
-    -condition,
-    names_to  = c("variable", "stat"),
-    names_sep = "__"
-  ) |>
+  pivot_longer(-condition, names_to = c("variable", "stat"), names_sep = "__") |>
   pivot_wider(names_from = stat, values_from = value) |>
   mutate(variable = factor(variable, levels = outcome_vars,
                            labels = outcome_labels[outcome_vars]))
@@ -129,8 +119,6 @@ ggplot(means_df, aes(x = condition, y = mean, fill = condition)) +
 ## Outcome correlations
 
 ```{r correlations, fig.height=6, fig.width=7}
-#| fig-cap: "Pairwise correlations among outcome variables"
-
 cor_mat <- d |>
   select(all_of(outcome_vars)) |>
   cor(use = "pairwise.complete.obs") |>
