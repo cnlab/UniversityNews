@@ -1,0 +1,176 @@
+---
+title: "Step 2 — Analysis"
+subtitle: "Action and Relevance conditions vs Control"
+date: today
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 2
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r setup}
+library(tidyverse)
+library(broom)
+library(effectsize)
+library(here)
+library(knitr)
+
+source(here("Step2", "analysis", "config.R"))
+
+d <- readRDS(CLEANED_RDS)
+
+outcomes <- c(
+  share_direct      = "Share directly",
+  share_social      = "Share on social media",
+  read_more         = "Want to read more",
+  govtfund_general  = "Govt funding attitude (general)",
+  govtfund_cuts     = "Disapprove of funding cuts",
+  behavior_intent   = "Behavioral intention",
+  climate_composite = "Climate beliefs (composite)"
+)
+
+condition_colors <- c(control = "#888888", relevance = "#011F5B", action = "#990000")
+```
+
+## Design
+
+Between-subjects, 3 conditions. Reference level: **control**. For each outcome, a separate linear model estimates the contrasts:
+
+- **Relevance vs Control** (`conditionrelevance`)
+- **Action vs Control** (`conditionaction`)
+
+**N = `r nrow(d)`** (`r paste(paste0(levels(d$condition), ": ", table(d$condition)), collapse = " | ")`)
+
+## Models
+
+```{r models}
+models <- map(names(outcomes), function(var) {
+  lm(as.formula(paste(var, "~ condition")), data = d)
+}) |>
+  set_names(names(outcomes))
+```
+
+## Contrasts vs Control
+
+```{r contrasts}
+results <- map_dfr(names(outcomes), function(var) {
+  tidy(models[[var]], conf.int = TRUE) |>
+    filter(term %in% c("conditionrelevance", "conditionaction")) |>
+    mutate(
+      outcome  = outcomes[[var]],
+      contrast = str_remove(term, "^condition")
+    )
+}) |>
+  select(outcome, contrast, estimate, std.error, statistic, p.value, conf.low, conf.high) |>
+  mutate(
+    across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
+    statistic = round(statistic, 2),
+    p.value   = round(p.value, 3),
+    sig       = case_when(
+      p.value < .001 ~ "***",
+      p.value < .01  ~ "**",
+      p.value < .05  ~ "*",
+      p.value < .10  ~ "†",
+      TRUE           ~ ""
+    )
+  )
+
+results |>
+  select(Outcome = outcome, Contrast = contrast,
+         `B` = estimate, `SE` = std.error,
+         `t` = statistic, `p` = p.value, sig,
+         `95% CI low` = conf.low, `95% CI high` = conf.high) |>
+  kable()
+```
+
+## Effect sizes (Cohen's *d*)
+
+```{r cohens-d}
+cohens_d_results <- map_dfr(names(outcomes), function(var) {
+  bind_rows(
+    cohens_d(as.formula(paste(var, "~ condition")),
+             data = d |> filter(condition %in% c("control", "relevance"))) |>
+      as.data.frame() |> mutate(outcome = outcomes[[var]], contrast = "relevance"),
+    cohens_d(as.formula(paste(var, "~ condition")),
+             data = d |> filter(condition %in% c("control", "action"))) |>
+      as.data.frame() |> mutate(outcome = outcomes[[var]], contrast = "action")
+  )
+}) |>
+  select(outcome, contrast, d = Cohens_d, ci_low = CI_low, ci_high = CI_high) |>
+  mutate(across(where(is.numeric), ~round(., 3)))
+
+cohens_d_results |>
+  kable(col.names = c("Outcome", "Contrast", "Cohen's d", "95% CI low", "95% CI high"))
+```
+
+## Omnibus F-tests
+
+```{r omnibus}
+map_dfr(names(outcomes), function(var) {
+  glance(models[[var]]) |>
+    mutate(outcome = outcomes[[var]])
+}) |>
+  select(Outcome = outcome,
+         `R²` = r.squared, `adj. R²` = adj.r.squared,
+         `F` = statistic, `p` = p.value,
+         `df` = df, `df resid.` = df.residual) |>
+  mutate(across(where(is.numeric), ~round(., 3))) |>
+  kable()
+```
+
+## Summary: all contrasts with effect sizes
+
+```{r summary-table}
+results |>
+  left_join(
+    cohens_d_results |> rename(`Cohen's d` = d, `d CI low` = ci_low, `d CI high` = ci_high),
+    by = c("outcome", "contrast")
+  ) |>
+  select(Outcome = outcome, Contrast = contrast,
+         `B` = estimate, `p` = p.value, sig,
+         `Cohen's d`, `d CI low`, `d CI high`) |>
+  kable()
+```
+
+## Coefficient plot
+
+```{r coef-plot, fig.height=6, fig.width=8}
+#| fig-cap: "Regression coefficients (vs Control) with 95% CIs. Dashed line at zero."
+
+results |>
+  mutate(
+    outcome  = factor(outcome, levels = rev(unname(outcomes))),
+    contrast = factor(contrast, levels = c("relevance", "action"))
+  ) |>
+  ggplot(aes(x = estimate, y = outcome, color = contrast,
+             xmin = conf.low, xmax = conf.high)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+  geom_pointrange(position = position_dodge(width = 0.5), size = 0.6) +
+  scale_color_manual(values = c(relevance = "#011F5B", action = "#990000"),
+                     labels = c(relevance = "Relevance vs Control",
+                                action    = "Action vs Control")) +
+  labs(x = "Coefficient (B)", y = NULL, color = NULL) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+## Save results
+
+```{r save}
+results_out <- list(
+  models        = models,
+  contrasts     = results,
+  cohens_d      = cohens_d_results,
+  omnibus       = map_dfr(names(outcomes), ~glance(models[[.x]]) |> mutate(outcome = .x))
+)
+
+saveRDS(results_out, RESULTS_RDS)
+```
+
+Results saved to `r RESULTS_RDS`.

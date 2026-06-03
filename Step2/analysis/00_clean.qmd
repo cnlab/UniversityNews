@@ -1,0 +1,157 @@
+---
+title: "Step 2 — Data Cleaning"
+date: today
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 2
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r setup}
+library(tidyverse)
+library(qualtRics)
+library(here)
+library(knitr)
+
+source(here("Step2", "analysis", "config.R"))
+```
+
+## Load data
+
+```{r load}
+if (USE_API) {
+  qualtrics_api_credentials(
+    api_key  = Sys.getenv("QUALTRICS_API_KEY"),
+    base_url = paste0(DATA_CENTER, ".qualtrics.com")
+  )
+  raw <- fetch_survey(
+    surveyID      = SURVEY_ID,
+    label         = FALSE,
+    convert       = FALSE,
+    force_request = TRUE
+  )
+} else {
+  raw <- read_survey(LOCAL_DATA_PATH)
+}
+```
+
+Raw data: **`r nrow(raw)` rows**, **`r ncol(raw)` columns**.
+
+### Column names
+
+```{r colnames}
+names(raw)
+```
+
+## Exclusions
+
+```{r exclusions}
+d <- raw |>
+  filter(Status == 0 | is.na(Status)) |>
+  filter(Finished == TRUE | Finished == 1) |>
+  filter(PROLIFIC_PID != "{{%PROLIFIC_PID%}}", !is.na(PROLIFIC_PID))
+```
+
+| Step | N |
+|------|---|
+| Raw | `r nrow(raw)` |
+| After removing previews / non-finished | `r nrow(filter(raw, Status == 0 | is.na(Status), Finished == TRUE | Finished == 1))` |
+| After removing test Prolific PIDs | `r nrow(d)` |
+
+## Rename variables
+
+```{r rename}
+d <- d |>
+  rename(
+    share_direct      = matches("^Q1319"),
+    share_social      = matches("^Q1320"),
+    read_more_rel     = matches("^Q1321"),
+    read_more_act     = matches("^Q1322"),
+    read_more_con     = matches("^Q1325"),
+    govtfund_general  = matches("^Q1108"),
+    govtfund_cuts     = matches("^Q1301"),
+    behavior_intent   = matches("^Q1124"),
+    climate_1         = matches("^Q1142"),
+    climate_2         = matches("^Q1188"),
+    climate_3         = matches("^Q1114"),
+    climate_4         = matches("^Q1189"),
+    climate_5         = matches("^Q1115"),
+    climate_6         = matches("^Q1190"),
+    climate_7         = matches("^Q1298"),
+    climate_8         = matches("^Q1300")
+  )
+```
+
+## Coalesce condition-specific items
+
+The "want to read more" slider lives in three separate question IDs depending on condition (QID1321/1322/1325). These are coalesced into a single `read_more` column.
+
+```{r coalesce}
+d <- d |>
+  mutate(
+    read_more = coalesce(
+      as.numeric(read_more_rel),
+      as.numeric(read_more_act),
+      as.numeric(read_more_con)
+    )
+  ) |>
+  select(-read_more_rel, -read_more_act, -read_more_con)
+```
+
+## Condition factor
+
+```{r condition}
+d <- d |>
+  filter(condition %in% CONDITION_LEVELS) |>
+  mutate(condition = factor(condition, levels = CONDITION_LEVELS))
+```
+
+```{r condition-table}
+d |>
+  count(condition) |>
+  kable(col.names = c("Condition", "N"))
+```
+
+## Numeric coercion and climate composite
+
+```{r numeric}
+outcome_vars <- c(
+  "share_direct", "share_social", "read_more",
+  "govtfund_general", "govtfund_cuts", "behavior_intent",
+  "climate_1", "climate_2", "climate_3", "climate_4",
+  "climate_5", "climate_6", "climate_7", "climate_8"
+)
+
+d <- d |>
+  mutate(across(all_of(outcome_vars), as.numeric)) |>
+  mutate(
+    climate_composite = rowMeans(pick(climate_1:climate_8), na.rm = TRUE)
+  )
+```
+
+::: callout-note
+Confirm item directions before using `climate_composite`. Reverse-score any negatively-worded items before this step.
+:::
+
+## Missing data
+
+```{r missing}
+d |>
+  summarise(across(all_of(c(outcome_vars, "climate_composite")), ~sum(is.na(.)))) |>
+  pivot_longer(everything(), names_to = "Variable", values_to = "N missing") |>
+  kable()
+```
+
+## Save
+
+```{r save}
+saveRDS(d, CLEANED_RDS)
+```
+
+Cleaned data saved to `r CLEANED_RDS`. **Final N = `r nrow(d)`**.
