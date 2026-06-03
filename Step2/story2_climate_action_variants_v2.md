@@ -66,6 +66,13 @@
 
 ---
 
+### Relevance F
+**Headline:** Want to Know How to Make Climate Change Feel More Relevant to the People You Care About?
+
+**Lede:** For many people, caring about climate change also means wishing the people closest to them — family, friends, neighbors — felt that same connection to the issue. Penn's Communication Neuroscience Lab is studying exactly what makes climate change feel personally meaningful rather than distant, testing six strategies with over 6,000 participants to understand what actually helps people engage.
+
+---
+
 ## Action Variants
 
 ### Action A
