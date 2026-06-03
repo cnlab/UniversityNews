@@ -4,6 +4,7 @@
 **URL:** https://www.asc.upenn.edu/news-events/news/what-are-most-effective-strategies-inspire-action-climate-change
 **Status:** Draft — under review by Nicole Cooper
 **Changes from v1:** Relevance variants written fresh from scratch. Action variants unchanged.
+**Changes within v2:** Relevance variants rewritten to stay purely in Relevance territory — focus on recognition and experience, no action language or teleological structure.
 
 ---
 
@@ -34,42 +35,42 @@
 ### Relevance A
 **Headline:** Most People Want to Do More About Climate Change. So Why Don't They?
 
-**Lede:** It's common to care about climate change and still feel uncertain about what to do — or whether any individual action makes a real difference. Penn's Communication Neuroscience Lab is running one of the largest studies of its kind, testing six strategies with over 6,000 people to understand what actually bridges the gap between concern and action.
+**Lede:** If you've ever cared about climate change but struggled to feel genuinely connected to it in daily life, you're far from alone. Penn researchers at the Communication Neuroscience Lab are studying that experience — what creates the gap between concern and connection, and why it persists even among people who care deeply — drawing on over 6,000 participants to map the psychology behind it.
 
 ---
 
 ### Relevance B
 **Headline:** Why Does Climate Change Still Feel Far Away — Even to People Who Care About It?
 
-**Lede:** Even people who take climate change seriously often find it hard to connect the issue to their everyday decisions. Penn researchers at the Communication Neuroscience Lab are testing six strategies with over 6,000 participants to understand what shifts that feeling — and what helps people move from awareness to engagement in their own lives.
+**Lede:** Even people who take climate change seriously often find the issue hard to connect to their everyday lives. Penn's Communication Neuroscience Lab is conducting one of the largest studies of its kind to understand that feeling — examining why climate change can feel at once urgent and strangely distant, and what shapes that experience across different people and communities.
 
 ---
 
 ### Relevance C
-**Headline:** What Would It Take to Get You to Act on Climate Change? Researchers Asked 6,000 People.
+**Headline:** What Does Climate Change Actually Mean to You? Researchers Are Asking 6,000 People.
 
-**Lede:** Penn researchers at the Communication Neuroscience Lab have enrolled over 6,000 people in one of the largest behavioral studies of climate engagement ever conducted, testing six strategies designed to motivate action. The study tracks real intentions — individual changes, community involvement, information sharing, and policy advocacy — to find out what actually moves people from concern to engagement.
+**Lede:** Penn researchers at the Communication Neuroscience Lab have enrolled over 6,000 people in one of the largest studies of climate engagement ever conducted — asking how people actually think and feel about the issue, and what makes it feel personal or remote. The goal is to understand the human relationship with climate change, not just what people know about it.
 
 ---
 
 ### Relevance D
-**Headline:** Climate Change Concerns Many People. Why Doesn't That Always Translate to Action?
+**Headline:** How Climate Change Shapes the Way Many People Think About Their Own Futures
 
-**Lede:** Most people express concern about climate change, yet many feel uncertain about what they can personally do about it. Penn researchers at the Communication Neuroscience Lab are testing six strategies with over 6,000 participants to understand exactly that disconnect — and what helps people move from concern to meaningful engagement in their own lives.
+**Lede:** For many people, climate change is already part of how they think about the years ahead — their own lives, their families, the communities they live in. Penn researchers at the Communication Neuroscience Lab are studying that relationship directly, examining how and why climate change figures into people's sense of what the future holds, and why that connection feels closer for some than others.
 
 ---
 
 ### Relevance E
-**Headline:** There Are Many Ways to Engage With Climate Change. Researchers Are Finding Out Which Ones Actually Work.
+**Headline:** Not Everyone Experiences Climate Change the Same Way. A New Study Is Finding Out Why.
 
-**Lede:** Climate engagement can take many forms — personal lifestyle choices, community involvement, sharing information, or advocating for policy. Penn's Communication Neuroscience Lab is conducting a large-scale study with over 6,000 participants to find out which strategies best support people in finding the form of engagement that fits their own circumstances.
+**Lede:** Some people feel a deep personal connection to climate change; others find it hard to see how it touches their lives directly. Penn's Communication Neuroscience Lab is conducting a large-scale study with over 6,000 participants to understand that variation — what shapes whether climate change feels like a personal issue or a distant one, and why those experiences differ.
 
 ---
 
 ### Relevance F
 **Headline:** Want to Know How to Make Climate Change Feel More Relevant to the People You Care About?
 
-**Lede:** For many people, caring about climate change also means wishing the people closest to them — family, friends, neighbors — felt that same connection to the issue. Penn's Communication Neuroscience Lab is studying exactly what makes climate change feel personally meaningful rather than distant, testing six strategies with over 6,000 participants to understand what actually helps people engage.
+**Lede:** For many people, caring about climate change also means wishing the people closest to them — family, friends, neighbors — felt that same connection to the issue. Penn's Communication Neuroscience Lab is studying what shapes that sense of personal connection with climate change, drawing on over 6,000 participants to understand the psychology of who feels close to the issue and why.
 
 ---
 
