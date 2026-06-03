@@ -30,10 +30,9 @@ if (USE_API) {
     base_url = paste0(DATA_CENTER, ".qualtrics.com")
   )
   raw <- fetch_survey(
-    surveyID      = SURVEY_ID,
-    label         = FALSE,
-    convert       = FALSE,
-    force_request = TRUE
+    surveyID = SURVEY_ID,
+    label    = FALSE,
+    convert  = FALSE
   )
 } else {
   raw <- read_survey(LOCAL_DATA_PATH)
@@ -47,7 +46,7 @@ Raw data: **`r nrow(raw)` rows**, **`r ncol(raw)` columns**.
 ```{r exclusions}
 n_raw <- nrow(raw)
 
-PILOT_START <- as.POSIXct("2026-06-03 16:00:00", tz = "America/New_York")
+PILOT_START <- as.POSIXct("2026-06-03 20:00:00", tz = "UTC")  # 4pm ET = 8pm UTC
 
 d <- raw |>
   # Keep only real Prolific responses (anonymous link); removes preview, test, and imported

@@ -1580,10 +1580,9 @@ border-radius: 0px;
     base_url = paste0(DATA_CENTER, &quot;.qualtrics.com&quot;)
   )
   raw &lt;- fetch_survey(
-    surveyID      = SURVEY_ID,
-    label         = FALSE,
-    convert       = FALSE,
-    force_request = TRUE
+    surveyID = SURVEY_ID,
+    label    = FALSE,
+    convert  = FALSE
   )
 } else {
   raw &lt;- read_survey(LOCAL_DATA_PATH)
@@ -1595,7 +1594,7 @@ border-radius: 0px;
 <h2>Exclusions</h2>
 <pre class="r"><code>n_raw &lt;- nrow(raw)
 
-PILOT_START &lt;- as.POSIXct(&quot;2026-06-03 16:00:00&quot;, tz = &quot;America/New_York&quot;)
+PILOT_START &lt;- as.POSIXct(&quot;2026-06-03 20:00:00&quot;, tz = &quot;UTC&quot;)  # 4pm ET = 8pm UTC
 
 d &lt;- raw |&gt;
   # Keep only real Prolific responses (anonymous link); removes preview, test, and imported
