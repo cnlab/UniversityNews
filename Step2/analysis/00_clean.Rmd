@@ -144,52 +144,9 @@ d <- d |>
   mutate(across(all_of(outcome_vars), as.numeric))
 ```
 
-## Bot detection and data quality flags
-
-Flags are added as columns — **not applied as exclusions here**. Review before deciding whether to exclude; confirm against pre-registration criteria.
-
-```{r flags}
-OFF_TASK_THRESHOLD <- 900   # 15 minutes in seconds
-RECAPTCHA_THRESHOLD <- 0.5
-
-d <- d |>
-  mutate(
-    flag_offtask   = totalOffTask > OFF_TASK_THRESHOLD,
-    flag_recaptcha = Q_RecaptchaScore < RECAPTCHA_THRESHOLD,
-    flag_any       = flag_offtask | flag_recaptcha
-  )
-```
-
-```{r flag-summary}
-d |>
-  summarise(
-    `Off-task > 15 min`   = sum(flag_offtask,   na.rm = TRUE),
-    `reCAPTCHA < 0.5`     = sum(flag_recaptcha, na.rm = TRUE),
-    `Either flag`         = sum(flag_any,        na.rm = TRUE)
-  ) |>
-  kable()
-```
-
-```{r flag-detail}
-d |>
-  filter(flag_any) |>
-  select(ResponseId, PROLIFIC_PID, condition, variant_seen,
-         totalOffTask, Q_RecaptchaScore, flag_offtask, flag_recaptcha) |>
-  mutate(totalOffTask = round(totalOffTask / 60, 1)) |>
-  rename(`Off-task (min)` = totalOffTask) |>
-  kable()
-```
-
-> **Decision point:** Exclude flagged participants? If yes, rerun after adding `filter(!flag_any)` before the Save step. Pre-registered threshold for off-task is 15 minutes.
-
 ## Prolific participant data
 
 ```{r prolific-merge}
-# TODO: export participant data from Prolific dashboard and set path below.
-# Prolific export: Study → Download data → Participant export (.csv)
-# Merge on PROLIFIC_PID to bring in Prolific's own bot/fraud flags,
-# time-taken, and approval status.
-
 PROLIFIC_EXPORT <- here("data", "raw", "UnivNews_Step2_pilot_prolific_demographic.csv")
 
 prolific <- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |>
@@ -205,10 +162,58 @@ prolific <- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |>
 
 d <- d |> left_join(prolific, by = "PROLIFIC_PID")
 
-cat("Prolific merge complete.\n")
 cat("Status:\n"); print(table(d$prolific_status, useNA = "ifany"))
 cat("\nBot check:\n"); print(table(d$prolific_bot, useNA = "ifany"))
 ```
+
+## Bot detection and data quality flags
+
+Exclude participants flagged on 2+ metrics (off-task > 15 min, reCAPTCHA < 0.5, Prolific bot != "high").
+
+```{r flags}
+OFF_TASK_THRESHOLD  <- 900
+RECAPTCHA_THRESHOLD <- 0.5
+
+d <- d |>
+  mutate(
+    flag_offtask   = totalOffTask > OFF_TASK_THRESHOLD,
+    flag_recaptcha = Q_RecaptchaScore < RECAPTCHA_THRESHOLD,
+    flag_prolific  = !is.na(prolific_bot) & prolific_bot != "high",
+    n_flags        = flag_offtask + flag_recaptcha + flag_prolific,
+    flag_exclude   = n_flags >= 2
+  )
+```
+
+```{r flag-summary}
+d |>
+  summarise(
+    `Off-task > 15 min`    = sum(flag_offtask,   na.rm = TRUE),
+    `reCAPTCHA < 0.5`      = sum(flag_recaptcha, na.rm = TRUE),
+    `Prolific bot != high` = sum(flag_prolific,  na.rm = TRUE),
+    `2+ flags (excluded)`  = sum(flag_exclude,   na.rm = TRUE)
+  ) |>
+  kable()
+```
+
+```{r flag-detail}
+d |>
+  filter(n_flags >= 1) |>
+  select(PROLIFIC_PID, condition, prolific_bot,
+         `Off-task (min)` = totalOffTask,
+         reCAPTCHA = Q_RecaptchaScore,
+         flag_offtask, flag_recaptcha, flag_prolific, n_flags, flag_exclude) |>
+  mutate(`Off-task (min)` = round(`Off-task (min)` / 60, 1)) |>
+  arrange(desc(n_flags)) |>
+  kable()
+```
+
+```{r apply-exclusions}
+n_before <- nrow(d)
+d <- d |> filter(!flag_exclude)
+n_excluded <- n_before - nrow(d)
+```
+
+`r n_excluded` participant(s) excluded for 2+ flags. N after exclusions: **`r nrow(d)`**.
 
 ## Missing data
 
