@@ -2,10 +2,10 @@
 # Source this file at the top of each analysis script
 
 # ── Data source ────────────────────────────────────────────────────────────────
-USE_API       <- FALSE                         # set TRUE once API credentials are configured
+USE_API       <- TRUE
 
-SURVEY_ID     <- "SV_XXXXXXXXXXXXXXX"          # TODO: fill in Qualtrics survey ID
-DATA_CENTER   <- "iad1"                        # TODO: fill in your Qualtrics data center
+SURVEY_ID     <- "SV_cRReDnnOiDdlnDg"
+DATA_CENTER   <- "iad1"
 
 LOCAL_DATA_PATH <- here::here("data", "raw", "UnivNews_Step2_test.csv")
 
