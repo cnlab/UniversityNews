@@ -189,3 +189,156 @@ saveRDS(results_out, RESULTS_RDS)
 ```
 
 Results saved to `r RESULTS_RDS`.
+
+---
+
+# Secondary analyses: variant-level
+
+Within the relevance and action conditions, participants were randomly assigned to one of three headline/lede variants. These analyses ask:
+
+1. Does each of the 6 variants differ from control?
+2. Do the 3 relevance variants differ from each other?
+3. Do the 3 action variants differ from each other?
+
+```{r variant-setup}
+library(emmeans)
+
+variant_levels <- c("control",
+                    "relevance1", "relevance2", "relevance3",
+                    "action1",    "action2",    "action3")
+
+d <- d |>
+  mutate(variant_condition = factor(variant_seen, levels = variant_levels))
+
+cat("Variant counts:\n")
+print(table(d$variant_condition, useNA = "ifany"))
+```
+
+## Variant-level models
+
+One model per outcome, 7-level factor with control as reference. Coefficients are each variant vs control.
+
+```{r variant-models}
+variant_models <- map(names(outcomes), function(var) {
+  tryCatch(
+    lm(as.formula(paste(var, "~ variant_condition")),
+       data = d |> filter(!is.na(.data[[var]]), !is.na(variant_condition))),
+    error = function(e) NULL
+  )
+}) |>
+  set_names(names(outcomes)) |>
+  Filter(Negate(is.null), x = _)
+```
+
+## Each variant vs Control
+
+```{r variant-vs-control}
+variant_vs_control <- map_dfr(names(variant_models), function(var) {
+  tidy(variant_models[[var]], conf.int = TRUE) |>
+    filter(str_detect(term, "^variant_condition")) |>
+    mutate(
+      outcome  = outcomes[[var]],
+      variant  = str_remove(term, "^variant_condition"),
+      condition = str_extract(variant, "^[a-z]+")
+    )
+}) |>
+  mutate(
+    across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
+    statistic = round(statistic, 2),
+    p.value   = round(p.value, 3),
+    sig = case_when(
+      p.value < .001 ~ "***", p.value < .01 ~ "**",
+      p.value < .05  ~ "*",   p.value < .10 ~ "†",
+      TRUE ~ ""
+    )
+  )
+
+variant_vs_control |>
+  select(Outcome = outcome, Variant = variant,
+         B = estimate, SE = std.error,
+         t = statistic, p = p.value, sig,
+         `95% CI low` = conf.low, `95% CI high` = conf.high) |>
+  arrange(Outcome, Variant) |>
+  kable()
+```
+
+## Variant vs Control coefficient plot
+
+```{r variant-coef-plot, fig.height=9, fig.width=10}
+variant_colors <- c(
+  relevance1 = "#011F5B", relevance2 = "#3A5FA0", relevance3 = "#7B9FD4",
+  action1    = "#990000", action2    = "#CC3333", action3    = "#FF7777"
+)
+
+variant_vs_control |>
+  filter(is.finite(estimate)) |>
+  mutate(
+    outcome = factor(outcome, levels = rev(unname(outcomes))),
+    variant = factor(variant, levels = rev(variant_levels[-1]))
+  ) |>
+  ggplot(aes(x = estimate, y = outcome, color = variant,
+             xmin = conf.low, xmax = conf.high)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+  geom_pointrange(position = position_dodge(width = 0.7), size = 0.4) +
+  scale_color_manual(values = variant_colors) +
+  labs(x = "Coefficient vs Control (B)", y = NULL, color = "Variant") +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = "right")
+```
+
+## Within-condition pairwise comparisons
+
+```{r within-pairs}
+pairwise_within <- function(model, group_variants) {
+  tryCatch({
+    em  <- emmeans(model, ~variant_condition)
+    obs <- as.character(summary(em)$variant_condition)
+    inc <- intersect(group_variants, obs)
+    if (length(inc) < 2) return(NULL)
+    contrast(em, method = "pairwise", include = inc) |>
+      summary() |>
+      as.data.frame()
+  }, error = function(e) NULL)
+}
+
+within_pairs <- map_dfr(names(variant_models), function(var) {
+  bind_rows(
+    pairwise_within(variant_models[[var]], c("relevance1","relevance2","relevance3")) |>
+      (\(x) if (!is.null(x)) mutate(x, outcome = outcomes[[var]], group = "relevance") else NULL)(),
+    pairwise_within(variant_models[[var]], c("action1","action2","action3")) |>
+      (\(x) if (!is.null(x)) mutate(x, outcome = outcomes[[var]], group = "action") else NULL)()
+  )
+})
+
+if (nrow(within_pairs) > 0) {
+  # emmeans uses 't.ratio' in older versions and 'statistic' or 't.ratio' in newer ones
+  t_col <- intersect(c("t.ratio", "statistic"), names(within_pairs))[1]
+
+  within_pairs |>
+    mutate(
+      across(where(is.numeric), ~round(., 3)),
+      sig = case_when(
+        p.value < .001 ~ "***", p.value < .01  ~ "**",
+        p.value < .05  ~ "*",   p.value < .10  ~ "†",
+        TRUE ~ ""
+      )
+    ) |>
+    select(Outcome = outcome, Group = group, Contrast = contrast,
+           Estimate = estimate, SE = SE,
+           t = all_of(t_col), p = p.value, sig) |>
+    arrange(Outcome, Group, Contrast) |>
+    kable()
+} else {
+  cat("Insufficient data for within-condition pairwise comparisons (expected with test data).\n")
+}
+```
+
+## Save updated results
+
+```{r save-secondary}
+results_out$variant_models       <- variant_models
+results_out$variant_vs_control   <- variant_vs_control
+results_out$within_pairs         <- within_pairs
+
+saveRDS(results_out, RESULTS_RDS)
+```
