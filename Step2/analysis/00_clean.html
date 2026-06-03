@@ -1878,22 +1878,34 @@ step. Pre-registered threshold for off-task is 15 minutes.</p>
 # Merge on PROLIFIC_PID to bring in Prolific&#39;s own bot/fraud flags,
 # time-taken, and approval status.
 
-PROLIFIC_EXPORT &lt;- here(&quot;data&quot;, &quot;raw&quot;, &quot;UnivNews_Step2_prolific.csv&quot;)  # TODO: update filename
+PROLIFIC_EXPORT &lt;- here(&quot;data&quot;, &quot;raw&quot;, &quot;UnivNews_Step2_pilot_prolific_demographic.csv&quot;)
 
-if (file.exists(PROLIFIC_EXPORT)) {
-  prolific &lt;- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |&gt;
-    rename(PROLIFIC_PID = `Participant id`) |&gt;
-    select(PROLIFIC_PID, Status, `Time taken`, `Completion code`,
-           any_of(c(&quot;Fraud score&quot;, &quot;Is Fraudulent&quot;)))
+prolific &lt;- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |&gt;
+  rename(
+    PROLIFIC_PID       = `Participant id`,
+    prolific_status    = Status,
+    prolific_timetaken = `Time taken`,
+    prolific_bot       = `Authenticity check: Bots`
+  ) |&gt;
+  select(PROLIFIC_PID, prolific_status, prolific_timetaken, prolific_bot,
+         Age, Sex, `Ethnicity simplified`, `Country of residence`,
+         `Student status`, `Employment status`)
 
-  d &lt;- d |&gt; left_join(prolific, by = &quot;PROLIFIC_PID&quot;)
+d &lt;- d |&gt; left_join(prolific, by = &quot;PROLIFIC_PID&quot;)
 
-  cat(&quot;Prolific merge complete. Status counts:\n&quot;)
-  print(table(d$Status, useNA = &quot;ifany&quot;))
-} else {
-  message(&quot;Prolific export not found at &quot;, PROLIFIC_EXPORT,
-          &quot; — skipping merge. Download from Prolific dashboard and update path.&quot;)
-}</code></pre>
+cat(&quot;Prolific merge complete.\n&quot;)</code></pre>
+<pre><code>## Prolific merge complete.</code></pre>
+<pre class="r"><code>cat(&quot;Status:\n&quot;); print(table(d$prolific_status, useNA = &quot;ifany&quot;))</code></pre>
+<pre><code>## Status:</code></pre>
+<pre><code>## 
+## AWAITING REVIEW 
+##              30</code></pre>
+<pre class="r"><code>cat(&quot;\nBot check:\n&quot;); print(table(d$prolific_bot, useNA = &quot;ifany&quot;))</code></pre>
+<pre><code>## 
+## Bot check:</code></pre>
+<pre><code>## 
+##  high mixed   N/A 
+##    28     1     1</code></pre>
 </div>
 <div id="missing-data" class="section level2">
 <h2>Missing data</h2>

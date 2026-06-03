@@ -190,22 +190,24 @@ d |>
 # Merge on PROLIFIC_PID to bring in Prolific's own bot/fraud flags,
 # time-taken, and approval status.
 
-PROLIFIC_EXPORT <- here("data", "raw", "UnivNews_Step2_prolific.csv")  # TODO: update filename
+PROLIFIC_EXPORT <- here("data", "raw", "UnivNews_Step2_pilot_prolific_demographic.csv")
 
-if (file.exists(PROLIFIC_EXPORT)) {
-  prolific <- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |>
-    rename(PROLIFIC_PID = `Participant id`) |>
-    select(PROLIFIC_PID, Status, `Time taken`, `Completion code`,
-           any_of(c("Fraud score", "Is Fraudulent")))
+prolific <- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |>
+  rename(
+    PROLIFIC_PID       = `Participant id`,
+    prolific_status    = Status,
+    prolific_timetaken = `Time taken`,
+    prolific_bot       = `Authenticity check: Bots`
+  ) |>
+  select(PROLIFIC_PID, prolific_status, prolific_timetaken, prolific_bot,
+         Age, Sex, `Ethnicity simplified`, `Country of residence`,
+         `Student status`, `Employment status`)
 
-  d <- d |> left_join(prolific, by = "PROLIFIC_PID")
+d <- d |> left_join(prolific, by = "PROLIFIC_PID")
 
-  cat("Prolific merge complete. Status counts:\n")
-  print(table(d$Status, useNA = "ifany"))
-} else {
-  message("Prolific export not found at ", PROLIFIC_EXPORT,
-          " — skipping merge. Download from Prolific dashboard and update path.")
-}
+cat("Prolific merge complete.\n")
+cat("Status:\n"); print(table(d$prolific_status, useNA = "ifany"))
+cat("\nBot check:\n"); print(table(d$prolific_bot, useNA = "ifany"))
 ```
 
 ## Missing data
