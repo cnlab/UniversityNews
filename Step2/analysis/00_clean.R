@@ -45,7 +45,7 @@ cat("\nN after exclusions:", nrow(d), "\n")
 # ArticleRate block (same across all conditions):
 #   QID1319 → share_direct   (slider: share directly with someone)
 #   QID1320 → share_social   (slider: share on social media)
-#   QID1306 → article_agree  (matrix: multiple sub-items, generates _1, _2, etc.)
+#   QID1306 → article_self_relev / article_social_relev (_1 = "relevant to me", _2 = "relevant to people I know")
 #
 # Condition-specific "want to read more" sliders (coalesced below):
 #   QID1321 (Relevance), QID1322 (Action), QID1325 (Control) → read_more

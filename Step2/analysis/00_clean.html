@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2026-06-03" />
+<meta name="date" content="2026-06-04" />
 
 <title>Step 2 — Data Cleaning</title>
 
@@ -1567,7 +1567,7 @@ border-radius: 0px;
 
 
 <h1 class="title toc-ignore">Step 2 — Data Cleaning</h1>
-<h4 class="date">2026-06-03</h4>
+<h4 class="date">2026-06-04</h4>
 
 </div>
 
@@ -1587,21 +1587,20 @@ border-radius: 0px;
 } else {
   raw &lt;- read_survey(LOCAL_DATA_PATH)
 }</code></pre>
-<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</code></pre>
-<p>Raw data: <strong>45 rows</strong>, <strong>242 columns</strong>.</p>
+<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |=======                                                               |  11%  |                                                                              |====================================================                  |  74%  |                                                                              |==================================================================    |  95%  |                                                                              |======================================================================| 100%</code></pre>
+<p>Raw data: <strong>949 rows</strong>, <strong>248
+columns</strong>.</p>
 </div>
 <div id="exclusions" class="section level2">
 <h2>Exclusions</h2>
 <pre class="r"><code>n_raw &lt;- nrow(raw)
 
-PILOT_START &lt;- as.POSIXct(&quot;2026-06-03 20:00:00&quot;, tz = &quot;UTC&quot;)  # 4pm ET = 8pm UTC
-
 d &lt;- raw |&gt;
   # Keep only real Prolific responses (anonymous link); removes preview, test, and imported
   filter(DistributionChannel == &quot;anonymous&quot;) |&gt;
   filter(Finished == TRUE) |&gt;
-  # Remove responses recorded before pilot launch
-  filter(RecordedDate &gt;= PILOT_START)
+  # Keep only Cohort 1 (launched 2026-06-04); excludes 30 pilot responses from 2026-06-03
+  filter(RecordedDate &gt;= COHORT1_START)
 
 # Remove unfilled Prolific PID template rows (only relevant if PIDs are present)
 if (any(!is.na(raw$PROLIFIC_PID))) {
@@ -1620,23 +1619,23 @@ n_final &lt;- nrow(d)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Raw</td>
-<td>45</td>
+<td>949</td>
 </tr>
 <tr class="even">
 <td>Anonymous channel only</td>
-<td>36</td>
+<td>940</td>
 </tr>
 <tr class="odd">
 <td>Finished</td>
-<td>36</td>
+<td>940</td>
 </tr>
 <tr class="even">
-<td>After pilot start cutoff (≥ 4pm ET 2026-06-03)</td>
-<td>30</td>
+<td>Cohort 1 only (≥ 2026-06-04 midnight ET)</td>
+<td>904</td>
 </tr>
 <tr class="odd">
 <td>After Prolific PID filter (if applicable)</td>
-<td>30</td>
+<td>902</td>
 </tr>
 </tbody>
 </table>
@@ -1650,8 +1649,8 @@ analysis-ready names:</p>
     # ArticleRate block
     share_direct    = rate_1_1,
     share_social    = rate_2_1,
-    article_agree_1 = rate_3_1,
-    article_agree_2 = rate_3_2,
+    article_self_relev   = rate_3_1,
+    article_social_relev = rate_3_2,
     # GovtFunding block
     govtfund_general = govtfund_1,
     govtfund_cuts    = govtfund_2,
@@ -1664,19 +1663,16 @@ analysis-ready names:</p>
 </div>
 <div id="coalesce-read_more" class="section level2">
 <h2>Coalesce read_more</h2>
-<p>The “want to read more” slider is split across condition-specific
-columns (one per loop row per condition). Only one will be non-NA per
-participant.</p>
+<p>Each condition variant is in its own block
+(<code>relevance1_1_1</code> … <code>control_1_1</code>). Only the block
+shown to each participant will be non-NA; coalesce collapses them into a
+single column.</p>
 <pre class="r"><code>d &lt;- d |&gt;
   mutate(
     read_more = coalesce(
-      as.numeric(`1_relevance_1_1`),
-      as.numeric(`2_relevance_1_1`),
-      as.numeric(`3_relevance_1_1`),
-      as.numeric(`1_action_1_1`),
-      as.numeric(`2_action_1_1`),
-      as.numeric(`3_action_1_1`),
-      as.numeric(`1_control_1_1`)
+      relevance1_1_1, relevance2_1_1, relevance3_1_1,
+      action1_1_1, action2_1_1, action3_1_1,
+      control_1_1
     )
   )</code></pre>
 </div>
@@ -1698,15 +1694,15 @@ participant.</p>
 <tbody>
 <tr class="odd">
 <td align="left">control</td>
-<td align="right">10</td>
+<td align="right">301</td>
 </tr>
 <tr class="even">
 <td align="left">relevance</td>
-<td align="right">10</td>
+<td align="right">304</td>
 </tr>
 <tr class="odd">
 <td align="left">action</td>
-<td align="right">10</td>
+<td align="right">297</td>
 </tr>
 </tbody>
 </table>
@@ -1715,7 +1711,7 @@ participant.</p>
 <h2>Numeric coercion</h2>
 <pre class="r"><code>outcome_vars &lt;- c(
   &quot;share_direct&quot;, &quot;share_social&quot;, &quot;read_more&quot;,
-  &quot;article_agree_1&quot;, &quot;article_agree_2&quot;,
+  &quot;article_self_relev&quot;, &quot;article_social_relev&quot;,
   &quot;govtfund_general&quot;, &quot;govtfund_cuts&quot;,
   &quot;behavior_intent_1&quot;, &quot;behavior_intent_2&quot;, &quot;behavior_intent_3&quot;,
   &quot;climate_1&quot;, &quot;climate_2&quot;,
@@ -1727,7 +1723,7 @@ d &lt;- d |&gt;
 </div>
 <div id="prolific-participant-data" class="section level2">
 <h2>Prolific participant data</h2>
-<pre class="r"><code>PROLIFIC_EXPORT &lt;- here(&quot;data&quot;, &quot;raw&quot;, &quot;UnivNews_Step2_pilot_prolific_demographic.csv&quot;)
+<pre class="r"><code>PROLIFIC_EXPORT &lt;- here(&quot;Data&quot;, &quot;Raw&quot;, &quot;UnivNews_Step2_prolific_demographic.csv&quot;)
 
 prolific &lt;- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |&gt;
   rename(
@@ -1745,117 +1741,183 @@ d &lt;- d |&gt; left_join(prolific, by = &quot;PROLIFIC_PID&quot;)
 cat(&quot;Status:\n&quot;); print(table(d$prolific_status, useNA = &quot;ifany&quot;))</code></pre>
 <pre><code>## Status:</code></pre>
 <pre><code>## 
-## AWAITING REVIEW 
-##              30</code></pre>
+## AWAITING REVIEW        RETURNED       TIMED-OUT 
+##             898               1               3</code></pre>
 <pre class="r"><code>cat(&quot;\nBot check:\n&quot;); print(table(d$prolific_bot, useNA = &quot;ifany&quot;))</code></pre>
 <pre><code>## 
 ## Bot check:</code></pre>
 <pre><code>## 
 ##  high mixed   N/A 
-##    28     1     1</code></pre>
+##   872    10    20</code></pre>
 </div>
-<div id="bot-detection-and-data-quality-flags" class="section level2">
-<h2>Bot detection and data quality flags</h2>
-<p>Exclude participants flagged on 2+ metrics (off-task &gt; 15 min,
-reCAPTCHA &lt; 0.5, Prolific bot != “high”).</p>
-<pre class="r"><code>OFF_TASK_THRESHOLD  &lt;- 900
-RECAPTCHA_THRESHOLD &lt;- 0.5
+<div id="hard-exclusions-prolific-non-completions" class="section level2">
+<h2>Hard exclusions: Prolific non-completions</h2>
+<p>Remove participants who returned or timed out on Prolific regardless
+of Qualtrics completion status.</p>
+<pre class="r"><code>n_before_hard &lt;- nrow(d)
+d &lt;- d |&gt; filter(!prolific_status %in% c(&quot;RETURNED&quot;, &quot;TIMED-OUT&quot;))
+cat(n_before_hard - nrow(d), &quot;participant(s) removed (RETURNED or TIMED-OUT on Prolific).\n&quot;)</code></pre>
+<pre><code>## 4 participant(s) removed (RETURNED or TIMED-OUT on Prolific).</code></pre>
+</div>
+<div id="data-quality-flags" class="section level2">
+<h2>Data quality flags</h2>
+<p>Exclude participants flagged on 2+ authenticity checks: reCAPTCHA
+&lt; 0.5, Prolific bot = “mixed”, failed attention check.</p>
+<ul>
+<li>Off-task time is recorded as an informational column but not used as
+an exclusion criterion (per Prolific guidelines).</li>
+<li>Prolific bot <code>N/A</code> (unassessed account) is not treated as
+a flag.</li>
+<li>Attention check NAs are not treated as failures.</li>
+<li><code>flag_any_auth</code>: convenience column marking any single
+authenticity failure (not an exclusion).</li>
+</ul>
+<pre class="r"><code>RECAPTCHA_THRESHOLD &lt;- 0.5
+OFF_TASK_THRESHOLD  &lt;- 900
 
 d &lt;- d |&gt;
   mutate(
     flag_offtask   = totalOffTask &gt; OFF_TASK_THRESHOLD,
     flag_recaptcha = Q_RecaptchaScore &lt; RECAPTCHA_THRESHOLD,
-    flag_prolific  = !is.na(prolific_bot) &amp; prolific_bot != &quot;high&quot;,
-    n_flags        = flag_offtask + flag_recaptcha + flag_prolific,
+    flag_prolific  = prolific_bot == &quot;mixed&quot;,
+    flag_attention = !is.na(attention_1) &amp; attention_1 != 4,
+    n_flags        = rowSums(cbind(flag_recaptcha, flag_prolific, flag_attention),
+                             na.rm = TRUE),
+    flag_any_auth  = n_flags &gt;= 1,
     flag_exclude   = n_flags &gt;= 2
   )</code></pre>
 <pre class="r"><code>d |&gt;
   summarise(
-    `Off-task &gt; 15 min`    = sum(flag_offtask,   na.rm = TRUE),
-    `reCAPTCHA &lt; 0.5`      = sum(flag_recaptcha, na.rm = TRUE),
-    `Prolific bot != high` = sum(flag_prolific,  na.rm = TRUE),
-    `2+ flags (excluded)`  = sum(flag_exclude,   na.rm = TRUE)
+    `Off-task &gt; 15 min (info only)` = sum(flag_offtask,   na.rm = TRUE),
+    `reCAPTCHA &lt; 0.5`               = sum(flag_recaptcha, na.rm = TRUE),
+    `Prolific bot = mixed`          = sum(flag_prolific,  na.rm = TRUE),
+    `Failed attention check`        = sum(flag_attention, na.rm = TRUE),
+    `Any auth flag (flag_any_auth)` = sum(flag_any_auth,  na.rm = TRUE),
+    `2+ auth flags (excluded)`      = sum(flag_exclude,   na.rm = TRUE)
   ) |&gt;
   kable()</code></pre>
 <table>
 <colgroup>
-<col width="24%" />
-<col width="21%" />
-<col width="28%" />
-<col width="26%" />
+<col width="20%" />
+<col width="11%" />
+<col width="14%" />
+<col width="15%" />
+<col width="20%" />
+<col width="17%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="right">Off-task &gt; 15 min</th>
+<th align="right">Off-task &gt; 15 min (info only)</th>
 <th align="right">reCAPTCHA &lt; 0.5</th>
-<th align="right">Prolific bot != high</th>
-<th align="right">2+ flags (excluded)</th>
+<th align="right">Prolific bot = mixed</th>
+<th align="right">Failed attention check</th>
+<th align="right">Any auth flag (flag_any_auth)</th>
+<th align="right">2+ auth flags (excluded)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right">6</td>
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="right">0</td>
+<td align="right">75</td>
+<td align="right">37</td>
+<td align="right">10</td>
+<td align="right">7</td>
+<td align="right">51</td>
+<td align="right">3</td>
 </tr>
 </tbody>
 </table>
 <pre class="r"><code>d |&gt;
-  filter(n_flags &gt;= 1) |&gt;
-  select(PROLIFIC_PID, condition, prolific_bot,
+  filter(flag_any_auth | flag_offtask) |&gt;
+  select(PROLIFIC_PID, condition, prolific_bot, attention_1,
          `Off-task (min)` = totalOffTask,
          reCAPTCHA = Q_RecaptchaScore,
-         flag_offtask, flag_recaptcha, flag_prolific, n_flags, flag_exclude) |&gt;
+         flag_offtask, flag_recaptcha, flag_prolific, flag_attention,
+         n_flags, flag_exclude) |&gt;
   mutate(`Off-task (min)` = round(`Off-task (min)` / 60, 1)) |&gt;
-  arrange(desc(n_flags)) |&gt;
+  arrange(desc(n_flags), desc(flag_offtask)) |&gt;
   kable()</code></pre>
 <table>
 <colgroup>
-<col width="18%" />
+<col width="15%" />
+<col width="6%" />
+<col width="7%" />
 <col width="7%" />
 <col width="9%" />
-<col width="11%" />
+<col width="6%" />
 <col width="7%" />
 <col width="9%" />
-<col width="11%" />
-<col width="10%" />
-<col width="5%" />
+<col width="8%" />
 <col width="9%" />
+<col width="4%" />
+<col width="7%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">PROLIFIC_PID</th>
 <th align="left">condition</th>
 <th align="left">prolific_bot</th>
+<th align="right">attention_1</th>
 <th align="right">Off-task (min)</th>
 <th align="right">reCAPTCHA</th>
 <th align="left">flag_offtask</th>
 <th align="left">flag_recaptcha</th>
 <th align="left">flag_prolific</th>
+<th align="left">flag_attention</th>
 <th align="right">n_flags</th>
 <th align="left">flag_exclude</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">69f26e196eba9bf176b63d90</td>
-<td align="left">action</td>
-<td align="left">N/A</td>
-<td align="right">2.9</td>
-<td align="right">0.8</td>
-<td align="left">FALSE</td>
+<td align="left">69cf17d1a963b681aed752bc</td>
+<td align="left">control</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.3</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
-<td align="right">1</td>
+<td align="left">TRUE</td>
 <td align="left">FALSE</td>
+<td align="right">2</td>
+<td align="left">TRUE</td>
 </tr>
 <tr class="even">
-<td align="left">67191eac7e29fe765781a851</td>
+<td align="left">69da76fcc8125b750510d7db</td>
 <td align="left">control</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="right">2</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">69e7ccb245d5adb5a70cf6f1</td>
+<td align="left">control</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="right">2</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">69d3c90bc7bc3c12fd6d3d26</td>
+<td align="left">action</td>
 <td align="left">high</td>
-<td align="right">36.4</td>
-<td align="right">0.8</td>
+<td align="right">4</td>
+<td align="right">60.8</td>
+<td align="right">0.1</td>
+<td align="left">TRUE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -1863,59 +1925,97 @@ d &lt;- d |&gt;
 <td align="left">FALSE</td>
 </tr>
 <tr class="odd">
-<td align="left">6a01f40d1499bfa74069d4c6</td>
-<td align="left">relevance</td>
+<td align="left">6a20d4cfb34a97243d116fb3</td>
+<td align="left">control</td>
 <td align="left">high</td>
+<td align="right">4</td>
+<td align="right">60.7</td>
+<td align="right">0.2</td>
+<td align="left">TRUE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a1f2df1e09a81b25f63fc2c</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
 <td align="right">0.0</td>
 <td align="right">0.4</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
 <td align="right">1</td>
 <td align="left">FALSE</td>
 </tr>
-<tr class="even">
-<td align="left">5bef41fa54277d000114d6ad</td>
+<tr class="odd">
+<td align="left">5c1021a547d07800011a23de</td>
 <td align="left">relevance</td>
 <td align="left">high</td>
-<td align="right">54.4</td>
-<td align="right">1.0</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.3</td>
+<td align="left">FALSE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="right">1</td>
 <td align="left">FALSE</td>
 </tr>
-<tr class="odd">
-<td align="left">6a1f306fcf71c3b8c7bad102</td>
+<tr class="even">
+<td align="left">617323e630f3fa36361cb35b</td>
 <td align="left">relevance</td>
 <td align="left">mixed</td>
+<td align="right">4</td>
 <td align="right">0.0</td>
-<td align="right">0.8</td>
+<td align="right">1.0</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
 <td align="left">TRUE</td>
+<td align="left">FALSE</td>
 <td align="right">1</td>
 <td align="left">FALSE</td>
 </tr>
-<tr class="even">
-<td align="left">659aaea375eef229eb250614</td>
+<tr class="odd">
+<td align="left">69ff8f6c58779f2e9509c9ea</td>
 <td align="left">relevance</td>
 <td align="left">high</td>
-<td align="right">69.7</td>
+<td align="right">2</td>
+<td align="right">0.0</td>
 <td align="right">1.0</td>
-<td align="left">TRUE</td>
 <td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">695faffc1c520509cbca165d</td>
+<td align="left">action</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="right">1</td>
 <td align="left">FALSE</td>
 </tr>
 <tr class="odd">
-<td align="left">69e0064bf31fa2eb5621347e</td>
-<td align="left">control</td>
+<td align="left">6a2065582290417bc3730432</td>
+<td align="left">action</td>
 <td align="left">high</td>
-<td align="right">36.2</td>
-<td align="right">1.0</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -1923,11 +2023,13 @@ d &lt;- d |&gt;
 <td align="left">FALSE</td>
 </tr>
 <tr class="even">
-<td align="left">5e076480c4e1550e2114f006</td>
+<td align="left">6632edd68127fba862de05bf</td>
 <td align="left">control</td>
 <td align="left">high</td>
-<td align="right">54.4</td>
-<td align="right">1.0</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
@@ -1935,15 +2037,1571 @@ d &lt;- d |&gt;
 <td align="left">FALSE</td>
 </tr>
 <tr class="odd">
-<td align="left">69d67e558286a0e5a947c5e4</td>
+<td align="left">5dda993086c886a06ce9108d</td>
 <td align="left">action</td>
 <td align="left">high</td>
-<td align="right">47.7</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69fba866c48220909d281e3f</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a0dc0b94c02dc5318d72910</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">63225b65b2d6e889f7289909</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69df9cd408ba6597d9f9c1d2</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">2</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">698b2308b6ee90c7b05f833f</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.0</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69f133c1f4e5ae68e2ae20db</td>
+<td align="left">relevance</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.7</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">5e2b74daae56b71b9d24d89b</td>
+<td align="left">action</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a18e556695d00840058b827</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69a9e5bf591680851043ed1c</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">4.8</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">5d45e9143c5a360019b1bd3c</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a1afb8846eb6abd7232f9b7</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69fef2baef4c76d1fd6b0db8</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69d82814721c2cfd983fcfb0</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a012c1cbb725fe5329c2720</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">698f44adf9775aaad5565569</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.8</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">698f86e9e195d4df7200ab22</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">2</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69fbe423be749a147362302f</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">2</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69fa20ee9a52dd94e1b95859</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">2</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6057989131b9effa0cb4429f</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">2</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a093fe448969e17be809803</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a0242fe81b4eb272382adf4</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.3</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69eb64c8e52bffe449ca8c2a</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.8</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69f3c17241c2b5b749c70292</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6960496131f055569ae3d71b</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69e6610e9cae943b4223b361</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69f8daef1e0000419e1905d1</td>
+<td align="left">control</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6596bd0080a6c5fb83b93520</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">673e222bdb1a35935b3075f1</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.3</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a0a5c00f030450b266965e0</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.1</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6991e46740117ca6ef90cd7c</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">2</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">546ec14dfdf99b2bc7ebd032</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.3</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a09e5de818bbc375e747141</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">5.8</td>
+<td align="right">0.3</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69da9bde739b7e308e8e8190</td>
+<td align="left">control</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">0.1</td>
+<td align="right">0.9</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69db0b94b3c4d7fd11ea7b66</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.8</td>
+<td align="right">0.2</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69d7c00327a7c8f593a9967d</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.4</td>
+<td align="right">0.1</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a0fa371879b33f4961411ee</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">11.5</td>
+<td align="right">0.3</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69fd765a574187547e6c7add</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.0</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">67f80601e44359732a7f2af4</td>
+<td align="left">control</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">699ca1d819e8b3d00305124c</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">16.5</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">66b2a6152d3083bbaccd3431</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">31.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6734f38285a487704a4dc0e1</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">28.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a01e86995470b850035a1a9</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">17.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">67b9d746fcdac8285c79cb7e</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">23.4</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6043001e416c7828f58c6c22</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">41.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a1b97446a2dc6cd10d930e0</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">23.4</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a00d721e13d7ae79bfe649a</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">27.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a021a1b0cdacf95050adc8e</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">35.6</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69f26e9c5a8921fd4f889f91</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">74.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a14a82112cb264383c96445</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">32.3</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">60fcd798788c8bb8c7284451</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">23.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69dd297487c7874b5c22b7d6</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">23.2</td>
 <td align="right">0.9</td>
 <td align="left">TRUE</td>
 <td align="left">FALSE</td>
 <td align="left">FALSE</td>
-<td align="right">1</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">5fc535c343622e000bc9f3c4</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">26.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">614e5092e08a3a2d3204ffd2</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">58.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69aef13dd6750508e97618d5</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">18.2</td>
+<td align="right">0.9</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">631f556a440983f62a543b8b</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">26.2</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a08966556ff4f2f16988811</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">18.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">5ecf40ccb218ec372490e3ea</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">40.3</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a0959453efc1c8a3e55e053</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">20.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">695bdd477f9e16a0c15e87e0</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">21.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">67018ddda66fca6195d1070f</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">73.6</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a089cf91ba4fb845b4cb1dd</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">15.6</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">5dd55652f30aa650f027e1c2</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">38.9</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69dd10f3eb98f8d63408dece</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">33.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6295b064f01df59a15157dfc</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">61.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a0e5d6ec79af5772d61fd49</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">33.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">616c27e289fbac20c73f34b6</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">60.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a16ff587c92c40cf876e93d</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">63.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a20e6d9c2de1455791e425e</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">24.6</td>
+<td align="right">0.8</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a087102490a86b035b41f9c</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">37.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6997ace35f7613bf9c48fa5d</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">29.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">66a276d13f40200c70c28109</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">78.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">66b2c5af02db82fc0cc8b4ee</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">103.2</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a1c4a1a8ba952043a1b9103</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">15.5</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">667ed2de5180d5a15f488fbb</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">27.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a20560efd78381863d36529</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">18.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a033f860b7156dd0eb815b0</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">42.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69e16cd2e784eeb487ee81c7</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">23.9</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a13b6da7eec296ad9e677aa</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">41.2</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69b26f292867a214a1b0e47a</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">44.5</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69c45acaa988033e0a15876a</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">25.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a034bb0b7ec91a078a1077b</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">50.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69c15f008aea7a436997784d</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">20.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69fe601571e49e034cfd0cc5</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">21.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">66d40e332be72e1fc3f10994</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">17.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">63cff43985317bac287a325f</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">40.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">677dc8b2a9160d395ca7e008</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">28.7</td>
+<td align="right">0.5</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">662fbb4163d7a1695a748636</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">38.6</td>
+<td align="right">0.9</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69b98b40fe5dbb04f332d376</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">35.1</td>
+<td align="right">0.8</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">660db7a0e45001b3e976309e</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">33.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69e471c43852befc800b98f0</td>
+<td align="left">relevance</td>
+<td align="left">N/A</td>
+<td align="right">4</td>
+<td align="right">27.2</td>
+<td align="right">0.9</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a2056f7a6d6c88a6826730b</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">92.4</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6453a9598ae568cfac992ccc</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">32.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a012c073af02953d56ae431</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">25.3</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">696968ce6e15d186d48966b0</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">25.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">66e87276ccc570e1c0d7df24</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">22.5</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69f582c3a034764e79a9e140</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">80.4</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">5b233660648d5b0001b7de87</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">17.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69cfb3479509fc554e7f10f4</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">92.7</td>
+<td align="right">0.8</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">693b4c0ff54bd868cfb08188</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">43.9</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">699667a4e410f621ec24c7ce</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">116.6</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69e6dc24e0c7b73db5f9347a</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">37.4</td>
+<td align="right">0.9</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69a9eef3b3983f8a4e3151b8</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">16.3</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69e2b4eefb7cb0e2b6b843f1</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">17.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6945ca01e1c426ec49cc0542</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">17.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a02630be5e7c76739f764dc</td>
+<td align="left">control</td>
+<td align="left">N/A</td>
+<td align="right">4</td>
+<td align="right">16.2</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">671b277a6d04904df5f9503b</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">425.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">66a94c224273fab59f0b2c71</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">83.6</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a0b751ffe787421cdb8921e</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">41.3</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a02204aaa796419a20f469b</td>
+<td align="left">control</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">28.1</td>
+<td align="right">0.9</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">66e9bdb86f599f239c1ea24e</td>
+<td align="left">relevance</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">203.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69d17f45e6b9c77fa67890e0</td>
+<td align="left">action</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">23.5</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
 <td align="left">FALSE</td>
 </tr>
 </tbody>
@@ -1951,8 +3609,8 @@ d &lt;- d |&gt;
 <pre class="r"><code>n_before &lt;- nrow(d)
 d &lt;- d |&gt; filter(!flag_exclude)
 n_excluded &lt;- n_before - nrow(d)</code></pre>
-<p>0 participant(s) excluded for 2+ flags. N after exclusions:
-<strong>30</strong>.</p>
+<p>3 participant(s) excluded for 2+ flags. N after exclusions:
+<strong>895</strong>.</p>
 </div>
 <div id="missing-data" class="section level2">
 <h2>Missing data</h2>
@@ -1970,22 +3628,22 @@ n_excluded &lt;- n_before - nrow(d)</code></pre>
 <tbody>
 <tr class="odd">
 <td align="left">share_direct</td>
-<td align="right">0</td>
+<td align="right">14</td>
 </tr>
 <tr class="even">
 <td align="left">share_social</td>
-<td align="right">0</td>
+<td align="right">23</td>
 </tr>
 <tr class="odd">
 <td align="left">read_more</td>
-<td align="right">0</td>
+<td align="right">3</td>
 </tr>
 <tr class="even">
-<td align="left">article_agree_1</td>
+<td align="left">article_self_relev</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">article_agree_2</td>
+<td align="left">article_social_relev</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
@@ -2036,7 +3694,7 @@ n_excluded &lt;- n_before - nrow(d)</code></pre>
 <pre class="r"><code>saveRDS(d, CLEANED_RDS)</code></pre>
 <p>Cleaned data saved to
 /Users/nicolecooper/Documents/GitHub/UniversityNews/Step2/analysis/step2_clean.rds.
-<strong>Final N = 30</strong>.</p>
+<strong>Final N = 902</strong>.</p>
 </div>
 
 

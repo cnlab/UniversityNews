@@ -1,138 +1,484 @@
 ---
 title: "Step 2 — Exploratory Data Analysis"
+author: "Nicole Cooper"
 date: "`r Sys.Date()`"
 output:
   html_document:
-    self_contained: true
-    toc: true
-    toc_depth: 2
-    toc_float: true
     code_folding: hide
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    theme: united
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                      fig.width = 8, fig.height = 5)
+options(scipen = 999)
+```
 
-library(tidyverse)
-library(here)
-library(knitr)
+```{r packages}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, reactable, scales, RColorBrewer, here)
+```
 
+```{r aesthetics}
+plot_aes <- theme_minimal() +
+  theme(
+    legend.position    = "bottom",
+    legend.text        = element_text(size = 9),
+    text               = element_text(size = 12),
+    axis.text          = element_text(color = "black"),
+    axis.ticks.y       = element_blank(),
+    panel.grid.major.y = element_blank()
+  )
+
+palette_main     <- "#197278"
+condition_colors <- c(control = "#888888", relevance = "#011F5B", action = "#990000")
+```
+
+```{r scale-levels}
+lvl_agree7 <- c("Strongly disagree", "Disagree", "Somewhat disagree",
+                "Neither agree nor disagree",
+                "Somewhat agree", "Agree", "Strongly agree")
+
+lvl_approve7 <- c("Strongly disapprove", "Disapprove", "Somewhat disapprove",
+                  "Neither approve nor disapprove",
+                  "Somewhat approve", "Approve", "Strongly approve")
+
+lvl_intent7 <- c("Definitely will not", "Probably will not", "Maybe will not",
+                 "Unsure", "Maybe will", "Probably will", "Definitely will")
+
+lvl_ideology <- c("Extremely liberal", "Liberal", "Slightly liberal",
+                  "Moderate / middle of the road",
+                  "Slightly conservative", "Conservative", "Extremely conservative")
+
+lvl_degree <- c("Did not complete high school",
+                "High school graduate (diploma)", "High school graduate (GED)",
+                "Some college (1–4 years, no degree)", "Associate's degree",
+                "Bachelor's degree", "Master's degree",
+                "Professional degree (MD, JD, etc.)", "Doctoral degree (PhD, EdD, etc.)")
+
+lvl_income <- c("Less than $5,000", "$5,000–$11,999", "$12,000–$15,999",
+                "$16,000–$24,999", "$25,000–$34,999", "$35,000–$49,999",
+                "$50,000–$74,999", "$75,000–$99,999", "$100,000–$149,999",
+                "$150,000 or greater", "Prefer not to say / Don't know")
+
+lvl_gender <- c("Man", "Woman", "Non-binary / gender non-conforming",
+                "Transgender man", "Transgender woman", "Genderqueer / gender fluid",
+                "Additional gender category", "Prefer to self-describe")
+
+lvl_lgbtq  <- c("Yes, I identify as LGBTQ+", "Prefer not to say",
+                "No, I do not identify as LGBTQ+")
+
+lvl_race <- c("White / Caucasian", "Black / African American",
+              "Hispanic / Latino", "Asian / Asian American",
+              "Native American / Alaska Native", "Pacific Islander",
+              "Middle Eastern / North African", "Multiracial", "Other")
+
+lvl_univ_aff <- c("I am currently enrolled as a student",
+                  "I am currently employed (faculty, staff, or administration)",
+                  "I was previously enrolled as a student",
+                  "I was previously employed",
+                  "A family member currently attends or works at a university",
+                  "None of the above")
+```
+
+```{r helpers}
 source(here("Step2", "analysis", "config.R"))
-
 d <- readRDS(CLEANED_RDS)
+
+# Derive MacArthur ladder rung from On/Off indicator columns
+ses_cols <- paste0("ses_subjective_", 1:10)
+d <- d |> mutate(
+  ses_ladder = apply(d[, ses_cols], 1, function(r) {
+    on <- which(r == "On"); if (length(on) == 0) NA_integer_ else as.integer(on[1])
+  })
+)
 
 outcome_vars <- c(
   "share_direct", "share_social", "read_more",
-  "article_agree_1", "article_agree_2",
+  "article_self_relev", "article_social_relev",
   "govtfund_general", "govtfund_cuts",
   "behavior_intent_1", "behavior_intent_2", "behavior_intent_3",
-  "climate_1", "climate_2",
   "climate_3_1", "climate_3_2", "climate_3_3"
 )
 
 outcome_labels <- c(
-  share_direct      = "Share directly",
-  share_social      = "Share on social media",
-  read_more         = "Want to read more",
-  article_agree_1   = "Article agreement (1)",
-  article_agree_2   = "Article agreement (2)",
-  govtfund_general  = "Govt funding (general)",
-  govtfund_cuts     = "Disapprove of funding cuts",
-  behavior_intent_1 = "Behavioral intention (1)",
-  behavior_intent_2 = "Behavioral intention (2)",
-  behavior_intent_3 = "Behavioral intention (3)",
-  climate_1         = "Climate belief (1)",
-  climate_2         = "Climate belief (2)",
-  climate_3_1       = "Climate belief (3a)",
-  climate_3_2       = "Climate belief (3b)",
-  climate_3_3       = "Climate belief (3c)"
+  share_direct         = "Share directly",
+  share_social         = "Share on social media",
+  read_more            = "Want to read more",
+  article_self_relev   = "Self-relevance",
+  article_social_relev = "Social relevance",
+  govtfund_general     = "Govt funding (general)",
+  govtfund_cuts        = "Approval of funding cuts",
+  behavior_intent_1    = "Behavioral intention (1)",
+  behavior_intent_2    = "Behavioral intention (2)",
+  behavior_intent_3    = "Behavioral intention (3)",
+  climate_3_1          = "Climate attitude (3a)",
+  climate_3_2          = "Climate attitude (3b)",
+  climate_3_3          = "Climate attitude (3c)"
 )
 
-condition_colors <- c(control = "#888888", relevance = "#011F5B", action = "#990000")
-```
-
-## Sample
-
-**N = `r nrow(d)`**
-
-```{r condition-n}
-d |>
-  count(condition) |>
-  mutate(pct = round(n / sum(n) * 100, 1)) |>
-  kable(col.names = c("Condition", "N", "%"))
-```
-
-```{r variant-n}
-d |>
-  count(condition, variant_seen) |>
-  kable(col.names = c("Condition", "Variant", "N"))
-```
-
-## Means and SDs by condition
-
-```{r means-table}
-map_dfr(outcome_vars, function(var) {
+# Pre-compute condition means for all outcomes
+means_df <- map_dfr(outcome_vars, function(var) {
+  lbl <- outcome_labels[[var]]
   d |>
     group_by(condition) |>
-    summarise(
-      M  = round(mean(.data[[var]], na.rm = TRUE), 2),
-      SD = round(sd(.data[[var]],   na.rm = TRUE), 2),
-      .groups = "drop"
-    ) |>
-    mutate(Outcome = outcome_labels[[var]])
-}) |>
-  select(Outcome, condition, M, SD) |>
-  arrange(Outcome, condition) |>
-  kable()
-```
+    summarise(M  = mean(.data[[var]], na.rm = TRUE),
+              SD = sd(.data[[var]],  na.rm = TRUE),
+              n  = sum(!is.na(.data[[var]])),
+              .groups = "drop") |>
+    mutate(SE = SD / sqrt(n), var = var, label = lbl)
+})
 
-## Distributions by outcome
+# Apply numeric→label mapping for display
+recode_num <- function(x, levels) {
+  factor(levels[as.integer(x)], levels = levels)
+}
 
-```{r distributions, fig.height=4, fig.width=8, results='asis'}
-for (var in outcome_vars) {
-  plot_data <- d |> filter(!is.na(.data[[var]]), !is.na(condition))
-  if (nrow(plot_data) == 0) next
-  p <- ggplot(plot_data, aes(x = .data[[var]], fill = condition)) +
-    geom_histogram(bins = 15, alpha = 0.8, position = "identity") +
+# Frequency table (reactable)
+freq_tab <- function(data, col, levels = NULL) {
+  df <- data |>
+    filter(!is.na(.data[[col]]), .data[[col]] != "") |>
+    count(Response = .data[[col]], name = "n") |>
+    mutate(Pct = round(100 * n / sum(n), 1))
+  if (!is.null(levels)) {
+    present <- intersect(levels, as.character(df$Response))
+    df <- df |> mutate(Response = factor(Response, levels = present)) |> arrange(Response)
+  } else {
+    df <- df |> arrange(desc(n))
+  }
+  df |> reactable(striped = TRUE, compact = TRUE, defaultPageSize = 15)
+}
+
+# Bar chart: single variable, overall
+bar_single <- function(data, col, title = "", levels = NULL, fill = palette_main) {
+  df <- data |>
+    filter(!is.na(.data[[col]]), .data[[col]] != "") |>
+    count(response = .data[[col]])
+  if (!is.null(levels)) {
+    present <- intersect(levels, as.character(df$response))
+    df <- df |> mutate(response = factor(response, levels = present))
+  } else {
+    df <- df |> mutate(response = fct_reorder(response, n))
+  }
+  ggplot(df, aes(x = response, y = n)) +
+    geom_col(fill = fill) +
+    geom_text(aes(label = n), hjust = -0.2, size = 3.5) +
+    coord_flip() +
+    expand_limits(y = max(df$n) * 1.15) +
+    labs(x = "", y = "Count", title = title) +
+    plot_aes
+}
+
+# Bar chart: Likert variable, faceted by condition
+bar_by_condition <- function(data, col, title = "", levels = NULL) {
+  df <- data |>
+    filter(!is.na(.data[[col]]), !is.na(condition)) |>
+    count(condition, response = .data[[col]])
+  if (!is.null(levels)) {
+    present <- intersect(levels, as.character(df$response))
+    df <- df |> mutate(response = factor(response, levels = present))
+  }
+  ggplot(df, aes(x = response, y = n, fill = condition)) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~condition, ncol = 3) +
+    scale_fill_manual(values = condition_colors) +
+    coord_flip() +
+    labs(x = "", y = "Count", title = title) +
+    plot_aes
+}
+
+# Histogram: 0–100 slider, faceted by condition
+hist_slider <- function(data, col, title = "") {
+  df <- data |> filter(!is.na(.data[[col]]), !is.na(condition))
+  ggplot(df, aes(x = .data[[col]], fill = condition)) +
+    geom_histogram(bins = 20, alpha = 0.9) +
     facet_wrap(~condition, ncol = 3) +
     scale_fill_manual(values = condition_colors, drop = FALSE) +
-    labs(title = outcome_labels[[var]], x = NULL, y = "Count") +
+    labs(title = title, x = NULL, y = "Count") +
     theme_minimal(base_size = 11) +
     theme(legend.position = "none")
-  print(p)
+}
+
+# Means ± SE plot for a subset of outcomes
+means_plot <- function(vars, height = 4) {
+  df <- means_df |>
+    filter(var %in% vars) |>
+    filter(!is.na(M), is.finite(M)) |>
+    mutate(label = factor(label, levels = outcome_labels[vars]))
+  ggplot(df, aes(x = condition, y = M, fill = condition)) +
+    geom_col(width = 0.6, alpha = 0.9) +
+    geom_errorbar(aes(ymin = M - SE, ymax = M + SE), width = 0.2) +
+    facet_wrap(~label, scales = "free_y", ncol = min(3, length(vars))) +
+    scale_fill_manual(values = condition_colors) +
+    labs(x = NULL, y = "Mean (±1 SE)") +
+    theme_minimal(base_size = 10) +
+    theme(legend.position = "none",
+          axis.text.x = element_text(angle = 20, hjust = 1))
+}
+
+# Means table for a subset of outcomes
+means_table <- function(vars) {
+  means_df |>
+    filter(var %in% vars) |>
+    mutate(M = round(M, 2), SD = round(SD, 2)) |>
+    select(Outcome = label, Condition = condition, M, SD, n) |>
+    arrange(Outcome, Condition) |>
+    reactable(striped = TRUE, compact = TRUE, groupBy = "Outcome",
+              defaultPageSize = length(vars) * 3)
+}
+
+# Stacked proportional bar: matrix question
+bar_matrix <- function(data, cols, item_labels, title = "", scale_levels = NULL,
+                       pal = "RdYlGn", pal_dir = 1, legend_rows = 2) {
+  df <- data |>
+    select(all_of(cols)) |>
+    rename_with(~ item_labels) |>
+    pivot_longer(everything(), names_to = "item", values_to = "response") |>
+    filter(!is.na(response), response != "")
+  if (!is.null(scale_levels)) {
+    present <- intersect(scale_levels, as.character(unique(df$response)))
+    df <- df |> mutate(response = factor(response, levels = present))
+  }
+  df |>
+    count(item, response) |>
+    group_by(item) |>
+    mutate(pct  = n / sum(n),
+           item = factor(item, levels = rev(item_labels))) |>
+    ggplot(aes(x = item, y = pct, fill = response)) +
+    geom_col(position = "fill", width = 0.7) +
+    coord_flip() +
+    scale_y_continuous(labels = percent_format(accuracy = 1)) +
+    scale_fill_brewer(palette = pal, direction = pal_dir) +
+    labs(x = "", y = "Proportion", fill = "", title = title) +
+    plot_aes +
+    guides(fill = guide_legend(reverse = TRUE, nrow = legend_rows))
+}
+
+# Frequency table: matrix question
+freq_matrix <- function(data, cols, item_labels, scale_levels = NULL) {
+  df <- data |>
+    select(all_of(cols)) |>
+    rename_with(~ item_labels) |>
+    pivot_longer(everything(), names_to = "Item", values_to = "Response") |>
+    filter(!is.na(Response), Response != "") |>
+    count(Item, Response) |>
+    group_by(Item) |>
+    mutate(Pct = round(100 * n / sum(n), 1))
+  if (!is.null(scale_levels)) {
+    present <- intersect(scale_levels, as.character(unique(df$Response)))
+    df <- df |> mutate(Response = factor(Response, levels = present)) |>
+      arrange(Item, Response)
+  }
+  df |>
+    reactable(groupBy = "Item", striped = TRUE, compact = TRUE, filterable = TRUE,
+              defaultPageSize = 20,
+              columns = list(Item = colDef(minWidth = 250)))
+}
+
+# Multi-select: count per indicator column
+bar_multiselect <- function(data, cols, item_labels, title = "", fill = palette_main) {
+  df <- tibble(
+    item = item_labels,
+    n    = sapply(cols, function(c) sum(data[[c]] == 1, na.rm = TRUE))
+  ) |> mutate(item = fct_reorder(item, n))
+  ggplot(df, aes(x = item, y = n)) +
+    geom_col(fill = fill) +
+    geom_text(aes(label = n), hjust = -0.2, size = 3.5) +
+    coord_flip() +
+    expand_limits(y = max(df$n) * 1.15) +
+    labs(x = "", y = "Count", title = title) +
+    plot_aes
 }
 ```
 
-## Means plot
+**N = `r nrow(d)`** (Cohort 1, 2026-06-04; exclusions applied — see `00_clean.html`).
 
-```{r means-plot, fig.height=10, fig.width=10}
-means_df <- map_dfr(outcome_vars, function(var) {
-  d |>
-    group_by(condition) |>
-    summarise(
-      mean = mean(.data[[var]], na.rm = TRUE),
-      se   = sd(.data[[var]], na.rm = TRUE) / sqrt(sum(!is.na(.data[[var]]))),
-      .groups = "drop"
-    ) |>
-    mutate(variable = outcome_labels[[var]])
-}) |>
-  filter(!is.na(mean), is.finite(mean)) |>
-  mutate(variable = factor(variable, levels = unname(outcome_labels)))
+Condition counts: `r paste(paste0(levels(d$condition), " (", table(d$condition), ")"), collapse = " | ")`.
 
-ggplot(means_df, aes(x = condition, y = mean, fill = condition)) +
-  geom_col(width = 0.6, alpha = 0.9) +
-  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = 0.2) +
-  facet_wrap(~variable, scales = "free_y", ncol = 3) +
-  scale_fill_manual(values = condition_colors) +
-  labs(x = NULL, y = "Mean (±1 SE)") +
-  theme_minimal(base_size = 10) +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 20, hjust = 1))
+---
+
+# 1. Article Ratings {.tabset}
+
+## Sharing {.unnumbered}
+
+**share_direct**: Would you share this article directly with someone you know?
+
+```{r share-direct}
+hist_slider(d, "share_direct", "Share directly (0–100)")
 ```
 
-## Outcome correlations
+**share_social**: Would you share this article by posting on social media?
 
-```{r correlations, fig.height=8, fig.width=9}
+```{r share-social}
+hist_slider(d, "share_social", "Share on social media (0–100)")
+```
+
+**read_more**: How much would you want to read more articles like this one?
+
+```{r read-more}
+hist_slider(d, "read_more", "Want to read more (0–100)")
+```
+
+## Relevance {.unnumbered}
+
+**article_self_relev** / **article_social_relev**: "Rate your agreement with the following statements."
+
+```{r relevance}
+d_rel <- d |> mutate(
+  article_self_relev   = recode_num(article_self_relev,   lvl_agree7),
+  article_social_relev = recode_num(article_social_relev, lvl_agree7)
+)
+bar_by_condition(d_rel, "article_self_relev",
+                 "This article is relevant to me", levels = lvl_agree7)
+freq_tab(d_rel, "article_self_relev", levels = lvl_agree7)
+
+bar_by_condition(d_rel, "article_social_relev",
+                 "This article is relevant to people I know", levels = lvl_agree7)
+freq_tab(d_rel, "article_social_relev", levels = lvl_agree7)
+```
+
+## Means by condition {.unnumbered}
+
+```{r article-means, fig.height = 5}
+means_plot(c("share_direct", "share_social", "read_more",
+             "article_self_relev", "article_social_relev"))
+means_table(c("share_direct", "share_social", "read_more",
+              "article_self_relev", "article_social_relev"))
+```
+
+---
+
+# 2. Government Funding {.tabset}
+
+## General Attitude {.unnumbered}
+
+**govtfund_general**: Do you approve or disapprove of the federal government using taxpayer funds to invest in research at colleges and universities?
+
+```{r gf-general}
+d_gf <- d |> mutate(govtfund_general = recode_num(govtfund_general, lvl_approve7))
+bar_by_condition(d_gf, "govtfund_general",
+                 "Approval of federal research funding", levels = lvl_approve7)
+freq_tab(d_gf, "govtfund_general", levels = lvl_approve7)
+```
+
+## Attitude Toward Cuts {.unnumbered}
+
+**govtfund_cuts**: Do you disapprove or approve of cuts to funding for scientific research? (1 = Strongly disapprove, 7 = Strongly approve)
+
+```{r gf-cuts}
+d_gf2 <- d |> mutate(govtfund_cuts = recode_num(govtfund_cuts, lvl_approve7))
+bar_by_condition(d_gf2, "govtfund_cuts",
+                 "Approval of funding cuts", levels = lvl_approve7)
+freq_tab(d_gf2, "govtfund_cuts", levels = lvl_approve7)
+```
+
+## Means by condition {.unnumbered}
+
+```{r gf-means, fig.height = 4}
+means_plot(c("govtfund_general", "govtfund_cuts"))
+means_table(c("govtfund_general", "govtfund_cuts"))
+```
+
+---
+
+# 3. Behavioral Intentions {.tabset}
+
+## Intent to Act {.unnumbered}
+
+How likely are you to do each of the following in the next 3 months?
+
+```{r behavioral-intent, fig.height = 4}
+d_bi <- d |> mutate(
+  behavior_intent_1 = recode_num(behavior_intent_1, lvl_intent7),
+  behavior_intent_2 = recode_num(behavior_intent_2, lvl_intent7),
+  behavior_intent_3 = recode_num(behavior_intent_3, lvl_intent7)
+)
+bi_cols   <- c("behavior_intent_1", "behavior_intent_2", "behavior_intent_3")
+bi_labels <- c("Behavioral intention (1)", "Behavioral intention (2)",
+               "Behavioral intention (3)")
+
+bar_matrix(d_bi, bi_cols, bi_labels,
+           title        = "Behavioral intentions",
+           scale_levels = lvl_intent7,
+           pal = "Blues", pal_dir = 1, legend_rows = 2)
+freq_matrix(d_bi, bi_cols, bi_labels, scale_levels = lvl_intent7)
+```
+
+## Means by condition {.unnumbered}
+
+```{r bi-means, fig.height = 4}
+means_plot(c("behavior_intent_1", "behavior_intent_2", "behavior_intent_3"))
+means_table(c("behavior_intent_1", "behavior_intent_2", "behavior_intent_3"))
+```
+
+---
+
+# 4. Climate Attitudes {.tabset}
+
+## Climate Attitudes (climate_3) {.unnumbered}
+
+```{r climate3, fig.height = 4}
+d_cl <- d |> mutate(
+  climate_3_1 = recode_num(climate_3_1, lvl_agree7),
+  climate_3_2 = recode_num(climate_3_2, lvl_agree7),
+  climate_3_3 = recode_num(climate_3_3, lvl_agree7)
+)
+cl_cols   <- c("climate_3_1", "climate_3_2", "climate_3_3")
+cl_labels <- c("Climate attitude (3a)", "Climate attitude (3b)", "Climate attitude (3c)")
+
+bar_matrix(d_cl, cl_cols, cl_labels,
+           title        = "Climate attitudes",
+           scale_levels = lvl_agree7,
+           pal = "RdYlBu", pal_dir = 1, legend_rows = 2)
+freq_matrix(d_cl, cl_cols, cl_labels, scale_levels = lvl_agree7)
+```
+
+## Means by condition {.unnumbered}
+
+```{r cl-means, fig.height = 4}
+means_plot(c("climate_3_1", "climate_3_2", "climate_3_3"))
+means_table(c("climate_3_1", "climate_3_2", "climate_3_3"))
+```
+
+---
+
+# 5. Climate Belief Covariates {.tabset}
+
+`climate_1` and `climate_2` are categorical pre-attitude items, not comparable to the 7-point outcome scales.
+
+## Global Warming Happening {.unnumbered}
+
+**climate_1**: Do you think global warming is happening?
+
+```{r clim1}
+lvl_gw <- c("Yes", "No", "Don't know")
+d_cov  <- d |> mutate(climate_1 = recode_num(climate_1, lvl_gw))
+bar_single(d_cov, "climate_1",
+           title = "Do you think global warming is happening?", levels = lvl_gw)
+freq_tab(d_cov, "climate_1", levels = lvl_gw)
+```
+
+## Cause of Warming {.unnumbered}
+
+**climate_2**: Assuming global warming is happening, do you think it is...
+
+```{r clim2}
+lvl_cause <- c("Mostly human-caused", "Mostly naturally occurring",
+               "Caused about equally by humans and natural changes", "Other")
+d_cov2 <- d |> mutate(climate_2 = recode_num(climate_2, lvl_cause))
+bar_single(d_cov2, "climate_2", title = "Cause of global warming", levels = lvl_cause)
+freq_tab(d_cov2, "climate_2", levels = lvl_cause)
+```
+
+---
+
+# 6. Outcome Correlations
+
+```{r correlations, fig.height = 8, fig.width = 9}
 cor_mat <- d |>
   select(all_of(outcome_vars)) |>
   cor(use = "pairwise.complete.obs") |>
@@ -154,4 +500,139 @@ ggplot(cor_df, aes(x = var1, y = var2, fill = r)) +
   labs(x = NULL, y = NULL, fill = "r") +
   theme_minimal(base_size = 9) +
   theme(axis.text.x = element_text(angle = 40, hjust = 1))
+```
+
+---
+
+# 7. Demographics {.tabset}
+
+## Age {.unnumbered}
+
+```{r demo-age}
+d |>
+  mutate(Age = as.numeric(Age)) |>
+  summarise(M   = round(mean(Age, na.rm = TRUE), 1),
+            SD  = round(sd(Age,   na.rm = TRUE), 1),
+            Min = min(Age, na.rm = TRUE),
+            Max = max(Age, na.rm = TRUE)) |>
+  reactable(compact = TRUE)
+
+d |>
+  mutate(Age = as.numeric(Age)) |>
+  filter(!is.na(Age)) |>
+  ggplot(aes(x = Age)) +
+  geom_histogram(binwidth = 5, fill = palette_main, color = "white") +
+  labs(x = "Age", y = "Count", title = "Age distribution") +
+  plot_aes
+```
+
+## Gender {.unnumbered}
+
+```{r demo-gender}
+d_gend <- d |> mutate(gender_label = recode_num(gender, lvl_gender))
+bar_single(d_gend, "gender_label", title = "Gender identity", levels = lvl_gender)
+freq_tab(d_gend, "gender_label", levels = lvl_gender)
+```
+
+## Sex (Prolific) {.unnumbered}
+
+```{r demo-sex}
+bar_single(d, "Sex", title = "Sex (Prolific-provided)")
+freq_tab(d, "Sex")
+```
+
+## Race / Ethnicity {.unnumbered}
+
+```{r demo-race, fig.height = 5}
+race_cols <- paste0("race_", 1:9)
+bar_multiselect(d, race_cols, lvl_race,
+                title = "Race / ethnicity (select all that apply)")
+
+d |>
+  mutate(race_self_resp = na_if(race_self, "")) |>
+  filter(!is.na(race_self_resp)) |>
+  count(race_self_resp, sort = TRUE) |>
+  reactable(striped = TRUE, compact = TRUE,
+            columns = list(race_self_resp = colDef(name = "Self-description")))
+```
+
+## Ethnicity (Prolific) {.unnumbered}
+
+```{r demo-ethnicity}
+bar_single(d, "Ethnicity simplified", title = "Ethnicity (Prolific-provided)")
+freq_tab(d, "Ethnicity simplified")
+```
+
+## LGBTQ+ {.unnumbered}
+
+```{r demo-lgbtq}
+d_lgbtq <- d |> mutate(lgbtq_label = recode_num(LGBTQ, lvl_lgbtq))
+bar_single(d_lgbtq, "lgbtq_label", title = "LGBTQ+ identity", levels = lvl_lgbtq)
+freq_tab(d_lgbtq, "lgbtq_label", levels = lvl_lgbtq)
+```
+
+## Education {.unnumbered}
+
+```{r demo-edu}
+d_edu <- d |> mutate(ses_degree_label = recode_num(ses_degree, lvl_degree))
+bar_single(d_edu, "ses_degree_label",
+           title = "Highest education level", levels = lvl_degree)
+freq_tab(d_edu, "ses_degree_label", levels = lvl_degree)
+```
+
+## Income {.unnumbered}
+
+```{r demo-income}
+d_inc <- d |> mutate(income_label = recode_num(ses_income_household, lvl_income))
+bar_single(d_inc, "income_label", title = "Household income", levels = lvl_income)
+freq_tab(d_inc, "income_label", levels = lvl_income)
+```
+
+## Subjective SES {.unnumbered}
+
+MacArthur ladder (1 = bottom, 10 = top): relative standing in the US by money, education, and job prestige.
+
+```{r demo-ses}
+d |>
+  filter(!is.na(ses_ladder)) |>
+  summarise(M = round(mean(ses_ladder), 1), SD = round(sd(ses_ladder), 1),
+            Min = min(ses_ladder), Max = max(ses_ladder)) |>
+  reactable(compact = TRUE)
+
+d |>
+  filter(!is.na(ses_ladder)) |>
+  ggplot(aes(x = factor(ses_ladder))) +
+  geom_bar(fill = palette_main) +
+  labs(x = "Ladder rung", y = "Count",
+       title = "Subjective SES (MacArthur ladder)") +
+  plot_aes
+```
+
+## Political Ideology {.unnumbered}
+
+```{r demo-ideology}
+d_pol <- d |> mutate(ideology_label = recode_num(politics_ideology, lvl_ideology))
+bar_single(d_pol, "ideology_label",
+           title = "Political ideology", levels = lvl_ideology)
+freq_tab(d_pol, "ideology_label", levels = lvl_ideology)
+```
+
+## University Affiliation {.unnumbered}
+
+```{r demo-affil, fig.height = 5}
+aff_cols <- paste0("univ_affiliate_", 1:6)
+bar_multiselect(d, aff_cols, lvl_univ_aff,
+                title = "University affiliation (select all that apply)")
+```
+
+## Student & Employment Status {.unnumbered}
+
+```{r demo-student}
+bar_single(d, "Student status", title = "Student status (Prolific-provided)")
+freq_tab(d, "Student status")
+```
+
+```{r demo-employment, fig.height = 4}
+bar_single(d, "Employment status", title = "Employment status (Prolific-provided)")
+freq_tab(d, "Employment status")
 ```

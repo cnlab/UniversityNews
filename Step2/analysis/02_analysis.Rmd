@@ -1,113 +1,125 @@
 ---
 title: "Step 2 — Analysis"
 subtitle: "Action and Relevance conditions vs Control"
+author: "Nicole Cooper"
 date: "`r Sys.Date()`"
 output:
   html_document:
-    self_contained: true
-    toc: true
-    toc_depth: 2
-    toc_float: true
     code_folding: hide
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    theme: united
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                      fig.width = 9, fig.height = 6)
+options(scipen = 999)
+```
 
-library(tidyverse)
-library(broom)
-library(effectsize)
-library(here)
-library(knitr)
+```{r packages}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, broom, effectsize, emmeans, reactable, here)
+```
 
+```{r load}
 source(here("Step2", "analysis", "config.R"))
-
 d <- readRDS(CLEANED_RDS)
 
 outcomes <- c(
-  share_direct      = "Share directly",
-  share_social      = "Share on social media",
-  read_more         = "Want to read more",
-  article_agree_1   = "Article agreement (1)",
-  article_agree_2   = "Article agreement (2)",
-  govtfund_general  = "Govt funding (general)",
-  govtfund_cuts     = "Disapprove of funding cuts",
-  behavior_intent_1 = "Behavioral intention (1)",
-  behavior_intent_2 = "Behavioral intention (2)",
-  behavior_intent_3 = "Behavioral intention (3)",
-  climate_1         = "Climate belief (1)",
-  climate_2         = "Climate belief (2)",
-  climate_3_1       = "Climate belief (3a)",
-  climate_3_2       = "Climate belief (3b)",
-  climate_3_3       = "Climate belief (3c)"
+  share_direct         = "Share directly",
+  share_social         = "Share on social media",
+  read_more            = "Want to read more",
+  article_self_relev   = "Self-relevance",
+  article_social_relev = "Social relevance",
+  govtfund_general     = "Govt funding (general)",
+  govtfund_cuts        = "Approval of funding cuts",
+  behavior_intent_1    = "Behavioral intention (1)",
+  behavior_intent_2    = "Behavioral intention (2)",
+  behavior_intent_3    = "Behavioral intention (3)",
+  climate_3_1          = "Climate attitude (3a)",
+  climate_3_2          = "Climate attitude (3b)",
+  climate_3_3          = "Climate attitude (3c)"
+)
+
+covariates <- c(
+  climate_1 = "Global warming happening? (1–3)",
+  climate_2 = "Cause of warming (1–4)"
 )
 
 condition_colors <- c(control = "#888888", relevance = "#011F5B", action = "#990000")
+variant_colors   <- c(
+  relevance1 = "#011F5B", relevance2 = "#3A5FA0", relevance3 = "#7B9FD4",
+  action1    = "#990000", action2    = "#CC3333", action3    = "#FF7777"
+)
+
+sig_stars <- function(p) case_when(
+  p < .001 ~ "***", p < .01 ~ "**", p < .05 ~ "*", p < .10 ~ "†", TRUE ~ ""
+)
+
+# Moderators (centered continuous)
+ses_cols <- paste0("ses_subjective_", 1:10)
+d <- d |> mutate(
+  Age = as.numeric(Age),
+  ses_ladder = apply(d[, ses_cols], 1, function(r) {
+    on <- which(r == "On"); if (length(on) == 0) NA_integer_ else as.integer(on[1])
+  }),
+  univ_affiliated = as.integer(
+    rowSums(cbind(univ_affiliate_1, univ_affiliate_2, univ_affiliate_3,
+                  univ_affiliate_4, univ_affiliate_5), na.rm = TRUE) > 0
+  ),
+  age_c       = scale(Age,               center = TRUE, scale = FALSE)[, 1],
+  ideology_c  = scale(politics_ideology, center = TRUE, scale = FALSE)[, 1],
+  climate1_c  = scale(climate_1,         center = TRUE, scale = FALSE)[, 1],
+  climate2_c  = scale(climate_2,         center = TRUE, scale = FALSE)[, 1]
+)
+
+moderators <- c(
+  age_c          = "Age",
+  ideology_c     = "Political ideology",
+  climate1_c     = "Climate belief (happening)",
+  climate2_c     = "Climate belief (cause)",
+  univ_affiliated = "Univ. affiliated"
+)
 ```
-
-## Design
-
-Between-subjects, 3 conditions. Reference level: **control**. For each outcome, a separate linear model estimates:
-
-- **Relevance vs Control** (`conditionrelevance`)
-- **Action vs Control** (`conditionaction`)
 
 **N = `r nrow(d)`** (`r paste(paste0(levels(d$condition), ": ", table(d$condition)), collapse = " | ")`)
 
-## Models
+Between-subjects, 3 conditions. Reference level: **control**. Each outcome is modeled separately; coefficients are treatment vs control contrasts.
+
+---
+
+# 1. Primary analysis: condition effects {.tabset}
 
 ```{r models}
 models <- map(names(outcomes), function(var) {
   tryCatch(
-    lm(as.formula(paste(var, "~ condition")), data = d |> filter(!is.na(.data[[var]]))),
+    lm(as.formula(paste(var, "~ condition")),
+       data = d |> filter(!is.na(.data[[var]]))),
     error = function(e) NULL
   )
-}) |>
-  set_names(names(outcomes))
+}) |> set_names(names(outcomes))
 
 skipped <- names(Filter(is.null, models))
-if (length(skipped) > 0) {
+if (length(skipped) > 0)
   cat("Skipped (insufficient data):", paste(skipped, collapse = ", "), "\n")
-}
 models <- Filter(Negate(is.null), models)
-```
 
-## Contrasts vs Control
-
-```{r contrasts}
 results <- map_dfr(names(models), function(var) {
   tidy(models[[var]], conf.int = TRUE) |>
     filter(term %in% c("conditionrelevance", "conditionaction")) |>
-    mutate(
-      outcome  = outcomes[[var]],
-      contrast = str_remove(term, "^condition")
-    )
+    mutate(outcome  = outcomes[[var]],
+           contrast = str_remove(term, "^condition"))
 }) |>
-  select(outcome, contrast, estimate, std.error, statistic, p.value, conf.low, conf.high) |>
-  mutate(
-    across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
-    statistic = round(statistic, 2),
-    p.value   = round(p.value, 3),
-    sig       = case_when(
-      p.value < .001 ~ "***",
-      p.value < .01  ~ "**",
-      p.value < .05  ~ "*",
-      p.value < .10  ~ "†",
-      TRUE           ~ ""
-    )
-  )
+  select(outcome, contrast, estimate, std.error, statistic, p.value,
+         conf.low, conf.high) |>
+  mutate(across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
+         statistic = round(statistic, 2),
+         p.value   = round(p.value,   3),
+         sig       = sig_stars(p.value))
 
-results |>
-  select(Outcome = outcome, Contrast = contrast,
-         B = estimate, SE = std.error,
-         t = statistic, p = p.value, sig,
-         `95% CI low` = conf.low, `95% CI high` = conf.high) |>
-  kable()
-```
-
-## Effect sizes (Cohen's *d*)
-
-```{r cohens-d}
 cohens_d_results <- map_dfr(names(models), function(var) {
   bind_rows(
     cohens_d(as.formula(paste(var, "~ condition")),
@@ -120,44 +132,34 @@ cohens_d_results <- map_dfr(names(models), function(var) {
 }) |>
   select(outcome, contrast, d = Cohens_d, ci_low = CI_low, ci_high = CI_high) |>
   mutate(across(where(is.numeric), ~round(., 3)))
-
-cohens_d_results |>
-  kable(col.names = c("Outcome", "Contrast", "Cohen's d", "95% CI low", "95% CI high"))
 ```
 
-## Omnibus F-tests
-
-```{r omnibus}
-map_dfr(names(models), function(var) {
-  glance(models[[var]]) |>
-    mutate(outcome = outcomes[[var]])
-}) |>
-  select(Outcome = outcome,
-         `R²` = r.squared, `adj. R²` = adj.r.squared,
-         F = statistic, p = p.value,
-         df, `df resid.` = df.residual) |>
-  mutate(across(where(is.numeric), ~round(., 3))) |>
-  kable()
-```
-
-## Summary table
+## Summary {.unnumbered}
 
 ```{r summary-table}
 results |>
   left_join(
-    cohens_d_results |>
-      rename(`Cohen's d` = d, `d CI low` = ci_low, `d CI high` = ci_high),
+    cohens_d_results |> rename(`Cohen's d` = d, `d CI low` = ci_low, `d CI high` = ci_high),
     by = c("outcome", "contrast")
   ) |>
   select(Outcome = outcome, Contrast = contrast,
-         B = estimate, p = p.value, sig,
-         `Cohen's d`, `d CI low`, `d CI high`) |>
-  kable()
+         B = estimate, SE = std.error, t = statistic,
+         p = p.value, sig, `Cohen's d`, `d CI low`, `d CI high`) |>
+  arrange(Outcome, Contrast) |>
+  reactable(
+    striped = TRUE, compact = TRUE, filterable = TRUE,
+    defaultPageSize = nrow(results),
+    columns = list(
+      sig       = colDef(name = ""),
+      `d CI low`  = colDef(name = "d CI low"),
+      `d CI high` = colDef(name = "d CI high")
+    )
+  )
 ```
 
-## Coefficient plot
+## Coefficient plot {.unnumbered}
 
-```{r coef-plot, fig.height=8, fig.width=9}
+```{r coef-plot, fig.height = 8}
 results |>
   mutate(
     outcome  = factor(outcome, levels = rev(unname(outcomes))),
@@ -175,34 +177,47 @@ results |>
   theme(legend.position = "bottom")
 ```
 
-## Save results
+## Contrasts {.unnumbered}
 
-```{r save}
-results_out <- list(
-  models    = models,
-  contrasts = results,
-  cohens_d  = cohens_d_results,
-  omnibus   = map_dfr(names(models), ~glance(models[[.x]]) |> mutate(outcome = .x))
-)
-
-saveRDS(results_out, RESULTS_RDS)
+```{r contrasts}
+results |>
+  select(Outcome = outcome, Contrast = contrast,
+         B = estimate, SE = std.error, t = statistic,
+         p = p.value, sig, `CI low` = conf.low, `CI high` = conf.high) |>
+  reactable(striped = TRUE, compact = TRUE, filterable = TRUE,
+            defaultPageSize = nrow(results))
 ```
 
-Results saved to `r RESULTS_RDS`.
+## Effect sizes {.unnumbered}
+
+```{r cohens-d}
+cohens_d_results |>
+  select(Outcome = outcome, Contrast = contrast,
+         `Cohen's d` = d, `CI low` = ci_low, `CI high` = ci_high) |>
+  reactable(striped = TRUE, compact = TRUE, filterable = TRUE,
+            defaultPageSize = nrow(cohens_d_results))
+```
+
+## Omnibus F-tests {.unnumbered}
+
+```{r omnibus}
+map_dfr(names(models), function(var) {
+  glance(models[[var]]) |> mutate(outcome = outcomes[[var]])
+}) |>
+  select(Outcome = outcome,
+         `R²` = r.squared, `adj. R²` = adj.r.squared,
+         F = statistic, p = p.value, df, `df resid.` = df.residual) |>
+  mutate(across(where(is.numeric), ~round(., 3))) |>
+  reactable(striped = TRUE, compact = TRUE, defaultPageSize = length(models))
+```
 
 ---
 
-# Secondary analyses: variant-level
+# 2. Variant-level analyses {.tabset}
 
-Within the relevance and action conditions, participants were randomly assigned to one of three headline/lede variants. These analyses ask:
-
-1. Does each of the 6 variants differ from control?
-2. Do the 3 relevance variants differ from each other?
-3. Do the 3 action variants differ from each other?
+Within the relevance and action conditions, participants saw one of three headline/lede variants. These analyses ask: (1) does each variant differ from control, and (2) do the three variants within each condition differ from each other?
 
 ```{r variant-setup}
-library(emmeans)
-
 variant_levels <- c("control",
                     "relevance1", "relevance2", "relevance3",
                     "action1",    "action2",    "action3")
@@ -210,15 +225,6 @@ variant_levels <- c("control",
 d <- d |>
   mutate(variant_condition = factor(variant_seen, levels = variant_levels))
 
-cat("Variant counts:\n")
-print(table(d$variant_condition, useNA = "ifany"))
-```
-
-## Variant-level models
-
-One model per outcome, 7-level factor with control as reference. Coefficients are each variant vs control.
-
-```{r variant-models}
 variant_models <- map(names(outcomes), function(var) {
   tryCatch(
     lm(as.formula(paste(var, "~ variant_condition")),
@@ -228,48 +234,23 @@ variant_models <- map(names(outcomes), function(var) {
 }) |>
   set_names(names(outcomes)) |>
   Filter(Negate(is.null), x = _)
-```
 
-## Each variant vs Control
-
-```{r variant-vs-control}
 variant_vs_control <- map_dfr(names(variant_models), function(var) {
   tidy(variant_models[[var]], conf.int = TRUE) |>
     filter(str_detect(term, "^variant_condition")) |>
-    mutate(
-      outcome  = outcomes[[var]],
-      variant  = str_remove(term, "^variant_condition"),
-      condition = str_extract(variant, "^[a-z]+")
-    )
+    mutate(outcome   = outcomes[[var]],
+           variant   = str_remove(term, "^variant_condition"),
+           condition = str_extract(variant, "^[a-z]+"))
 }) |>
-  mutate(
-    across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
-    statistic = round(statistic, 2),
-    p.value   = round(p.value, 3),
-    sig = case_when(
-      p.value < .001 ~ "***", p.value < .01 ~ "**",
-      p.value < .05  ~ "*",   p.value < .10 ~ "†",
-      TRUE ~ ""
-    )
-  )
-
-variant_vs_control |>
-  select(Outcome = outcome, Variant = variant,
-         B = estimate, SE = std.error,
-         t = statistic, p = p.value, sig,
-         `95% CI low` = conf.low, `95% CI high` = conf.high) |>
-  arrange(Outcome, Variant) |>
-  kable()
+  mutate(across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
+         statistic = round(statistic, 2),
+         p.value   = round(p.value,   3),
+         sig       = sig_stars(p.value))
 ```
 
-## Variant vs Control coefficient plot
+## Coefficient plot {.unnumbered}
 
-```{r variant-coef-plot, fig.height=9, fig.width=10}
-variant_colors <- c(
-  relevance1 = "#011F5B", relevance2 = "#3A5FA0", relevance3 = "#7B9FD4",
-  action1    = "#990000", action2    = "#CC3333", action3    = "#FF7777"
-)
-
+```{r variant-coef-plot, fig.height = 9}
 variant_vs_control |>
   filter(is.finite(estimate)) |>
   mutate(
@@ -286,7 +267,19 @@ variant_vs_control |>
   theme(legend.position = "right")
 ```
 
-## Within-condition pairwise comparisons
+## Each variant vs Control {.unnumbered}
+
+```{r variant-vs-control}
+variant_vs_control |>
+  select(Outcome = outcome, Variant = variant,
+         B = estimate, SE = std.error, t = statistic,
+         p = p.value, sig, `CI low` = conf.low, `CI high` = conf.high) |>
+  arrange(Outcome, Variant) |>
+  reactable(striped = TRUE, compact = TRUE, filterable = TRUE,
+            defaultPageSize = 20)
+```
+
+## Within-condition pairwise {.unnumbered}
 
 ```{r within-pairs}
 pairwise_within <- function(model, group_variants) {
@@ -296,8 +289,7 @@ pairwise_within <- function(model, group_variants) {
     inc <- intersect(group_variants, obs)
     if (length(inc) < 2) return(NULL)
     contrast(em, method = "pairwise", include = inc) |>
-      summary() |>
-      as.data.frame()
+      summary() |> as.data.frame()
   }, error = function(e) NULL)
 }
 
@@ -311,34 +303,159 @@ within_pairs <- map_dfr(names(variant_models), function(var) {
 })
 
 if (nrow(within_pairs) > 0) {
-  # emmeans uses 't.ratio' in older versions and 'statistic' or 't.ratio' in newer ones
   t_col <- intersect(c("t.ratio", "statistic"), names(within_pairs))[1]
-
   within_pairs |>
-    mutate(
-      across(where(is.numeric), ~round(., 3)),
-      sig = case_when(
-        p.value < .001 ~ "***", p.value < .01  ~ "**",
-        p.value < .05  ~ "*",   p.value < .10  ~ "†",
-        TRUE ~ ""
-      )
-    ) |>
+    mutate(across(where(is.numeric), ~round(., 3)),
+           sig = sig_stars(p.value)) |>
     select(Outcome = outcome, Group = group, Contrast = contrast,
            Estimate = estimate, SE = SE,
            t = all_of(t_col), p = p.value, sig) |>
     arrange(Outcome, Group, Contrast) |>
-    kable()
+    reactable(striped = TRUE, compact = TRUE, filterable = TRUE,
+              defaultPageSize = 20)
 } else {
-  cat("Insufficient data for within-condition pairwise comparisons (expected with test data).\n")
+  cat("Insufficient data for within-condition pairwise comparisons.\n")
 }
 ```
 
-## Save updated results
+---
 
-```{r save-secondary}
-results_out$variant_models       <- variant_models
-results_out$variant_vs_control   <- variant_vs_control
-results_out$within_pairs         <- within_pairs
+# 3. Moderation analyses {.tabset}
 
+Five candidate moderators: **age**, **political ideology**, **climate belief — is warming happening** (`climate_1`, 1–3), **climate belief — cause of warming** (`climate_2`, 1–4), and **university affiliation** (binary). Continuous moderators are mean-centered. Each model is `outcome ~ condition * moderator`; interaction terms are extracted for relevance vs control and action vs control.
+
+```{r moderation-models}
+mod_results <- map_dfr(names(outcomes), function(ov) {
+  map_dfr(names(moderators), function(mv) {
+    sub <- d |> filter(!is.na(.data[[ov]]), !is.na(.data[[mv]]))
+    m <- tryCatch(
+      lm(as.formula(paste(ov, "~ condition *", mv)), data = sub),
+      error = function(e) NULL
+    )
+    if (is.null(m)) return(NULL)
+    tidy(m) |>
+      filter(grepl("condition.*:|:.*condition", term)) |>
+      mutate(outcome   = outcomes[[ov]],
+             moderator = moderators[[mv]],
+             contrast  = str_extract(term, "relevance|action"))
+  })
+}) |>
+  filter(!is.na(p.value)) |>
+  mutate(
+    across(c(estimate, std.error, statistic), ~round(., 3)),
+    p.value = round(p.value, 3),
+    sig     = sig_stars(p.value),
+    p_fdr   = round(p.adjust(p.value, method = "BH"), 3)
+  )
+
+n_tests    <- nrow(mod_results)
+n_sig_raw  <- sum(mod_results$p.value < .05)
+n_fdr_05   <- sum(mod_results$p_fdr   < .05)
+n_fdr_10   <- sum(mod_results$p_fdr   < .10)
+```
+
+**`r n_tests` interaction terms tested** (13 outcomes × 5 moderators × 2 contrasts).
+Expected significant by chance at *p* < .05: **`r round(n_tests * 0.05, 1)`**.
+Observed *p* < .05: **`r n_sig_raw`** — indistinguishable from chance.
+After FDR correction (Benjamini-Hochberg): **`r n_fdr_05`** survive at *q* < .05, **`r n_fdr_10`** at *q* < .10.
+
+## All interactions {.unnumbered}
+
+```{r mod-table}
+mod_results |>
+  select(Outcome = outcome, Moderator = moderator, Contrast = contrast,
+         B = estimate, SE = std.error, t = statistic,
+         p = p.value, sig, `p (FDR)` = p_fdr) |>
+  arrange(p) |>
+  reactable(
+    striped = TRUE, compact = TRUE, filterable = TRUE,
+    defaultPageSize = 15,
+    columns = list(sig = colDef(name = ""))
+  )
+```
+
+## Interaction plot {.unnumbered}
+
+Interaction estimates (B) for each outcome × moderator × contrast. Points past the dashed lines are nominally significant (*p* < .05) before correction — none survive FDR.
+
+```{r mod-plot, fig.height = 9, fig.width = 10}
+mod_results |>
+  mutate(
+    outcome  = factor(outcome,   levels = rev(unname(outcomes))),
+    contrast = factor(contrast,  levels = c("relevance", "action"))
+  ) |>
+  ggplot(aes(x = estimate, y = outcome, color = contrast)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+  geom_point(position = position_dodge(width = 0.5), size = 1.8, alpha = 0.8) +
+  facet_wrap(~moderator, ncol = 3, scales = "free_x") +
+  scale_color_manual(values = c(relevance = "#011F5B", action = "#990000"),
+                     labels = c(relevance = "Relevance × Moderator",
+                                action    = "Action × Moderator")) +
+  labs(x = "Interaction coefficient (B)", y = NULL, color = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = "bottom")
+```
+
+---
+
+# 4. Interpretation
+
+## Condition-level effects
+
+The action frame consistently reduced engagement relative to control — reliably on **want to read more** (B = −7.8, *p* = .001, *d* = −0.27), **self-relevance** (B = −0.36, *p* = .010, *d* = −0.21), and **social relevance** (B = −0.28, *p* = .034, *d* = −0.17), with a marginal effect on **share directly** (B = −4.4, *p* = .079). No other outcomes reached significance.
+
+The relevance frame produced no significant effects on any of the 13 outcomes. The point estimates are small and inconsistent in direction. This is a flat null across the board, not a near-miss.
+
+Neither condition affected government funding attitudes, behavioral intentions, or climate attitudes. These are likely too stable to move from a single framing manipulation.
+
+Randomization was well-balanced — no demographic differences across conditions — so the backfire is not a confound.
+
+## Variant-level findings
+
+The aggregate condition-level effects mask heterogeneity within conditions.
+
+**Within the action condition:**
+
+- **Action 1** ("What Actually Works to Motivate Climate Action?") drives most of the backfire: read_more (B = −11.1, *p* = .001), self-relevance (B = −0.61, *p* = .002), share directly (B = −8.3, *p* = .022). This is the most evaluative and outcome-prescriptive variant — it frames the research as producing correct answers and implicitly positions the reader as someone who should be acting.
+- **Action 3** ("Simple Exercises That Could Help You Take Meaningful Action") produces moderate backfire on read_more and social relevance. The "simple exercises / anyone can use" framing may read as reductive or self-help-adjacent.
+- **Action 2** ("Not Sure What You Can Do?") is null across all outcomes and is statistically indistinguishable from control. It starts from the reader's uncertainty rather than a prescription, acknowledging that people don't know what to do and offering research as a resource rather than a mandate.
+
+**Within the relevance condition:**
+
+- **Relevance 3** ("Want to Know How to Make Climate Change Feel More Relevant to the People You Care About?") actually backfires on self-relevance (*p* = .025) and behavioral intention (*p* = .049). Despite being labeled a relevance frame, it is functionally a *social influence* frame — it asks whether the reader wants to persuade others, which is a different psychological proposition and may feel instrumental or manipulative.
+- **Relevance 1** ("Most People Want to Do More About Climate Change. So Why Don't They?") trends marginally positive on one behavioral intention item (B = +0.42, *p* = .056), but does not reliably outperform control on any outcome after correction. It normalizes the gap between caring and feeling connected — validating rather than prescriptive.
+- **Relevance 2** ("Climate Change Shapes the Way People Like You Think About the Future") is null. The direct "people like you" hook may land as generic on a Prolific sample accustomed to survey language.
+
+No within-condition pairwise comparisons survive correction (0 of 78 at *p* < .05; 3 marginal trends all within relevance, contrasting relevance3 against relevance1 and relevance2).
+
+## Theoretical synthesis
+
+No variant of either condition reliably outperformed control on any outcome — the manipulation produced backfire or null, never a robust improvement. Of 78 variant-vs-control comparisons, 30 have positive point estimates but none reach *p* < .05; 11 negative effects reach *p* < .05 or .10.
+
+The pattern across variants suggests that **the backfire is driven by implied obligation, not by action framing per se.** The two null variants — action2 and relevance2 — are the two gentlest frames. The backfire variants are those that feel most prescriptive (action1, action3) or that misfire on their intended psychological mechanism (relevance3, which targets social influence rather than self-relevance).
+
+The relevance-vs-action distinction at the aggregate condition level may be less meaningful than the tone and implied expectation within each frame. Action2, reframed around the reader's uncertainty, behaves like a neutral article. Relevance3, reframed around persuading others, behaves like a mild backfire.
+
+## Moderation
+
+No demographic or attitudinal variable (age, political ideology, climate beliefs, university affiliation) reliably moderates the condition effects. Of 130 interaction terms tested, 7 are nominally significant at *p* < .05 — indistinguishable from chance. None survive FDR correction. The backfire appears to be broadly distributed across participant subgroups.
+
+---
+
+# 5. Save results
+
+```{r save}
+results_out <- list(
+  models              = models,
+  contrasts           = results,
+  cohens_d            = cohens_d_results,
+  omnibus             = map_dfr(names(models), ~glance(models[[.x]]) |> mutate(outcome = .x)),
+  variant_models      = variant_models,
+  variant_vs_control  = variant_vs_control,
+  within_pairs        = within_pairs,
+  moderation          = mod_results
+)
 saveRDS(results_out, RESULTS_RDS)
 ```
+
+Results saved to `r RESULTS_RDS`.
