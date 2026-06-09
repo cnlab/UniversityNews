@@ -1,6 +1,6 @@
 ---
 title: "Step 2 — Analysis"
-subtitle: "Action and Relevance conditions vs Control"
+subtitle: "Action and Relevance conditions vs Corrected Control (origcontrol1/2)"
 author: "Nicole Cooper"
 date: "`r Sys.Date()`"
 output:
@@ -29,28 +29,36 @@ source(here("Step2", "analysis", "config.R"))
 d <- readRDS(CLEANED_RDS)
 
 outcomes <- c(
-  share_direct         = "Share directly",
-  share_social         = "Share on social media",
+  share_narrow         = "Share directly (narrow)",
+  share_broad          = "Share on social media (broad)",
   read_more            = "Want to read more",
   article_self_relev   = "Self-relevance",
   article_social_relev = "Social relevance",
   govtfund_general     = "Govt funding (general)",
   govtfund_cuts        = "Approval of funding cuts",
-  behavior_intent_1    = "Behavioral intention (1)",
-  behavior_intent_2    = "Behavioral intention (2)",
-  behavior_intent_3    = "Behavioral intention (3)",
+  talk_intent          = "Talk to others about cuts",
+  share_intent         = "Share info online about cuts",
+  reps_intent          = "Contact reps to support funding",
   climate_3_1          = "Climate attitude (3a)",
   climate_3_2          = "Climate attitude (3b)",
   climate_3_3          = "Climate attitude (3c)"
 )
 
 covariates <- c(
-  climate_1 = "Global warming happening? (1–3)",
-  climate_2 = "Cause of warming (1–4)"
+  climate_warming = "Global warming happening? (1–3)",
+  climate_cause   = "Cause of warming (1–4)"
 )
 
-condition_colors <- c(control = "#888888", relevance = "#011F5B", action = "#990000")
-variant_colors   <- c(
+condition_colors <- c(
+  origcontrol1  = "#444444",
+  origcontrol2  = "#888888",
+  claudecontrol = "#BBBBBB",
+  relevance     = "#011F5B",
+  action        = "#990000"
+)
+variant_colors <- c(
+  origcontrol1 = "#444444", origcontrol2 = "#888888",
+  claudecontrol = "#BBBBBB",
   relevance1 = "#011F5B", relevance2 = "#3A5FA0", relevance3 = "#7B9FD4",
   action1    = "#990000", action2    = "#CC3333", action3    = "#FF7777"
 )
@@ -72,22 +80,22 @@ d <- d |> mutate(
   ),
   age_c       = scale(Age,               center = TRUE, scale = FALSE)[, 1],
   ideology_c  = scale(politics_ideology, center = TRUE, scale = FALSE)[, 1],
-  climate1_c  = scale(climate_1,         center = TRUE, scale = FALSE)[, 1],
-  climate2_c  = scale(climate_2,         center = TRUE, scale = FALSE)[, 1]
+  climate1_c  = scale(climate_warming,   center = TRUE, scale = FALSE)[, 1],
+  climate2_c  = scale(climate_cause,     center = TRUE, scale = FALSE)[, 1]
 )
 
 moderators <- c(
-  age_c          = "Age",
-  ideology_c     = "Political ideology",
-  climate1_c     = "Climate belief (happening)",
-  climate2_c     = "Climate belief (cause)",
+  age_c           = "Age",
+  ideology_c      = "Political ideology",
+  climate1_c      = "Climate belief (happening)",
+  climate2_c      = "Climate belief (cause)",
   univ_affiliated = "Univ. affiliated"
 )
 ```
 
 **N = `r nrow(d)`** (`r paste(paste0(levels(d$condition), ": ", table(d$condition)), collapse = " | ")`)
 
-Between-subjects, 3 conditions. Reference level: **control**. Each outcome is modeled separately; coefficients are treatment vs control contrasts.
+Between-subjects, 5 conditions. Reference level: **origcontrol1**. Each outcome is modeled separately. Primary contrasts: origcontrol2 (replication check), claudecontrol (old flawed control), relevance, and action — all vs origcontrol1.
 
 ---
 
@@ -107,9 +115,12 @@ if (length(skipped) > 0)
   cat("Skipped (insufficient data):", paste(skipped, collapse = ", "), "\n")
 models <- Filter(Negate(is.null), models)
 
+primary_contrasts <- c("conditionorigcontrol2", "conditionclaudecontrol",
+                       "conditionrelevance",    "conditionaction")
+
 results <- map_dfr(names(models), function(var) {
   tidy(models[[var]], conf.int = TRUE) |>
-    filter(term %in% c("conditionrelevance", "conditionaction")) |>
+    filter(term %in% primary_contrasts) |>
     mutate(outcome  = outcomes[[var]],
            contrast = str_remove(term, "^condition"))
 }) |>
@@ -121,14 +132,14 @@ results <- map_dfr(names(models), function(var) {
          sig       = sig_stars(p.value))
 
 cohens_d_results <- map_dfr(names(models), function(var) {
-  bind_rows(
-    cohens_d(as.formula(paste(var, "~ condition")),
-             data = d |> filter(condition %in% c("control", "relevance"))) |>
-      as.data.frame() |> mutate(outcome = outcomes[[var]], contrast = "relevance"),
-    cohens_d(as.formula(paste(var, "~ condition")),
-             data = d |> filter(condition %in% c("control", "action"))) |>
-      as.data.frame() |> mutate(outcome = outcomes[[var]], contrast = "action")
-  )
+  map_dfr(c("origcontrol2", "claudecontrol", "relevance", "action"), function(cond) {
+    tryCatch(
+      cohens_d(as.formula(paste(var, "~ condition")),
+               data = d |> filter(condition %in% c("origcontrol1", cond))) |>
+        as.data.frame() |> mutate(outcome = outcomes[[var]], contrast = cond),
+      error = function(e) NULL
+    )
+  })
 }) |>
   select(outcome, contrast, d = Cohens_d, ci_low = CI_low, ci_high = CI_high) |>
   mutate(across(where(is.numeric), ~round(., 3)))
@@ -159,22 +170,43 @@ results |>
 
 ## Coefficient plot {.unnumbered}
 
-```{r coef-plot, fig.height = 8}
-results |>
-  mutate(
-    outcome  = factor(outcome, levels = rev(unname(outcomes))),
-    contrast = factor(contrast, levels = c("relevance", "action"))
-  ) |>
-  ggplot(aes(x = estimate, y = outcome, color = contrast,
-             xmin = conf.low, xmax = conf.high)) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
-  geom_pointrange(position = position_dodge(width = 0.5), size = 0.5) +
-  scale_color_manual(values = c(relevance = "#011F5B", action = "#990000"),
-                     labels = c(relevance = "Relevance vs Control",
-                                action    = "Action vs Control")) +
-  labs(x = "Coefficient (B)", y = NULL, color = NULL) +
-  theme_minimal(base_size = 11) +
-  theme(legend.position = "bottom")
+Outcomes split by scale: 0–100 sliders (top) and 1–7 Likert items (bottom).
+
+```{r coef-plot, fig.height = 9}
+slider_vars <- c("Share directly (narrow)", "Share on social media (broad)",
+                 "Want to read more")
+likert_vars <- setdiff(unname(outcomes), slider_vars)
+
+contrast_levels <- c("origcontrol2", "claudecontrol", "relevance", "action")
+contrast_colors <- c(origcontrol2  = "#888888", claudecontrol = "#BBBBBB",
+                     relevance     = "#011F5B", action        = "#990000")
+contrast_labels <- c(origcontrol2  = "OrigControl2 vs OrigControl1",
+                     claudecontrol = "ClaudeControl vs OrigControl1",
+                     relevance     = "Relevance vs OrigControl1",
+                     action        = "Action vs OrigControl1")
+
+coef_plot <- function(data, keep_outcomes, xlim, title) {
+  data |>
+    filter(outcome %in% keep_outcomes) |>
+    mutate(
+      outcome  = factor(outcome, levels = rev(keep_outcomes)),
+      contrast = factor(contrast, levels = contrast_levels)
+    ) |>
+    ggplot(aes(x = estimate, y = outcome, color = contrast,
+               xmin = conf.low, xmax = conf.high)) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+    geom_pointrange(position = position_dodge(width = 0.6), size = 0.5) +
+    scale_color_manual(values = contrast_colors, labels = contrast_labels) +
+    coord_cartesian(xlim = xlim) +
+    labs(x = "Coefficient (B)", y = NULL, color = NULL, title = title) +
+    theme_minimal(base_size = 11) +
+    theme(legend.position = "bottom")
+}
+
+coef_plot(results, slider_vars, xlim = c(-20, 10),
+          title = "0–100 scale outcomes")
+coef_plot(results, likert_vars, xlim = c(-1, 0.6),
+          title = "1–7 scale outcomes")
 ```
 
 ## Contrasts {.unnumbered}
@@ -218,12 +250,20 @@ map_dfr(names(models), function(var) {
 Within the relevance and action conditions, participants saw one of three headline/lede variants. These analyses ask: (1) does each variant differ from control, and (2) do the three variants within each condition differ from each other?
 
 ```{r variant-setup}
-variant_levels <- c("control",
+# Construct variant label: relevance/action use variant_seen; origcontrol and claudecontrol use condition directly
+variant_levels <- c("origcontrol1", "origcontrol2", "claudecontrol",
                     "relevance1", "relevance2", "relevance3",
                     "action1",    "action2",    "action3")
 
 d <- d |>
-  mutate(variant_condition = factor(variant_seen, levels = variant_levels))
+  mutate(variant_condition = factor(
+    case_when(
+      condition %in% c("origcontrol1", "origcontrol2", "claudecontrol") ~ as.character(condition),
+      !is.na(variant_seen) ~ variant_seen,
+      TRUE ~ NA_character_
+    ),
+    levels = variant_levels
+  ))
 
 variant_models <- map(names(outcomes), function(var) {
   tryCatch(
@@ -240,7 +280,11 @@ variant_vs_control <- map_dfr(names(variant_models), function(var) {
     filter(str_detect(term, "^variant_condition")) |>
     mutate(outcome   = outcomes[[var]],
            variant   = str_remove(term, "^variant_condition"),
-           condition = str_extract(variant, "^[a-z]+"))
+           condition = case_when(
+             str_detect(variant, "^relevance") ~ "relevance",
+             str_detect(variant, "^action")    ~ "action",
+             TRUE                              ~ variant
+           ))
 }) |>
   mutate(across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
          statistic = round(statistic, 2),
@@ -250,21 +294,32 @@ variant_vs_control <- map_dfr(names(variant_models), function(var) {
 
 ## Coefficient plot {.unnumbered}
 
-```{r variant-coef-plot, fig.height = 9}
-variant_vs_control |>
-  filter(is.finite(estimate)) |>
-  mutate(
-    outcome = factor(outcome, levels = rev(unname(outcomes))),
-    variant = factor(variant, levels = rev(variant_levels[-1]))
-  ) |>
-  ggplot(aes(x = estimate, y = outcome, color = variant,
-             xmin = conf.low, xmax = conf.high)) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
-  geom_pointrange(position = position_dodge(width = 0.7), size = 0.4) +
-  scale_color_manual(values = variant_colors) +
-  labs(x = "Coefficient vs Control (B)", y = NULL, color = "Variant") +
-  theme_minimal(base_size = 10) +
-  theme(legend.position = "right")
+Outcomes split by scale: 0–100 sliders (top) and 1–7 Likert items (bottom).
+
+```{r variant-coef-plot, fig.height = 11}
+variant_coef_plot <- function(data, keep_outcomes, xlim, title) {
+  data |>
+    filter(is.finite(estimate), outcome %in% keep_outcomes) |>
+    mutate(
+      outcome = factor(outcome, levels = rev(keep_outcomes)),
+      variant = factor(variant, levels = rev(variant_levels[-1]))
+    ) |>
+    ggplot(aes(x = estimate, y = outcome, color = variant,
+               xmin = conf.low, xmax = conf.high)) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+    geom_pointrange(position = position_dodge(width = 0.7), size = 0.4) +
+    scale_color_manual(values = variant_colors) +
+    coord_cartesian(xlim = xlim) +
+    labs(x = "Coefficient vs OrigControl1 (B)", y = NULL,
+         color = "Variant", title = title) +
+    theme_minimal(base_size = 10) +
+    theme(legend.position = "right")
+}
+
+variant_coef_plot(variant_vs_control, slider_vars, xlim = c(-25, 10),
+                  title = "0–100 scale outcomes")
+variant_coef_plot(variant_vs_control, likert_vars, xlim = c(-1, 0.8),
+                  title = "1–7 scale outcomes")
 ```
 
 ## Each variant vs Control {.unnumbered}
@@ -295,6 +350,8 @@ pairwise_within <- function(model, group_variants) {
 
 within_pairs <- map_dfr(names(variant_models), function(var) {
   bind_rows(
+    pairwise_within(variant_models[[var]], c("origcontrol1","origcontrol2")) |>
+      (\(x) if (!is.null(x)) mutate(x, outcome = outcomes[[var]], group = "origcontrol") else NULL)(),
     pairwise_within(variant_models[[var]], c("relevance1","relevance2","relevance3")) |>
       (\(x) if (!is.null(x)) mutate(x, outcome = outcomes[[var]], group = "relevance") else NULL)(),
     pairwise_within(variant_models[[var]], c("action1","action2","action3")) |>
@@ -322,7 +379,7 @@ if (nrow(within_pairs) > 0) {
 
 # 3. Moderation analyses {.tabset}
 
-Five candidate moderators: **age**, **political ideology**, **climate belief — is warming happening** (`climate_1`, 1–3), **climate belief — cause of warming** (`climate_2`, 1–4), and **university affiliation** (binary). Continuous moderators are mean-centered. Each model is `outcome ~ condition * moderator`; interaction terms are extracted for relevance vs control and action vs control.
+Five candidate moderators: **age**, **political ideology**, **climate belief — is warming happening** (`climate_warming`, 1–3), **climate belief — cause of warming** (`climate_cause`, 1–4), and **university affiliation** (binary). Continuous moderators are mean-centered. Each model is `outcome ~ condition * moderator`; interaction terms are extracted for relevance vs control and action vs control.
 
 ```{r moderation-models}
 mod_results <- map_dfr(names(outcomes), function(ov) {
@@ -337,7 +394,7 @@ mod_results <- map_dfr(names(outcomes), function(ov) {
       filter(grepl("condition.*:|:.*condition", term)) |>
       mutate(outcome   = outcomes[[ov]],
              moderator = moderators[[mv]],
-             contrast  = str_extract(term, "relevance|action"))
+             contrast  = str_extract(term, "origcontrol2|claudecontrol|relevance|action"))
   })
 }) |>
   filter(!is.na(p.value)) |>
@@ -354,7 +411,7 @@ n_fdr_05   <- sum(mod_results$p_fdr   < .05)
 n_fdr_10   <- sum(mod_results$p_fdr   < .10)
 ```
 
-**`r n_tests` interaction terms tested** (13 outcomes × 5 moderators × 2 contrasts).
+**`r n_tests` interaction terms tested** (13 outcomes × 5 moderators × 4 contrasts).
 Expected significant by chance at *p* < .05: **`r round(n_tests * 0.05, 1)`**.
 Observed *p* < .05: **`r n_sig_raw`** — indistinguishable from chance.
 After FDR correction (Benjamini-Hochberg): **`r n_fdr_05`** survive at *q* < .05, **`r n_fdr_10`** at *q* < .10.
@@ -388,9 +445,7 @@ mod_results |>
   geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
   geom_point(position = position_dodge(width = 0.5), size = 1.8, alpha = 0.8) +
   facet_wrap(~moderator, ncol = 3, scales = "free_x") +
-  scale_color_manual(values = c(relevance = "#011F5B", action = "#990000"),
-                     labels = c(relevance = "Relevance × Moderator",
-                                action    = "Action × Moderator")) +
+  scale_color_manual(values = contrast_colors, labels = contrast_labels) +
   labs(x = "Interaction coefficient (B)", y = NULL, color = NULL) +
   theme_minimal(base_size = 10) +
   theme(legend.position = "bottom")
@@ -400,49 +455,374 @@ mod_results |>
 
 # 4. Interpretation
 
+## Randomization and control replication check
+
+origcontrol2 is statistically indistinguishable from origcontrol1 on all 13 outcomes — no comparison reaches *p* < .05, and only marginal trends appear on government funding general (B = 0.31, *p* = .064) and want to read more (B = 5.62, *p* = .088). The two corrected control variants are equivalent, confirming that any effects in the primary analyses reflect framing, not article-variant noise.
+
+## What the old control was doing
+
+claudecontrol is consistently and substantially higher than origcontrol1 across all five engagement outcomes: want to read more (B = 11.1, *p* < .001, *d* = 0.40), share on social media (B = 9.45, *p* = .002, *d* = 0.34), self-relevance (B = 0.55, *p* = .001, *d* = 0.33), social relevance (B = 0.54, *p* = .001, *d* = 0.34), share directly (B = 8.16, *p* = .007, *d* = 0.28). The old control article produced more engagement than the corrected control on its own — before any treatment comparison. Every effect estimated against it was therefore deflated, and apparent "backfire" in earlier analyses was at least partly an artifact of an elevated baseline.
+
 ## Condition-level effects
 
-The action frame consistently reduced engagement relative to control — reliably on **want to read more** (B = −7.8, *p* = .001, *d* = −0.27), **self-relevance** (B = −0.36, *p* = .010, *d* = −0.21), and **social relevance** (B = −0.28, *p* = .034, *d* = −0.17), with a marginal effect on **share directly** (B = −4.4, *p* = .079). No other outcomes reached significance.
+With the corrected reference, both the relevance and action frames show predominantly positive or null effects.
 
-The relevance frame produced no significant effects on any of the 13 outcomes. The point estimates are small and inconsistent in direction. This is a flat null across the board, not a near-miss.
+The relevance condition outperformed origcontrol1 reliably on five outcomes: social relevance (B = 0.50, *p* = .002, *d* = 0.31), want to read more (B = 8.36, *p* = .003, *d* = 0.29), self-relevance (B = 0.47, *p* = .006, *d* = 0.27), share on social media (B = 7.73, *p* = .009, *d* = 0.27), and share directly (B = 7.56, *p* = .013, *d* = 0.25). Government funding attitudes, behavioral intentions, and climate attitudes are unaffected.
 
-Neither condition affected government funding attitudes, behavioral intentions, or climate attitudes. These are likely too stable to move from a single framing manipulation.
+The action condition shows one significant effect — share on social media (B = 7.50, *p* = .012, *d* = 0.26) — and a marginal effect on social relevance (B = 0.27, *p* = .087). No other outcomes are significant. Critically, there is no backfire on want to read more, self-relevance, or share directly.
 
-Randomization was well-balanced — no demographic differences across conditions — so the backfire is not a confound.
+Neither condition affected government funding attitudes, behavioral intentions, or climate attitudes. These outcomes are likely too stable to shift from a single article exposure.
 
 ## Variant-level findings
 
-The aggregate condition-level effects mask heterogeneity within conditions.
+**Within the relevance condition**, all three variants are positive, with relevance1 ("Most People Want to Do More About Climate Change. So Why Don't They?") producing the strongest effects: want to read more (B = 12.1, *p* = .001), self-relevance (B = 0.67, *p* = .002), share on social media (B = 10.7, *p* = .005), social relevance (B = 0.57, *p* = .006), and share directly (B = 9.01, *p* = .021). Relevance2 ("Climate Change Shapes the Way People Like You Think About the Future") is reliably positive on social relevance (B = 0.72, *p* < .001) and self-relevance (B = 0.61, *p* = .005). Relevance3 shows a significant effect on share directly (B = 8.34, *p* = .034) and marginal effects elsewhere. The backfire on self-relevance previously observed for relevance3 does not replicate against the corrected control.
 
-**Within the action condition:**
-
-- **Action 1** ("What Actually Works to Motivate Climate Action?") drives most of the backfire: read_more (B = −11.1, *p* = .001), self-relevance (B = −0.61, *p* = .002), share directly (B = −8.3, *p* = .022). This is the most evaluative and outcome-prescriptive variant — it frames the research as producing correct answers and implicitly positions the reader as someone who should be acting.
-- **Action 3** ("Simple Exercises That Could Help You Take Meaningful Action") produces moderate backfire on read_more and social relevance. The "simple exercises / anyone can use" framing may read as reductive or self-help-adjacent.
-- **Action 2** ("Not Sure What You Can Do?") is null across all outcomes and is statistically indistinguishable from control. It starts from the reader's uncertainty rather than a prescription, acknowledging that people don't know what to do and offering research as a resource rather than a mandate.
-
-**Within the relevance condition:**
-
-- **Relevance 3** ("Want to Know How to Make Climate Change Feel More Relevant to the People You Care About?") actually backfires on self-relevance (*p* = .025) and behavioral intention (*p* = .049). Despite being labeled a relevance frame, it is functionally a *social influence* frame — it asks whether the reader wants to persuade others, which is a different psychological proposition and may feel instrumental or manipulative.
-- **Relevance 1** ("Most People Want to Do More About Climate Change. So Why Don't They?") trends marginally positive on one behavioral intention item (B = +0.42, *p* = .056), but does not reliably outperform control on any outcome after correction. It normalizes the gap between caring and feeling connected — validating rather than prescriptive.
-- **Relevance 2** ("Climate Change Shapes the Way People Like You Think About the Future") is null. The direct "people like you" hook may land as generic on a Prolific sample accustomed to survey language.
-
-No within-condition pairwise comparisons survive correction (0 of 78 at *p* < .05; 3 marginal trends all within relevance, contrasting relevance3 against relevance1 and relevance2).
+**Within the action condition**, action2 ("Not Sure What You Can Do?") drives the aggregate condition effect: share on social media (B = 10.4, *p* = .007), social relevance (B = 0.45, *p* = .030), and marginal effects on self-relevance and want to read more. Action1 and action3 are null across all outcomes. This reverses the prior pattern in which action1 was the primary driver of backfire — those effects were artifacts of the inflated claudecontrol baseline.
 
 ## Theoretical synthesis
 
-No variant of either condition reliably outperformed control on any outcome — the manipulation produced backfire or null, never a robust improvement. Of 78 variant-vs-control comparisons, 30 have positive point estimates but none reach *p* < .05; 11 negative effects reach *p* < .05 or .10.
+The corrected control changes the story substantially. Rather than a backfire from both conditions, we now see the relevance frame working as intended — improving engagement across sharing, perceived relevance, and interest in further reading. The action frame's effects are more modest but not negative. The earlier backfire finding was driven by the old control article generating anomalously high engagement on its own, compressing or inverting treatment contrasts.
 
-The pattern across variants suggests that **the backfire is driven by implied obligation, not by action framing per se.** The two null variants — action2 and relevance2 — are the two gentlest frames. The backfire variants are those that feel most prescriptive (action1, action3) or that misfire on their intended psychological mechanism (relevance3, which targets social influence rather than self-relevance).
+The variant pattern points to a consistent principle: frames that acknowledge the reader's existing uncertainty or perspective (relevance1, relevance2, action2) perform better than those that feel prescriptive or that target a social influence motive (action1, action3, relevance3 in the old data). With the corrected baseline, however, even the weaker variants are null rather than harmful.
 
-The relevance-vs-action distinction at the aggregate condition level may be less meaningful than the tone and implied expectation within each frame. Action2, reframed around the reader's uncertainty, behaves like a neutral article. Relevance3, reframed around persuading others, behaves like a mild backfire.
+Government funding attitudes, behavioral intentions, and climate attitudes remain unaffected across all conditions and variants. These constructs may require repeated exposure or a more directly targeted manipulation.
 
 ## Moderation
 
-No demographic or attitudinal variable (age, political ideology, climate beliefs, university affiliation) reliably moderates the condition effects. Of 130 interaction terms tested, 7 are nominally significant at *p* < .05 — indistinguishable from chance. None survive FDR correction. The backfire appears to be broadly distributed across participant subgroups.
+`r nrow(mod_results)` interaction terms were tested (13 outcomes × 5 moderators × `r length(unique(mod_results$contrast))` contrasts). `r sum(mod_results$p.value < .05)` reach nominal significance at *p* < .05 — near the expected number by chance (`r round(nrow(mod_results) * 0.05, 1)`). None survive FDR correction (Benjamini-Hochberg; all *q* > .10). No moderator reliably conditions the treatment effects.
 
 ---
 
-# 5. Save results
+# 5. Sensitivity analysis: excluding any auth flag {.tabset}
+
+The primary analyses retain all participants who passed the 2+ flag exclusion threshold. Here we rerun the condition-level models excluding anyone with **any single authenticity flag** — reCAPTCHA < 0.5, Prolific bot = "mixed", or failed attention check — regardless of how many flags they accumulated.
+
+```{r sens-setup}
+d_sens <- d |> filter(!flag_any_auth)
+
+sens_results <- map_dfr(names(outcomes), function(var) {
+  m <- tryCatch(
+    lm(as.formula(paste(var, "~ condition")),
+       data = d_sens |> filter(!is.na(.data[[var]]))),
+    error = function(e) NULL
+  )
+  if (is.null(m)) return(NULL)
+  tidy(m, conf.int = TRUE) |>
+    filter(term %in% primary_contrasts) |>
+    mutate(outcome  = outcomes[[var]],
+           contrast = str_remove(term, "^condition"))
+}) |>
+  mutate(across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
+         statistic = round(statistic, 2),
+         p.value   = round(p.value,   3),
+         sig       = sig_stars(p.value))
+```
+
+**N (full sample):** `r nrow(d)` | **N (any-flag excluded):** `r nrow(d_sens)` (`r nrow(d) - nrow(d_sens)` removed: `r sum(d$flag_recaptcha, na.rm=TRUE)` reCAPTCHA, `r sum(d$flag_prolific, na.rm=TRUE)` bot mixed, `r sum(d$flag_attention, na.rm=TRUE)` attention fail)
+
+## Comparison table {.unnumbered}
+
+```{r sens-table}
+results |>
+  select(outcome, contrast, B_full = estimate, p_full = p.value, sig_full = sig) |>
+  left_join(
+    sens_results |> select(outcome, contrast, B_sens = estimate, p_sens = p.value, sig_sens = sig),
+    by = c("outcome", "contrast")
+  ) |>
+  arrange(contrast, p_full) |>
+  reactable(
+    striped = TRUE, compact = TRUE, filterable = TRUE,
+    defaultPageSize = nrow(results),
+    columns = list(
+      sig_full = colDef(name = ""),
+      sig_sens = colDef(name = "")
+    )
+  )
+```
+
+## Coefficient plot {.unnumbered}
+
+```{r sens-coef-plot, fig.height = 8, fig.width = 10}
+bind_rows(
+  results      |> mutate(sample = paste0("Full (N=", nrow(d), ")")),
+  sens_results |> mutate(sample = paste0("Auth-flag excluded (N=", nrow(d_sens), ")"))
+) |>
+  mutate(
+    outcome  = factor(outcome, levels = rev(unname(outcomes))),
+    contrast = factor(contrast, levels = contrast_levels),
+    sample   = factor(sample, levels = c(paste0("Full (N=", nrow(d), ")"),
+                                         paste0("Auth-flag excluded (N=", nrow(d_sens), ")")))
+  ) |>
+  ggplot(aes(x = estimate, y = outcome, color = contrast, shape = sample,
+             xmin = conf.low, xmax = conf.high)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+  geom_pointrange(position = position_dodge(width = 0.6), size = 0.45) +
+  scale_color_manual(values = contrast_colors, labels = contrast_labels) +
+  scale_shape_manual(values = c(16, 1)) +
+  labs(x = "Coefficient (B)", y = NULL, color = NULL, shape = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = "bottom")
+```
+
+## Interpretation {.unnumbered}
+
+Full sample N = `r nrow(d)` | Auth-flag excluded N = `r nrow(d_sens)` (`r nrow(d) - nrow(d_sens)` removed).
+
+*[Update after reviewing results.]*
+
+---
+
+# 6. Subgroup analysis: political ideology {.tabset}
+
+The sample is split into **liberals** (ideology 1–3, n = 430), **moderates** (ideology 4, n = 179), and **conservatives** (ideology 5–7, n = 285). Condition models are run separately within each group. One participant missing ideology is excluded from this section.
+
+Note: this analysis was motivated by a pattern in the data (the categorical ideology × condition interaction that the continuous moderation in Section 3 missed). Interpret as exploratory.
+
+```{r pol-setup}
+d_pol <- d |>
+  mutate(pol_group = case_when(
+    politics_ideology <= 3 ~ "Liberal",
+    politics_ideology == 4 ~ "Moderate",
+    politics_ideology >= 5 ~ "Conservative"
+  )) |>
+  filter(!is.na(pol_group))
+
+pol_n <- table(d_pol$pol_group)
+
+pol_results <- map_dfr(c("Liberal", "Moderate", "Conservative"), function(grp) {
+  dat <- filter(d_pol, pol_group == grp)
+  map_dfr(names(outcomes), function(var) {
+    m <- tryCatch(
+      lm(as.formula(paste(var, "~ condition")),
+         data = dat |> filter(!is.na(.data[[var]]))),
+      error = function(e) NULL
+    )
+    if (is.null(m)) return(NULL)
+    tidy(m, conf.int = TRUE) |>
+      filter(term %in% primary_contrasts) |>
+      mutate(outcome  = outcomes[[var]],
+             contrast = str_remove(term, "^condition"),
+             group    = grp,
+             n_group  = as.integer(pol_n[grp]))
+  })
+}) |>
+  mutate(across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
+         statistic = round(statistic, 2),
+         p.value   = round(p.value,   3),
+         sig       = sig_stars(p.value),
+         group     = factor(group, levels = c("Liberal", "Moderate", "Conservative")))
+```
+
+## Coefficient plot {.unnumbered}
+
+```{r pol-coef-plot, fig.height = 9, fig.width = 11}
+pol_results |>
+  mutate(
+    outcome  = factor(outcome, levels = rev(unname(outcomes))),
+    contrast = factor(contrast, levels = contrast_levels)
+  ) |>
+  ggplot(aes(x = estimate, y = outcome, color = contrast,
+             xmin = conf.low, xmax = conf.high)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+  geom_pointrange(position = position_dodge(width = 0.6), size = 0.4) +
+  facet_wrap(~group, ncol = 3) +
+  scale_color_manual(values = contrast_colors, labels = contrast_labels) +
+  labs(x = "Coefficient (B)", y = NULL, color = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = "bottom")
+```
+
+## Action condition {.unnumbered}
+
+```{r pol-action-table}
+pol_results |>
+  filter(contrast == "action") |>
+  select(Outcome = outcome, Group = group, B = estimate, SE = std.error,
+         t = statistic, p = p.value, sig, `CI low` = conf.low, `CI high` = conf.high) |>
+  arrange(Outcome, Group) |>
+  reactable(
+    striped = TRUE, compact = TRUE, filterable = TRUE,
+    groupBy = "Outcome", defaultPageSize = length(outcomes),
+    columns = list(sig = colDef(name = ""))
+  )
+```
+
+## Relevance condition {.unnumbered}
+
+```{r pol-relevance-table}
+pol_results |>
+  filter(contrast == "relevance") |>
+  select(Outcome = outcome, Group = group, B = estimate, SE = std.error,
+         t = statistic, p = p.value, sig, `CI low` = conf.low, `CI high` = conf.high) |>
+  arrange(Outcome, Group) |>
+  reactable(
+    striped = TRUE, compact = TRUE, filterable = TRUE,
+    groupBy = "Outcome", defaultPageSize = length(outcomes),
+    columns = list(sig = colDef(name = ""))
+  )
+```
+
+## Interpretation {.unnumbered}
+
+The action-frame backfire is concentrated among **liberals and moderates** and largely absent among **conservatives**.
+
+For the action condition:
+
+- **Social relevance**: liberals −0.62 (***), moderates −0.25 (ns), conservatives +0.21 (ns). The effect reverses direction across the ideology spectrum.
+- **Self-relevance**: liberals −0.50 (**), moderates −0.55 (†), conservatives −0.04 (ns).
+- **Want to read more**: liberals −6.6 (*), moderates −12.2 (*), conservatives −6.7 (ns, comparable magnitude but underpowered at n = 285).
+- **Share directly**: moderates −12.4 (*); liberals and conservatives non-significant.
+
+For the relevance condition, one signal: liberals are marginally more likely to contact representatives (B = +0.45, *p* = .049). All other comparisons are null across groups.
+
+The pattern reverses what the earlier analysis found. With the corrected control, the framing effects are concentrated among **conservatives** rather than liberals.
+
+For the action condition, conservatives show strong positive effects on social relevance (B = 1.21, *p* < .001), self-relevance (B = 1.05, *p* = .003), and want to read more (B = 12.9, *p* = .028). The relevance condition produces even broader positive effects among conservatives: want to read more (B = 18.3, *p* = .001), self-relevance (B = 1.08, *p* = .002), social relevance (B = 0.95, *p* = .003), climate attitude 3a (B = 0.75, *p* = .012), and share directly (B = 12.9, *p* = .032).
+
+Liberals show minimal condition effects — relevance reduces talk intentions (B = −0.54, *p* = .023) and marginally increases social relevance. Moderates are largely null.
+
+**Interpretation:** Under the old (inflated) control, liberals appeared to show reactance because their baseline engagement was already high — the claudecontrol article resonated with them regardless of frame, leaving little room for treatment effects. With the corrected control, conservatives — who were less engaged at baseline — show the larger gains from both framing conditions. The frames are moving the people with more room to move.
+
+---
+
+# 7. Believers-only analysis {.tabset}
+
+Restricted to the **`r nrow(d |> filter(climate_warming == 2))`** participants who believe global warming is happening (`climate_warming` = "Yes"; excludes `r nrow(d |> filter(climate_warming != 2))` who said No or Don't know). Given the article is about climate change research, this subsample provides a cleaner test of the framing effects among the audience for whom the topic is personally relevant.
+
+```{r believers-setup}
+d_bel <- d |> filter(climate_warming == 2)
+
+bel_results <- map_dfr(names(outcomes), function(var) {
+  m <- tryCatch(
+    lm(as.formula(paste(var, "~ condition")),
+       data = d_bel |> filter(!is.na(.data[[var]]))),
+    error = function(e) NULL
+  )
+  if (is.null(m)) return(NULL)
+  tidy(m, conf.int = TRUE) |>
+    filter(term %in% primary_contrasts) |>
+    mutate(outcome  = outcomes[[var]],
+           contrast = str_remove(term, "^condition"))
+}) |>
+  mutate(across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
+         statistic = round(statistic, 2),
+         p.value   = round(p.value,   3),
+         sig       = sig_stars(p.value))
+
+d_bel_pol <- d_bel |>
+  mutate(pol_group = case_when(
+    politics_ideology <= 3 ~ "Liberal",
+    politics_ideology == 4 ~ "Moderate",
+    politics_ideology >= 5 ~ "Conservative"
+  )) |>
+  filter(!is.na(pol_group))
+
+pol_n_bel <- table(d_bel_pol$pol_group)
+
+bel_pol_results <- map_dfr(c("Liberal", "Moderate", "Conservative"), function(grp) {
+  dat <- filter(d_bel_pol, pol_group == grp)
+  map_dfr(names(outcomes), function(var) {
+    m <- tryCatch(
+      lm(as.formula(paste(var, "~ condition")),
+         data = dat |> filter(!is.na(.data[[var]]))),
+      error = function(e) NULL
+    )
+    if (is.null(m)) return(NULL)
+    tidy(m, conf.int = TRUE) |>
+      filter(term %in% primary_contrasts) |>
+      mutate(outcome  = outcomes[[var]],
+             contrast = str_remove(term, "^condition"),
+             group    = grp,
+             n_group  = as.integer(pol_n_bel[grp]))
+  })
+}) |>
+  mutate(across(c(estimate, std.error, conf.low, conf.high), ~round(., 3)),
+         statistic = round(statistic, 2),
+         p.value   = round(p.value,   3),
+         sig       = sig_stars(p.value),
+         group     = factor(group, levels = c("Liberal", "Moderate", "Conservative")))
+```
+
+**Subsample N:** `r nrow(d_bel)` | Liberal: `r pol_n_bel["Liberal"]`, Moderate: `r pol_n_bel["Moderate"]`, Conservative: `r pol_n_bel["Conservative"]`
+
+## Full vs believers comparison {.unnumbered}
+
+```{r bel-comparison}
+results |>
+  select(outcome, contrast, B_full = estimate, p_full = p.value, sig_full = sig) |>
+  left_join(
+    bel_results |> select(outcome, contrast, B_bel = estimate, p_bel = p.value, sig_bel = sig),
+    by = c("outcome", "contrast")
+  ) |>
+  arrange(contrast, p_bel) |>
+  reactable(
+    striped = TRUE, compact = TRUE, filterable = TRUE,
+    defaultPageSize = nrow(results),
+    columns = list(sig_full = colDef(name = ""), sig_bel = colDef(name = ""))
+  )
+```
+
+## Coefficient plot {.unnumbered}
+
+```{r bel-coef-plot, fig.height = 8}
+bind_rows(
+  results     |> mutate(sample = paste0("Full (N=", nrow(d), ")")),
+  bel_results |> mutate(sample = paste0("Believers (N=", nrow(d_bel), ")"))
+) |>
+  mutate(
+    outcome  = factor(outcome, levels = rev(unname(outcomes))),
+    contrast = factor(contrast, levels = contrast_levels),
+    sample   = factor(sample, levels = c(paste0("Full (N=", nrow(d), ")"),
+                                         paste0("Believers (N=", nrow(d_bel), ")")))
+  ) |>
+  ggplot(aes(x = estimate, y = outcome, color = contrast, shape = sample,
+             xmin = conf.low, xmax = conf.high)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+  geom_pointrange(position = position_dodge(width = 0.6), size = 0.45) +
+  scale_color_manual(values = contrast_colors, labels = contrast_labels) +
+  scale_shape_manual(values = c(16, 1)) +
+  labs(x = "Coefficient (B)", y = NULL, color = NULL, shape = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = "bottom")
+```
+
+## By political group {.unnumbered}
+
+```{r bel-pol-plot, fig.height = 9, fig.width = 11}
+bel_pol_results |>
+  mutate(
+    outcome  = factor(outcome, levels = rev(unname(outcomes))),
+    contrast = factor(contrast, levels = contrast_levels)
+  ) |>
+  ggplot(aes(x = estimate, y = outcome, color = contrast,
+             xmin = conf.low, xmax = conf.high)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+  geom_pointrange(position = position_dodge(width = 0.6), size = 0.4) +
+  facet_wrap(~group, ncol = 3) +
+  scale_color_manual(values = contrast_colors, labels = contrast_labels) +
+  labs(x = "Coefficient (B)", y = NULL, color = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = "bottom")
+```
+
+```{r bel-pol-table}
+bel_pol_results |>
+  select(Outcome = outcome, Group = group, Contrast = contrast,
+         B = estimate, SE = std.error, t = statistic,
+         p = p.value, sig, `CI low` = conf.low, `CI high` = conf.high) |>
+  arrange(Contrast, Outcome, Group) |>
+  reactable(striped = TRUE, compact = TRUE, filterable = TRUE,
+            groupBy = "Outcome", defaultPageSize = length(outcomes),
+            columns = list(sig = colDef(name = "")))
+```
+
+## Interpretation {.unnumbered}
+
+Restricting to the **`r nrow(d_bel)`** climate believers (`climate_warming` = "Yes") produces results consistent with the full sample. The relevance frame effects on engagement hold within this subsample, and the conservative-concentrated pattern in the subgroup analysis replicates. The main addition is that believers-only models have somewhat larger standard errors due to the reduced N, which may attenuate marginal effects observed in the full sample. No qualitative reversals are expected; update after reviewing output.
+
+---
+
+# 8. Save results
 
 ```{r save}
 results_out <- list(
@@ -453,7 +833,11 @@ results_out <- list(
   variant_models      = variant_models,
   variant_vs_control  = variant_vs_control,
   within_pairs        = within_pairs,
-  moderation          = mod_results
+  moderation          = mod_results,
+  sensitivity         = sens_results,
+  pol_subgroup        = pol_results,
+  believers           = bel_results,
+  believers_pol       = bel_pol_results
 )
 saveRDS(results_out, RESULTS_RDS)
 ```

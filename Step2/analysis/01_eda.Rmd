@@ -35,7 +35,13 @@ plot_aes <- theme_minimal() +
   )
 
 palette_main     <- "#197278"
-condition_colors <- c(control = "#888888", relevance = "#011F5B", action = "#990000")
+condition_colors <- c(
+  origcontrol1  = "#444444",
+  origcontrol2  = "#888888",
+  claudecontrol = "#BBBBBB",
+  relevance     = "#011F5B",
+  action        = "#990000"
+)
 ```
 
 ```{r scale-levels}
@@ -43,9 +49,10 @@ lvl_agree7 <- c("Strongly disagree", "Disagree", "Somewhat disagree",
                 "Neither agree nor disagree",
                 "Somewhat agree", "Agree", "Strongly agree")
 
-lvl_approve7 <- c("Strongly disapprove", "Disapprove", "Somewhat disapprove",
+# Actual Qualtrics labels: Strongly / Moderately / Slightly (not Somewhat / generic)
+lvl_approve7 <- c("Strongly disapprove", "Moderately disapprove", "Slightly disapprove",
                   "Neither approve nor disapprove",
-                  "Somewhat approve", "Approve", "Strongly approve")
+                  "Slightly approve", "Moderately approve", "Strongly approve")
 
 lvl_intent7 <- c("Definitely will not", "Probably will not", "Maybe will not",
                  "Unsure", "Maybe will", "Probably will", "Definitely will")
@@ -54,23 +61,33 @@ lvl_ideology <- c("Extremely liberal", "Liberal", "Slightly liberal",
                   "Moderate / middle of the road",
                   "Slightly conservative", "Conservative", "Extremely conservative")
 
-lvl_degree <- c("Did not complete high school",
+# Code 1 = No formal education (never selected in this sample but needed for correct indexing)
+lvl_degree <- c("No formal education",
+                "Did not complete high school",
                 "High school graduate (diploma)", "High school graduate (GED)",
-                "Some college (1–4 years, no degree)", "Associate's degree",
-                "Bachelor's degree", "Master's degree",
-                "Professional degree (MD, JD, etc.)", "Doctoral degree (PhD, EdD, etc.)")
+                "Some college (1–4 years, no degree)",
+                "Associate's degree (including occupational or academic degrees)",
+                "Bachelor's degree (BA, BS, etc.)",
+                "Master's degree (MA, MS, MEng, MSW, etc.)",
+                "Professional school degree (MD, DDC, JD, etc.)",
+                "Doctoral degree (PhD, EdD, etc.)")
 
-lvl_income <- c("Less than $5,000", "$5,000–$11,999", "$12,000–$15,999",
-                "$16,000–$24,999", "$25,000–$34,999", "$35,000–$49,999",
-                "$50,000–$74,999", "$75,000–$99,999", "$100,000–$149,999",
-                "$150,000 or greater", "Prefer not to say / Don't know")
+lvl_income <- c("Less than $5,000", "$5,000 through $11,999", "$12,000 through $15,999",
+                "$16,000 through $24,999", "$25,000 through $34,999", "$35,000 through $49,999",
+                "$50,000 through $74,999", "$75,000 through $99,999",
+                "$100,000 through $149,999", "$150,000 or greater",
+                "Prefer not to say")
 
-lvl_gender <- c("Man", "Woman", "Non-binary / gender non-conforming",
-                "Transgender man", "Transgender woman", "Genderqueer / gender fluid",
-                "Additional gender category", "Prefer to self-describe")
+# Actual Qualtrics labels (verified): 1=Man, 2=Woman, 3=Prefer not to say,
+# 4=Non-binary, 5=Genderqueer, 6=Agender, 7=Gender fluid, 8=I prefer to self-describe
+lvl_gender <- c("Man", "Woman", "Prefer not to say",
+                "Non-binary", "Genderqueer", "Agender",
+                "Gender fluid", "I prefer to self-describe")
 
-lvl_lgbtq  <- c("Yes, I identify as LGBTQ+", "Prefer not to say",
-                "No, I do not identify as LGBTQ+")
+# Codes are 1=Yes, 4=Prefer not to say, 5=No — non-consecutive, use named recode
+lgbtq_recode <- c(`1` = "Yes, I identify as LGBTQ+",
+                  `4` = "Prefer not to say",
+                  `5` = "No, I do not identify as LGBTQ+")
 
 lvl_race <- c("White / Caucasian", "Black / African American",
               "Hispanic / Latino", "Asian / Asian American",
@@ -98,27 +115,33 @@ d <- d |> mutate(
 )
 
 outcome_vars <- c(
-  "share_direct", "share_social", "read_more",
+  "share_narrow", "share_broad", "read_more",
   "article_self_relev", "article_social_relev",
   "govtfund_general", "govtfund_cuts",
-  "behavior_intent_1", "behavior_intent_2", "behavior_intent_3",
+  "talk_intent", "share_intent", "reps_intent",
   "climate_3_1", "climate_3_2", "climate_3_3"
 )
 
 outcome_labels <- c(
-  share_direct         = "Share directly",
-  share_social         = "Share on social media",
+  share_narrow         = "Share directly (narrow)",
+  share_broad          = "Share on social media (broad)",
   read_more            = "Want to read more",
   article_self_relev   = "Self-relevance",
   article_social_relev = "Social relevance",
   govtfund_general     = "Govt funding (general)",
   govtfund_cuts        = "Approval of funding cuts",
-  behavior_intent_1    = "Behavioral intention (1)",
-  behavior_intent_2    = "Behavioral intention (2)",
-  behavior_intent_3    = "Behavioral intention (3)",
+  talk_intent          = "Talk to others about cuts",
+  share_intent         = "Share info online about cuts",
+  reps_intent          = "Contact reps to support funding",
   climate_3_1          = "Climate attitude (3a)",
   climate_3_2          = "Climate attitude (3b)",
   climate_3_3          = "Climate attitude (3c)"
+)
+
+covariate_vars <- c("climate_warming", "climate_cause")
+covariate_labels <- c(
+  climate_warming = "Global warming happening? (1=Yes, 2=No, 3=Don't know)",
+  climate_cause   = "Cause of warming (1=Human, 2=Natural, 3=Equal, 4=Other)"
 )
 
 # Pre-compute condition means for all outcomes
@@ -184,7 +207,7 @@ bar_by_condition <- function(data, col, title = "", levels = NULL) {
   }
   ggplot(df, aes(x = response, y = n, fill = condition)) +
     geom_col(show.legend = FALSE) +
-    facet_wrap(~condition, ncol = 3) +
+    facet_wrap(~condition, ncol = 5) +
     scale_fill_manual(values = condition_colors) +
     coord_flip() +
     labs(x = "", y = "Count", title = title) +
@@ -196,7 +219,7 @@ hist_slider <- function(data, col, title = "") {
   df <- data |> filter(!is.na(.data[[col]]), !is.na(condition))
   ggplot(df, aes(x = .data[[col]], fill = condition)) +
     geom_histogram(bins = 20, alpha = 0.9) +
-    facet_wrap(~condition, ncol = 3) +
+    facet_wrap(~condition, ncol = 5) +
     scale_fill_manual(values = condition_colors, drop = FALSE) +
     labs(title = title, x = NULL, y = "Count") +
     theme_minimal(base_size = 11) +
@@ -308,13 +331,13 @@ Condition counts: `r paste(paste0(levels(d$condition), " (", table(d$condition),
 **share_direct**: Would you share this article directly with someone you know?
 
 ```{r share-direct}
-hist_slider(d, "share_direct", "Share directly (0–100)")
+hist_slider(d, "share_narrow", "Share directly / narrow (0–100)")
 ```
 
 **share_social**: Would you share this article by posting on social media?
 
 ```{r share-social}
-hist_slider(d, "share_social", "Share on social media (0–100)")
+hist_slider(d, "share_broad", "Share on social media / broad (0–100)")
 ```
 
 **read_more**: How much would you want to read more articles like this one?
@@ -344,9 +367,9 @@ freq_tab(d_rel, "article_social_relev", levels = lvl_agree7)
 ## Means by condition {.unnumbered}
 
 ```{r article-means, fig.height = 5}
-means_plot(c("share_direct", "share_social", "read_more",
+means_plot(c("share_narrow", "share_broad", "read_more",
              "article_self_relev", "article_social_relev"))
-means_table(c("share_direct", "share_social", "read_more",
+means_table(c("share_narrow", "share_broad", "read_more",
               "article_self_relev", "article_social_relev"))
 ```
 
@@ -393,13 +416,14 @@ How likely are you to do each of the following in the next 3 months?
 
 ```{r behavioral-intent, fig.height = 4}
 d_bi <- d |> mutate(
-  behavior_intent_1 = recode_num(behavior_intent_1, lvl_intent7),
-  behavior_intent_2 = recode_num(behavior_intent_2, lvl_intent7),
-  behavior_intent_3 = recode_num(behavior_intent_3, lvl_intent7)
+  talk_intent  = recode_num(talk_intent,  lvl_intent7),
+  share_intent = recode_num(share_intent, lvl_intent7),
+  reps_intent  = recode_num(reps_intent,  lvl_intent7)
 )
-bi_cols   <- c("behavior_intent_1", "behavior_intent_2", "behavior_intent_3")
-bi_labels <- c("Behavioral intention (1)", "Behavioral intention (2)",
-               "Behavioral intention (3)")
+bi_cols   <- c("talk_intent", "share_intent", "reps_intent")
+bi_labels <- c("Talk to others about cuts",
+               "Share info online about cuts",
+               "Contact reps to support funding")
 
 bar_matrix(d_bi, bi_cols, bi_labels,
            title        = "Behavioral intentions",
@@ -411,8 +435,8 @@ freq_matrix(d_bi, bi_cols, bi_labels, scale_levels = lvl_intent7)
 ## Means by condition {.unnumbered}
 
 ```{r bi-means, fig.height = 4}
-means_plot(c("behavior_intent_1", "behavior_intent_2", "behavior_intent_3"))
-means_table(c("behavior_intent_1", "behavior_intent_2", "behavior_intent_3"))
+means_plot(c("talk_intent", "share_intent", "reps_intent"))
+means_table(c("talk_intent", "share_intent", "reps_intent"))
 ```
 
 ---
@@ -448,30 +472,34 @@ means_table(c("climate_3_1", "climate_3_2", "climate_3_3"))
 
 # 5. Climate Belief Covariates {.tabset}
 
-`climate_1` and `climate_2` are categorical pre-attitude items, not comparable to the 7-point outcome scales.
+`climate_warming` and `climate_cause` are categorical pre-attitude items, not comparable to the 7-point outcome scales.
 
 ## Global Warming Happening {.unnumbered}
 
-**climate_1**: Do you think global warming is happening?
+**climate_warming**: Do you think global warming is happening?
 
 ```{r clim1}
-lvl_gw <- c("Yes", "No", "Don't know")
-d_cov  <- d |> mutate(climate_1 = recode_num(climate_1, lvl_gw))
-bar_single(d_cov, "climate_1",
-           title = "Do you think global warming is happening?", levels = lvl_gw)
-freq_tab(d_cov, "climate_1", levels = lvl_gw)
+# Verified: code 1=No, 2=Yes, 3=Don't know
+lvl_gw <- c("No", "Yes", "Don't know")
+d_cov  <- d |> mutate(climate_warming = recode_num(climate_warming, lvl_gw))
+bar_single(d_cov, "climate_warming",
+           title = "Do you think global warming is happening?", levels = rev(lvl_gw))
+freq_tab(d_cov, "climate_warming", levels = rev(lvl_gw))
 ```
 
 ## Cause of Warming {.unnumbered}
 
-**climate_2**: Assuming global warming is happening, do you think it is...
+**climate_cause**: Assuming global warming is happening, do you think it is...
 
 ```{r clim2}
-lvl_cause <- c("Mostly human-caused", "Mostly naturally occurring",
-               "Caused about equally by humans and natural changes", "Other")
-d_cov2 <- d |> mutate(climate_2 = recode_num(climate_2, lvl_cause))
-bar_single(d_cov2, "climate_2", title = "Cause of global warming", levels = lvl_cause)
-freq_tab(d_cov2, "climate_2", levels = lvl_cause)
+# Verified: 1=Caused mostly by humans, 2=Mostly natural, 3=None of the above (GW not happening), 4=Other
+lvl_cause <- c("Caused mostly by humans",
+               "Caused mostly by natural changes in the environment",
+               "None of the above, because global warming isn't happening",
+               "Other")
+d_cov2 <- d |> mutate(climate_cause = recode_num(climate_cause, lvl_cause))
+bar_single(d_cov2, "climate_cause", title = "Cause of global warming", levels = lvl_cause)
+freq_tab(d_cov2, "climate_cause", levels = lvl_cause)
 ```
 
 ---
@@ -566,7 +594,9 @@ freq_tab(d, "Ethnicity simplified")
 ## LGBTQ+ {.unnumbered}
 
 ```{r demo-lgbtq}
-d_lgbtq <- d |> mutate(lgbtq_label = recode_num(LGBTQ, lvl_lgbtq))
+lvl_lgbtq <- c("Yes, I identify as LGBTQ+", "Prefer not to say",
+               "No, I do not identify as LGBTQ+")
+d_lgbtq <- d |> mutate(lgbtq_label = recode(as.character(LGBTQ), !!!lgbtq_recode))
 bar_single(d_lgbtq, "lgbtq_label", title = "LGBTQ+ identity", levels = lvl_lgbtq)
 freq_tab(d_lgbtq, "lgbtq_label", levels = lvl_lgbtq)
 ```

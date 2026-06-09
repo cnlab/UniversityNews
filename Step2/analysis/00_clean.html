@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2026-06-04" />
+<meta name="date" content="2026-06-09" />
 
 <title>Step 2 — Data Cleaning</title>
 
@@ -1567,7 +1567,7 @@ border-radius: 0px;
 
 
 <h1 class="title toc-ignore">Step 2 — Data Cleaning</h1>
-<h4 class="date">2026-06-04</h4>
+<h4 class="date">2026-06-09</h4>
 
 </div>
 
@@ -1587,8 +1587,8 @@ border-radius: 0px;
 } else {
   raw &lt;- read_survey(LOCAL_DATA_PATH)
 }</code></pre>
-<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |=======                                                               |  11%  |                                                                              |====================================================                  |  74%  |                                                                              |==================================================================    |  95%  |                                                                              |======================================================================| 100%</code></pre>
-<p>Raw data: <strong>949 rows</strong>, <strong>248
+<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |==========                                                            |  15%  |                                                                              |==========================                                            |  37%  |                                                                              |==============================================                        |  66%  |                                                                              |==============================================================        |  88%  |                                                                              |===================================================================   |  96%  |                                                                              |======================================================================| 100%</code></pre>
+<p>Raw data: <strong>1356 rows</strong>, <strong>258
 columns</strong>.</p>
 </div>
 <div id="exclusions" class="section level2">
@@ -1619,23 +1619,23 @@ n_final &lt;- nrow(d)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Raw</td>
-<td>949</td>
+<td>1356</td>
 </tr>
 <tr class="even">
 <td>Anonymous channel only</td>
-<td>940</td>
+<td>1347</td>
 </tr>
 <tr class="odd">
 <td>Finished</td>
-<td>940</td>
+<td>1347</td>
 </tr>
 <tr class="even">
 <td>Cohort 1 only (≥ 2026-06-04 midnight ET)</td>
-<td>904</td>
+<td>1311</td>
 </tr>
 <tr class="odd">
 <td>After Prolific PID filter (if applicable)</td>
-<td>902</td>
+<td>1309</td>
 </tr>
 </tbody>
 </table>
@@ -1647,34 +1647,66 @@ analysis-ready names:</p>
 <pre class="r"><code>d &lt;- d |&gt;
   rename(
     # ArticleRate block
-    share_direct    = rate_1_1,
-    share_social    = rate_2_1,
+    share_narrow    = rate_1_1,
+    share_broad    = rate_2_1,
     article_self_relev   = rate_3_1,
     article_social_relev = rate_3_2,
     # GovtFunding block
     govtfund_general = govtfund_1,
     govtfund_cuts    = govtfund_2,
     # BehaviorIntentions block (3 items shown via loop)
-    behavior_intent_1 = `2_behavint_1`,
-    behavior_intent_2 = `3_behavint_1`,
-    behavior_intent_3 = `4_behavint_1`
-    # climate_1, climate_2, climate_3_1/2/3 already named correctly
+    talk_intent = `2_behavint_1`,
+    share_intent = `3_behavint_1`,
+    reps_intent = `4_behavint_1`,
+    climate_warming = climate_1,
+    climate_cause = climate_2
+    # climate_3_1/2/3 already named correctly
   )</code></pre>
 </div>
 <div id="coalesce-read_more" class="section level2">
 <h2>Coalesce read_more</h2>
 <p>Each condition variant is in its own block
-(<code>relevance1_1_1</code> … <code>control_1_1</code>). Only the block
-shown to each participant will be non-NA; coalesce collapses them into a
-single column.</p>
+(<code>relevance1_1_1</code> … <code>control_1_1</code>,
+<code>origcontrol1_1_1</code>, <code>origcontrol2_1_1</code>). Only the
+block shown to each participant will be non-NA; coalesce collapses them
+into a single column.</p>
 <pre class="r"><code>d &lt;- d |&gt;
   mutate(
     read_more = coalesce(
       relevance1_1_1, relevance2_1_1, relevance3_1_1,
       action1_1_1, action2_1_1, action3_1_1,
-      control_1_1
+      control_1_1,
+      origcontrol1_1_1, origcontrol2_1_1
     )
   )</code></pre>
+</div>
+<div id="impute-missing-condition-labels" class="section level2">
+<h2>Impute missing condition labels</h2>
+<p>The <code>origcontrol1</code> and <code>origcontrol2</code> branches
+in Qualtrics did not set the <code>condition</code> embedded data field,
+so those participants have <code>NA</code> condition. Impute from the FL
+randomizer columns.</p>
+<pre class="r"><code># Two batches need imputation:
+# - Old batch (pre-fix): condition=NA, FL_75_DO columns set
+# - New batch (post-fix): condition=&quot;origcontrol&quot;, FL_75_DO columns set
+# Rows with condition=&quot;origcontrol&quot; and no FL_75_DO columns are the 90 FL_76-bug
+# participants (saw no article) and remain as &quot;origcontrol&quot; to be excluded later.
+d &lt;- d |&gt;
+  mutate(condition = case_when(
+    !is.na(FL_75_DO_UnivNews_Step2OrigControl1) ~ &quot;origcontrol1&quot;,
+    !is.na(FL_75_DO_UnivNews_Step2OrigControl2) ~ &quot;origcontrol2&quot;,
+    condition == &quot;control&quot; ~ &quot;claudecontrol&quot;,
+    TRUE ~ condition
+  ))
+
+cat(&quot;Condition counts after imputation:\n&quot;)</code></pre>
+<pre><code>## Condition counts after imputation:</code></pre>
+<pre class="r"><code>print(table(d$condition, useNA = &quot;ifany&quot;))</code></pre>
+<pre><code>## 
+##        action claudecontrol   origcontrol  origcontrol1  origcontrol2 
+##           301           305            90           153           153 
+##     relevance 
+##           307</code></pre>
 </div>
 <div id="condition-factor" class="section level2">
 <h2>Condition factor</h2>
@@ -1693,16 +1725,28 @@ single column.</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">control</td>
-<td align="right">301</td>
+<td align="left">origcontrol1</td>
+<td align="right">153</td>
+</tr>
+<tr class="even">
+<td align="left">origcontrol2</td>
+<td align="right">153</td>
+</tr>
+<tr class="odd">
+<td align="left">claudecontrol</td>
+<td align="right">305</td>
 </tr>
 <tr class="even">
 <td align="left">relevance</td>
-<td align="right">304</td>
+<td align="right">307</td>
 </tr>
 <tr class="odd">
 <td align="left">action</td>
-<td align="right">297</td>
+<td align="right">301</td>
+</tr>
+<tr class="even">
+<td align="left">origcontrol</td>
+<td align="right">90</td>
 </tr>
 </tbody>
 </table>
@@ -1710,20 +1754,27 @@ single column.</p>
 <div id="numeric-coercion" class="section level2">
 <h2>Numeric coercion</h2>
 <pre class="r"><code>outcome_vars &lt;- c(
-  &quot;share_direct&quot;, &quot;share_social&quot;, &quot;read_more&quot;,
+  &quot;share_narrow&quot;, &quot;share_broad&quot;, &quot;read_more&quot;,
   &quot;article_self_relev&quot;, &quot;article_social_relev&quot;,
   &quot;govtfund_general&quot;, &quot;govtfund_cuts&quot;,
-  &quot;behavior_intent_1&quot;, &quot;behavior_intent_2&quot;, &quot;behavior_intent_3&quot;,
-  &quot;climate_1&quot;, &quot;climate_2&quot;,
+  &quot;talk_intent&quot;, &quot;share_intent&quot;, &quot;reps_intent&quot;,
   &quot;climate_3_1&quot;, &quot;climate_3_2&quot;, &quot;climate_3_3&quot;
 )
 
+covariate_vars &lt;- c(
+  &quot;climate_warming&quot;,   # Do you think global warming is happening? (1–3)
+  &quot;climate_cause&quot;    # Assuming it is, caused by...? (1–4)
+)
+
 d &lt;- d |&gt;
-  mutate(across(all_of(outcome_vars), as.numeric))</code></pre>
+  mutate(across(all_of(c(outcome_vars, covariate_vars)), as.numeric))
+
+# climate_3_2 is reverse-coded relative to the other climate_3 items
+d &lt;- d |&gt; mutate(climate_3_2 = 8 - climate_3_2)</code></pre>
 </div>
 <div id="prolific-participant-data" class="section level2">
 <h2>Prolific participant data</h2>
-<pre class="r"><code>PROLIFIC_EXPORT &lt;- here(&quot;Data&quot;, &quot;Raw&quot;, &quot;UnivNews_Step2_prolific_demographic.csv&quot;)
+<pre class="r"><code>PROLIFIC_EXPORT &lt;- here(&quot;Data&quot;, &quot;Raw&quot;, &quot;UnivNews_Step2_prolific_demographic_060926.csv&quot;)
 
 prolific &lt;- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |&gt;
   rename(
@@ -1741,14 +1792,14 @@ d &lt;- d |&gt; left_join(prolific, by = &quot;PROLIFIC_PID&quot;)
 cat(&quot;Status:\n&quot;); print(table(d$prolific_status, useNA = &quot;ifany&quot;))</code></pre>
 <pre><code>## Status:</code></pre>
 <pre><code>## 
-## AWAITING REVIEW        RETURNED       TIMED-OUT 
-##             898               1               3</code></pre>
+##        APPROVED AWAITING REVIEW        REJECTED        RETURNED       TIMED-OUT 
+##             895             405               3               2               4</code></pre>
 <pre class="r"><code>cat(&quot;\nBot check:\n&quot;); print(table(d$prolific_bot, useNA = &quot;ifany&quot;))</code></pre>
 <pre><code>## 
 ## Bot check:</code></pre>
 <pre><code>## 
 ##  high mixed   N/A 
-##   872    10    20</code></pre>
+##  1261    12    36</code></pre>
 </div>
 <div id="hard-exclusions-prolific-non-completions" class="section level2">
 <h2>Hard exclusions: Prolific non-completions</h2>
@@ -1757,7 +1808,7 @@ of Qualtrics completion status.</p>
 <pre class="r"><code>n_before_hard &lt;- nrow(d)
 d &lt;- d |&gt; filter(!prolific_status %in% c(&quot;RETURNED&quot;, &quot;TIMED-OUT&quot;))
 cat(n_before_hard - nrow(d), &quot;participant(s) removed (RETURNED or TIMED-OUT on Prolific).\n&quot;)</code></pre>
-<pre><code>## 4 participant(s) removed (RETURNED or TIMED-OUT on Prolific).</code></pre>
+<pre><code>## 6 participant(s) removed (RETURNED or TIMED-OUT on Prolific).</code></pre>
 </div>
 <div id="data-quality-flags" class="section level2">
 <h2>Data quality flags</h2>
@@ -1817,11 +1868,11 @@ d &lt;- d |&gt;
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right">75</td>
-<td align="right">37</td>
-<td align="right">10</td>
-<td align="right">7</td>
-<td align="right">51</td>
+<td align="right">98</td>
+<td align="right">43</td>
+<td align="right">12</td>
+<td align="right">11</td>
+<td align="right">63</td>
 <td align="right">3</td>
 </tr>
 </tbody>
@@ -1838,16 +1889,16 @@ d &lt;- d |&gt;
   kable()</code></pre>
 <table>
 <colgroup>
-<col width="15%" />
-<col width="6%" />
-<col width="7%" />
-<col width="7%" />
-<col width="9%" />
-<col width="6%" />
-<col width="7%" />
-<col width="9%" />
+<col width="14%" />
 <col width="8%" />
-<col width="9%" />
+<col width="7%" />
+<col width="7%" />
+<col width="8%" />
+<col width="5%" />
+<col width="7%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
 <col width="4%" />
 <col width="7%" />
 </colgroup>
@@ -1870,7 +1921,7 @@ d &lt;- d |&gt;
 <tbody>
 <tr class="odd">
 <td align="left">69cf17d1a963b681aed752bc</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">mixed</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -1884,7 +1935,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">69da76fcc8125b750510d7db</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">mixed</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -1898,7 +1949,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">69e7ccb245d5adb5a70cf6f1</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">mixed</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -1926,7 +1977,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">6a20d4cfb34a97243d116fb3</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">60.7</td>
@@ -2024,7 +2075,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6632edd68127fba862de05bf</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2052,7 +2103,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">69fba866c48220909d281e3f</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2066,7 +2117,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">6a0dc0b94c02dc5318d72910</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2080,7 +2131,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">63225b65b2d6e889f7289909</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2094,7 +2145,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">69df9cd408ba6597d9f9c1d2</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">2</td>
 <td align="right">0.0</td>
@@ -2108,7 +2159,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">698b2308b6ee90c7b05f833f</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2150,7 +2201,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">6a18e556695d00840058b827</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2248,7 +2299,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">698f44adf9775aaad5565569</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.8</td>
@@ -2304,7 +2355,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6057989131b9effa0cb4429f</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">2</td>
 <td align="right">0.0</td>
@@ -2332,7 +2383,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6a0242fe81b4eb272382adf4</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2374,7 +2425,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">6960496131f055569ae3d71b</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2388,7 +2439,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">69e6610e9cae943b4223b361</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2402,7 +2453,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">69f8daef1e0000419e1905d1</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">mixed</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2416,7 +2467,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6596bd0080a6c5fb83b93520</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2444,7 +2495,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6a0a5c00f030450b266965e0</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2458,7 +2509,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">6991e46740117ca6ef90cd7c</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">2</td>
 <td align="right">0.0</td>
@@ -2500,7 +2551,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">69da9bde739b7e308e8e8190</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">mixed</td>
 <td align="right">4</td>
 <td align="right">0.1</td>
@@ -2514,7 +2565,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">69db0b94b3c4d7fd11ea7b66</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.8</td>
@@ -2528,7 +2579,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">69d7c00327a7c8f593a9967d</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">0.4</td>
@@ -2570,7 +2621,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">67f80601e44359732a7f2af4</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">mixed</td>
 <td align="right">4</td>
 <td align="right">0.0</td>
@@ -2583,8 +2634,176 @@ d &lt;- d |&gt;
 <td align="left">FALSE</td>
 </tr>
 <tr class="even">
+<td align="left">69a35a044731bcfdc4ea9df9</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">2.5</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">630a8feaa8eef385f72dc1a5</td>
+<td align="left">origcontrol2</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.1</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69d6d9121246fdf245404cfd</td>
+<td align="left">origcontrol2</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.9</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">699397c4953cfe8ddd54a8f0</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">5be57ef9610bcd000108ba45</td>
+<td align="left">origcontrol</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a20bb2045e8d03e12f71732</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.3</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a2646b7f420d230b6d1eafd</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">2</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a1a5bd9a38290cb551758ec</td>
+<td align="left">origcontrol</td>
+<td align="left">N/A</td>
+<td align="right">2</td>
+<td align="right">1.9</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">5ccb779b2c4e1f00159333ea</td>
+<td align="left">origcontrol2</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">0.0</td>
+<td align="right">0.4</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69eed384116adbde31bd6e0e</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">3</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">5d6376ec7e447f001c971315</td>
+<td align="left">claudecontrol</td>
+<td align="left">mixed</td>
+<td align="right">4</td>
+<td align="right">3.4</td>
+<td align="right">0.8</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a1cdd859f7ec758523a31eb</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">2</td>
+<td align="right">0.0</td>
+<td align="right">1.0</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
 <td align="left">699ca1d819e8b3d00305124c</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">16.5</td>
@@ -2626,7 +2845,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">6a01e86995470b850035a1a9</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">17.0</td>
@@ -2696,7 +2915,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6a021a1b0cdacf95050adc8e</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">35.6</td>
@@ -2752,7 +2971,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">69dd297487c7874b5c22b7d6</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">23.2</td>
@@ -2836,7 +3055,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">5ecf40ccb218ec372490e3ea</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">40.3</td>
@@ -2850,7 +3069,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">6a0959453efc1c8a3e55e053</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">20.7</td>
@@ -2864,7 +3083,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">695bdd477f9e16a0c15e87e0</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">21.0</td>
@@ -2920,7 +3139,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">69dd10f3eb98f8d63408dece</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">33.0</td>
@@ -2976,7 +3195,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6a16ff587c92c40cf876e93d</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">63.0</td>
@@ -2990,7 +3209,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">6a20e6d9c2de1455791e425e</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">24.6</td>
@@ -3102,7 +3321,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">6a033f860b7156dd0eb815b0</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">42.8</td>
@@ -3256,7 +3475,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">662fbb4163d7a1695a748636</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">38.6</td>
@@ -3270,7 +3489,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">69b98b40fe5dbb04f332d376</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">35.1</td>
@@ -3284,7 +3503,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">660db7a0e45001b3e976309e</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">33.7</td>
@@ -3312,7 +3531,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6a2056f7a6d6c88a6826730b</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">92.4</td>
@@ -3326,7 +3545,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="odd">
 <td align="left">6453a9598ae568cfac992ccc</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">32.7</td>
@@ -3340,7 +3559,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6a012c073af02953d56ae431</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">25.3</td>
@@ -3452,7 +3671,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">69e6dc24e0c7b73db5f9347a</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">37.4</td>
@@ -3480,7 +3699,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">69e2b4eefb7cb0e2b6b843f1</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">17.1</td>
@@ -3508,7 +3727,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6a02630be5e7c76739f764dc</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">N/A</td>
 <td align="right">4</td>
 <td align="right">16.2</td>
@@ -3564,7 +3783,7 @@ d &lt;- d |&gt;
 </tr>
 <tr class="even">
 <td align="left">6a02204aaa796419a20f469b</td>
-<td align="left">control</td>
+<td align="left">claudecontrol</td>
 <td align="left">high</td>
 <td align="right">4</td>
 <td align="right">28.1</td>
@@ -3604,13 +3823,349 @@ d &lt;- d |&gt;
 <td align="right">0</td>
 <td align="left">FALSE</td>
 </tr>
+<tr class="odd">
+<td align="left">65e8cf8f4c7424fa062e54a3</td>
+<td align="left">origcontrol2</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">61.1</td>
+<td align="right">0.9</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69cebd63ca869639e1230ccd</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">54.9</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a107bfed75f2ea8604745e0</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">27.5</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a2611c8b18148bdbb63c3b2</td>
+<td align="left">origcontrol</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">19.1</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a0b794a91737ea5a64687f5</td>
+<td align="left">origcontrol2</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">15.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">650b03136ab3d4c832d98b71</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">48.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">695be8c64cd9b03864442eaf</td>
+<td align="left">origcontrol2</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">19.6</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a1a43693d72f7ac08e6bf70</td>
+<td align="left">origcontrol</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">19.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a233936d4d9ff4efcb0d5f2</td>
+<td align="left">origcontrol2</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">21.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a206eb083467bd5f3b855cd</td>
+<td align="left">origcontrol</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">20.2</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a1c990b43838fd3a302fedf</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">19.5</td>
+<td align="right">0.9</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6638e8aa3d1f38846080806a</td>
+<td align="left">origcontrol2</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">23.9</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a26623dba3ca97e10bd6e4a</td>
+<td align="left">origcontrol2</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">32.9</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">664f8b5a03c6e4b93387863f</td>
+<td align="left">origcontrol2</td>
+<td align="left">N/A</td>
+<td align="right">4</td>
+<td align="right">20.6</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a163960ea3d4962d2bb9573</td>
+<td align="left">origcontrol</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">22.2</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">69fba19c13731b3f706e38b1</td>
+<td align="left">origcontrol1</td>
+<td align="left">N/A</td>
+<td align="right">4</td>
+<td align="right">19.3</td>
+<td align="right">0.9</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69b1b9c93046383751d6fe0c</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">36.8</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a20458f2ec6c27f40cb65cd</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">22.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">6a1f65a1e07a24fcff2743d7</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">41.9</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a0a5066345e146c51cf9b71</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">42.7</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69ac6f779a772607756d32a2</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">24.0</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">6a24dce9fb14bba45e63c3b5</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">30.3</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">69a779dc3f6d79053bf0f7ec</td>
+<td align="left">origcontrol1</td>
+<td align="left">high</td>
+<td align="right">4</td>
+<td align="right">15.9</td>
+<td align="right">1.0</td>
+<td align="left">TRUE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="left">FALSE</td>
+<td align="right">0</td>
+<td align="left">FALSE</td>
+</tr>
 </tbody>
 </table>
 <pre class="r"><code>n_before &lt;- nrow(d)
 d &lt;- d |&gt; filter(!flag_exclude)
 n_excluded &lt;- n_before - nrow(d)</code></pre>
 <p>3 participant(s) excluded for 2+ flags. N after exclusions:
-<strong>895</strong>.</p>
+<strong>1300</strong>.</p>
+</div>
+<div id="exclude-fl_76-bug-participants" class="section level2">
+<h2>Exclude FL_76 bug participants</h2>
+<p>Remove the <code>origcontrol</code> participants who were routed
+through FL_76 (an EmbeddedData-only branch that set
+<code>condition = &quot;origcontrol&quot;</code> without showing an article).
+These participants answered all post-article questions without having
+seen an article.</p>
+<pre class="r"><code>n_before_fl76 &lt;- nrow(d)
+d &lt;- d |&gt; filter(condition != &quot;origcontrol&quot;)
+cat(n_before_fl76 - nrow(d), &quot;origcontrol (FL_76 bug) participant(s) removed.\n&quot;)</code></pre>
+<pre><code>## 89 origcontrol (FL_76 bug) participant(s) removed.</code></pre>
+<pre class="r"><code>cat(&quot;N after FL_76 exclusion:&quot;, nrow(d), &quot;\n&quot;)</code></pre>
+<pre><code>## N after FL_76 exclusion: 1211</code></pre>
 </div>
 <div id="missing-data" class="section level2">
 <h2>Missing data</h2>
@@ -3627,12 +4182,12 @@ n_excluded &lt;- n_before - nrow(d)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">share_direct</td>
-<td align="right">14</td>
+<td align="left">share_narrow</td>
+<td align="right">21</td>
 </tr>
 <tr class="even">
-<td align="left">share_social</td>
-<td align="right">23</td>
+<td align="left">share_broad</td>
+<td align="right">37</td>
 </tr>
 <tr class="odd">
 <td align="left">read_more</td>
@@ -3655,23 +4210,15 @@ n_excluded &lt;- n_before - nrow(d)</code></pre>
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">behavior_intent_1</td>
+<td align="left">talk_intent</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
-<td align="left">behavior_intent_2</td>
+<td align="left">share_intent</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
-<td align="left">behavior_intent_3</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">climate_1</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">climate_2</td>
+<td align="left">reps_intent</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
@@ -3680,7 +4227,7 @@ n_excluded &lt;- n_before - nrow(d)</code></pre>
 </tr>
 <tr class="even">
 <td align="left">climate_3_2</td>
-<td align="right">0</td>
+<td align="right">1</td>
 </tr>
 <tr class="odd">
 <td align="left">climate_3_3</td>
@@ -3694,7 +4241,7 @@ n_excluded &lt;- n_before - nrow(d)</code></pre>
 <pre class="r"><code>saveRDS(d, CLEANED_RDS)</code></pre>
 <p>Cleaned data saved to
 /Users/nicolecooper/Documents/GitHub/UniversityNews/Step2/analysis/step2_clean.rds.
-<strong>Final N = 902</strong>.</p>
+<strong>Final N = 1309</strong>.</p>
 </div>
 
 

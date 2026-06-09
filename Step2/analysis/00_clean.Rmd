@@ -78,24 +78,26 @@ Column names in this export use custom export tags. Mapping to analysis-ready na
 d <- d |>
   rename(
     # ArticleRate block
-    share_direct    = rate_1_1,
-    share_social    = rate_2_1,
+    share_narrow    = rate_1_1,
+    share_broad    = rate_2_1,
     article_self_relev   = rate_3_1,
     article_social_relev = rate_3_2,
     # GovtFunding block
     govtfund_general = govtfund_1,
     govtfund_cuts    = govtfund_2,
     # BehaviorIntentions block (3 items shown via loop)
-    behavior_intent_1 = `2_behavint_1`,
-    behavior_intent_2 = `3_behavint_1`,
-    behavior_intent_3 = `4_behavint_1`
-    # climate_1, climate_2, climate_3_1/2/3 already named correctly
+    talk_intent = `2_behavint_1`,
+    share_intent = `3_behavint_1`,
+    reps_intent = `4_behavint_1`,
+    climate_warming = climate_1,
+    climate_cause = climate_2
+    # climate_3_1/2/3 already named correctly
   )
 ```
 
 ## Coalesce read_more
 
-Each condition variant is in its own block (`relevance1_1_1` … `control_1_1`). Only the block shown to each participant will be non-NA; coalesce collapses them into a single column.
+Each condition variant is in its own block (`relevance1_1_1` … `control_1_1`, `origcontrol1_1_1`, `origcontrol2_1_1`). Only the block shown to each participant will be non-NA; coalesce collapses them into a single column.
 
 ```{r coalesce}
 d <- d |>
@@ -103,9 +105,32 @@ d <- d |>
     read_more = coalesce(
       relevance1_1_1, relevance2_1_1, relevance3_1_1,
       action1_1_1, action2_1_1, action3_1_1,
-      control_1_1
+      control_1_1,
+      origcontrol1_1_1, origcontrol2_1_1
     )
   )
+```
+
+## Impute missing condition labels
+
+The `origcontrol1` and `origcontrol2` branches in Qualtrics did not set the `condition` embedded data field, so those participants have `NA` condition. Impute from the FL randomizer columns.
+
+```{r impute-condition}
+# Two batches need imputation:
+# - Old batch (pre-fix): condition=NA, FL_75_DO columns set
+# - New batch (post-fix): condition="origcontrol", FL_75_DO columns set
+# Rows with condition="origcontrol" and no FL_75_DO columns are the 90 FL_76-bug
+# participants (saw no article) and remain as "origcontrol" to be excluded later.
+d <- d |>
+  mutate(condition = case_when(
+    !is.na(FL_75_DO_UnivNews_Step2OrigControl1) ~ "origcontrol1",
+    !is.na(FL_75_DO_UnivNews_Step2OrigControl2) ~ "origcontrol2",
+    condition == "control" ~ "claudecontrol",
+    TRUE ~ condition
+  ))
+
+cat("Condition counts after imputation:\n")
+print(table(d$condition, useNA = "ifany"))
 ```
 
 ## Condition factor
@@ -126,26 +151,29 @@ d |>
 
 ```{r numeric}
 outcome_vars <- c(
-  "share_direct", "share_social", "read_more",
+  "share_narrow", "share_broad", "read_more",
   "article_self_relev", "article_social_relev",
   "govtfund_general", "govtfund_cuts",
-  "behavior_intent_1", "behavior_intent_2", "behavior_intent_3",
+  "talk_intent", "share_intent", "reps_intent",
   "climate_3_1", "climate_3_2", "climate_3_3"
 )
 
 covariate_vars <- c(
-  "climate_1",   # Do you think global warming is happening? (1–3)
-  "climate_2"    # Assuming it is, caused by...? (1–4)
+  "climate_warming",   # Do you think global warming is happening? (1–3)
+  "climate_cause"    # Assuming it is, caused by...? (1–4)
 )
 
 d <- d |>
   mutate(across(all_of(c(outcome_vars, covariate_vars)), as.numeric))
+
+# climate_3_2 is reverse-coded relative to the other climate_3 items
+d <- d |> mutate(climate_3_2 = 8 - climate_3_2)
 ```
 
 ## Prolific participant data
 
 ```{r prolific-merge}
-PROLIFIC_EXPORT <- here("Data", "Raw", "UnivNews_Step2_prolific_demographic.csv")
+PROLIFIC_EXPORT <- here("Data", "Raw", "UnivNews_Step2_prolific_demographic_060926.csv")
 
 prolific <- read_csv(PROLIFIC_EXPORT, show_col_types = FALSE) |>
   rename(
@@ -233,6 +261,17 @@ n_excluded <- n_before - nrow(d)
 ```
 
 `r n_excluded` participant(s) excluded for 2+ flags. N after exclusions: **`r nrow(d)`**.
+
+## Exclude FL_76 bug participants
+
+Remove the `origcontrol` participants who were routed through FL_76 (an EmbeddedData-only branch that set `condition = "origcontrol"` without showing an article). These participants answered all post-article questions without having seen an article.
+
+```{r exclude-fl76}
+n_before_fl76 <- nrow(d)
+d <- d |> filter(condition != "origcontrol")
+cat(n_before_fl76 - nrow(d), "origcontrol (FL_76 bug) participant(s) removed.\n")
+cat("N after FL_76 exclusion:", nrow(d), "\n")
+```
 
 ## Missing data
 
