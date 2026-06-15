@@ -30,7 +30,22 @@
       "Read(//Users/nicolecooper/**)",
       "Read(//Users/nicolecooper/Desktop/**)",
       "Bash(unzip -l \"/Users/nicolecooper/Desktop/UniversityNews/Data/Raw/UnivNews_Step0_April+20,+2026_11.03 \\(1\\).zip\")",
-      "Bash(rsync -av --exclude=.DS_Store --exclude=*.zip --exclude=archive/ /Users/nicolecooper/Desktop/UniversityNews/ /Users/nicolecooper/Documents/GitHub/UniversityNews/)"
+      "Bash(rsync -av --exclude=.DS_Store --exclude=*.zip --exclude=archive/ /Users/nicolecooper/Desktop/UniversityNews/ /Users/nicolecooper/Documents/GitHub/UniversityNews/)",
+      "WebFetch(domain:www.asc.upenn.edu)",
+      "Bash(git *)",
+      "WebFetch(domain:mailchi.mp)",
+      "WebFetch(domain:us21.campaign-archive.com)",
+      "WebFetch(domain:eepurl.com)",
+      "Bash(python3 *)",
+      "Bash(grep -v \"^--$\")",
+      "Bash(RSTUDIO_PANDOC=/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64 Rscript -e ' *)",
+      "Bash(grep -v \"ℹ\\\\|col_\\\\|^Warning\\\\|deprecated\\\\|here\\(\\)\\\\|── Col\\\\|^cols\\\\|^\\) $\\\\|^  #\")",
+      "Bash(PANDOC=/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64/pandoc Rscript -e ' *)",
+      "Bash(PANDOC=/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64/pandoc Rscript *)",
+      "Bash(grep -v \"^here\\\\|install\\\\|Column spec\\\\|cols\\(\\\\|\\\\.default\\\\|StartDate\\\\|EndDate\\\\|Recorded\\\\|ResponseId\\\\|Distrib\\\\|UserLang\\\\|Q_Duplic\\\\|timing_\\\\|gender_\\\\|Use spec\\\\|more col\\\\| = col_\\\\|^  \\\\|^\\)\\\\|^$\\\\|ℹ\\\\|──\")",
+      "Bash(grep -v \"^here\\\\|install\\\\|^$\")",
+      "Bash(grep -v \"^here\\\\|install\\\\|^$\\\\|Caution\\\\|untidy\\\\|emmeans\")",
+      "Bash(claude update *)"
     ]
   }
 }
