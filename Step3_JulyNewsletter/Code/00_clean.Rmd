@@ -1,0 +1,183 @@
+---
+title: "July Newsletter — Data Cleaning"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(qualtRics)
+library(here)
+library(knitr)
+```
+
+## Load data
+
+```{r load}
+QUALTRICS_PATH <- here("Step3_JulyNewsletter", "Data",
+                       "UnivNews_JulyNewsletter_July 6, 2026_10.30.csv")
+PROLIFIC_PATH  <- here("Step3_JulyNewsletter", "Data",
+                       "prolific_demographic_export_6a4566994567f01b9f90d339.csv")
+CLEANED_RDS    <- here("Step3_JulyNewsletter", "Data", "july_newsletter_clean.rds")
+
+raw <- read_survey(QUALTRICS_PATH)
+```
+
+Raw data: **`r nrow(raw)` rows**, **`r ncol(raw)` columns**.
+
+## Basic exclusions
+
+```{r exclusions}
+n_raw <- nrow(raw)
+
+d <- raw |>
+  filter(DistributionChannel == "anonymous") |>
+  filter(Finished == TRUE) |>
+  filter(PROLIFIC_PID != "{{%PROLIFIC_PID%}}", !is.na(PROLIFIC_PID))
+
+n_after_basic <- nrow(d)
+```
+
+| Step | N |
+|------|---|
+| Raw | `r n_raw` |
+| Anonymous channel only | `r nrow(filter(raw, DistributionChannel == "anonymous"))` |
+| Finished | `r nrow(filter(raw, DistributionChannel == "anonymous", Finished == TRUE))` |
+| Valid Prolific PID | `r n_after_basic` |
+
+## Prolific merge
+
+```{r prolific-merge}
+prolific <- read_csv(PROLIFIC_PATH, show_col_types = FALSE) |>
+  rename(
+    PROLIFIC_PID    = `Participant id`,
+    prolific_status = Status,
+    prolific_time   = `Time taken`,
+    prolific_bot    = `Authenticity check: Bots`
+  ) |>
+  select(PROLIFIC_PID, prolific_status, prolific_time, prolific_bot,
+         Age, Sex, `Ethnicity simplified`, `Country of residence`,
+         `Student status`, `Employment status`)
+
+d <- d |> left_join(prolific, by = "PROLIFIC_PID")
+
+cat("Prolific status:\n"); print(table(d$prolific_status, useNA = "ifany"))
+cat("\nProlific bot check:\n"); print(table(d$prolific_bot, useNA = "ifany"))
+```
+
+## Hard exclusions: Prolific non-completions
+
+```{r hard-exclusions}
+n_before_hard <- nrow(d)
+d <- d |> filter(!prolific_status %in% c("RETURNED", "TIMED-OUT"))
+cat(n_before_hard - nrow(d), "participant(s) removed (RETURNED or TIMED-OUT).\n")
+```
+
+## Data quality flags
+
+Three authenticity checks are available for this survey:
+
+- **reCAPTCHA** (`Q_RecaptchaScore` < 0.5): low score indicates likely bot.
+- **Prolific bot check** (`prolific_bot` == "mixed"): Prolific's internal signal of mixed authenticity. "N/A" means unassessed (account too new), not failed — not treated as a flag.
+- **Attention check** (`attnA_1_1`–`attnA_3_1`, `attnB_1_1`–`attnB_3_1`): six sliders across two blocks that participants are instructed to set to 100. Any value ≠ 100 on any item is a failure. NAs are treated as failures.
+
+`flag_any_auth` marks any single failure (informational). `flag_exclude` marks 2+ failures (exclusion criterion), consistent with Step 2.
+
+```{r flags}
+RECAPTCHA_THRESHOLD <- 0.5
+ATTN_CORRECT        <- 100
+
+d <- d |>
+  mutate(
+    flag_recaptcha = !is.na(Q_RecaptchaScore) & Q_RecaptchaScore < RECAPTCHA_THRESHOLD,
+    flag_bot       = prolific_bot == "mixed",
+    flag_attention = is.na(attnA_1_1) | attnA_1_1 != ATTN_CORRECT |
+                     is.na(attnA_2_1) | attnA_2_1 != ATTN_CORRECT |
+                     is.na(attnA_3_1) | attnA_3_1 != ATTN_CORRECT |
+                     is.na(attnB_1_1) | attnB_1_1 != ATTN_CORRECT |
+                     is.na(attnB_2_1) | attnB_2_1 != ATTN_CORRECT |
+                     is.na(attnB_3_1) | attnB_3_1 != ATTN_CORRECT,
+    n_flags        = rowSums(cbind(flag_recaptcha, flag_bot, flag_attention),
+                             na.rm = TRUE),
+    flag_any_auth  = n_flags >= 1,
+    flag_exclude   = n_flags >= 2
+  )
+```
+
+```{r flag-summary}
+d |>
+  summarise(
+    `reCAPTCHA < 0.5`          = sum(flag_recaptcha,  na.rm = TRUE),
+    `Prolific bot = mixed`      = sum(flag_bot,        na.rm = TRUE),
+    `Failed attention check`    = sum(flag_attention,  na.rm = TRUE),
+    `Any auth flag`             = sum(flag_any_auth,   na.rm = TRUE),
+    `2+ auth flags (excluded)`  = sum(flag_exclude,    na.rm = TRUE)
+  ) |>
+  kable()
+```
+
+```{r flag-detail}
+d |>
+  filter(flag_any_auth) |>
+  select(PROLIFIC_PID, prolific_bot,
+         reCAPTCHA = Q_RecaptchaScore,
+         attnA_1_1, attnA_2_1, attnA_3_1,
+         attnB_1_1, attnB_2_1, attnB_3_1,
+         flag_recaptcha, flag_bot, flag_attention, n_flags, flag_exclude) |>
+  arrange(desc(n_flags)) |>
+  kable()
+```
+
+```{r apply-exclusions}
+n_before <- nrow(d)
+d <- d |> filter(!flag_exclude)
+n_excluded <- n_before - nrow(d)
+```
+
+`r n_excluded` participant(s) excluded for 2+ flags. **N after exclusions: `r nrow(d)`**.
+
+## Missing data on key outcomes
+
+```{r missing}
+outcome_vars <- c(
+  "july1_relevant_1", "july2_relevant_1",
+  "july3_relevant_1", "july4_relevant_1"
+)
+
+d |>
+  summarise(across(all_of(outcome_vars), ~sum(is.na(.)))) |>
+  pivot_longer(everything(), names_to = "Variable", values_to = "N missing") |>
+  kable()
+```
+
+## Condition assignment
+
+Each participant was assigned a condition (relevance or control) for each of the 4 articles independently.
+
+```{r conditions}
+d |>
+  count(condition_1, condition_2, condition_3, condition_4) |>
+  kable(col.names = c("Article 1", "Article 2", "Article 3", "Article 4", "N"))
+
+cat("\nMarginal condition counts per article:\n")
+for (i in 1:4) {
+  col <- paste0("condition_", i)
+  cat("  Article", i, ":\n")
+  print(table(d[[col]], useNA = "ifany"))
+}
+```
+
+## Save
+
+```{r save}
+saveRDS(d, CLEANED_RDS)
+```
+
+Cleaned data saved to `r CLEANED_RDS`. **Final N = `r nrow(d)`**.

@@ -1,0 +1,524 @@
+---
+title: "July Newsletter — Analysis"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+library(broom.mixed)
+library(here)
+library(knitr)
+```
+
+## Load and reshape
+
+```{r load}
+CLEANED_RDS <- here("Step3_JulyNewsletter", "Data", "july_newsletter_clean.rds")
+d <- readRDS(CLEANED_RDS)
+```
+
+Reshape from wide to long 
+
+```{r reshape}
+d_long <- d |>
+  pivot_longer(
+    cols         = matches("^july[1-4]_(read|share|relevant)_1$"),
+    names_to     = c("article", ".value"),
+    names_pattern = "july(\\d)_(\\w+)_1"
+  ) |>
+  mutate(
+    condition = case_when(
+      article == "1" ~ condition_1,
+      article == "2" ~ condition_2,
+      article == "3" ~ condition_3,
+      article == "4" ~ condition_4
+    ),
+    article   = factor(paste0("article_", article)),
+    condition = factor(condition, levels = c("control", "relevance"))
+  ) |>
+  select(-condition_1, -condition_2, -condition_3, -condition_4)
+```
+
+```{r reshape-check}
+cat("Rows:", nrow(d_long), "(expect", nrow(d) * 4, ")\n")
+cat("Participants:", n_distinct(d_long$PROLIFIC_PID), "\n")
+cat("Articles:", levels(d_long$article), "\n")
+
+d_long |>
+  count(article, condition) |>
+  kable(col.names = c("Article", "Condition", "N ratings"))
+```
+
+```{r recode-likert}
+likert_levels <- c("Strongly disagree", "Disagree", "Somewhat disagree",
+                   "Neither agree nor disagree",
+                   "Somewhat agree", "Agree", "Strongly agree")
+
+d_long <- d_long |>
+  mutate(
+    research_apply   = as.numeric(factor(Q1295_1, levels = likert_levels)),
+    research_relev   = as.numeric(factor(Q1295_2, levels = likert_levels))
+  )
+```
+
+---
+
+## Manipulation check: self-relevance
+
+Did the relevance framing increase self-relevance ratings?
+
+### Overall: MLM
+
+`relevant ~ condition + (1 | person) + (1 + condition | article)`
+
+Random intercept for person (individual differences in overall self-relevance) and random intercept + slope for article (allowing both baseline relevance and the framing effect to vary across articles). Reference level: **control**.
+
+```{r mlm}
+m_overall <- lmer(
+  relevant ~ condition + (1 | PROLIFIC_PID) + (1 + condition | article),
+  data = d_long,
+  REML = TRUE
+)
+```
+
+```{r mlm-summary}
+# Fixed effects with Satterthwaite df and p-values (from lmerTest)
+tidy(m_overall, effects = "fixed", conf.int = TRUE) |>
+  mutate(across(where(is.numeric), ~round(., 3))) |>
+  kable()
+```
+
+```{r mlm-ranef}
+# Random effects variance components
+tidy(m_overall, effects = "ran_pars") |>
+  mutate(across(where(is.numeric), ~round(., 3))) |>
+  kable()
+```
+
+```{r mlm-convergence}
+# Check for convergence warnings
+if (length(m_overall@optinfo$conv$lme4) > 0) {
+  cat("Convergence warning:", m_overall@optinfo$conv$lme4$messages, "\n")
+  cat("\nFitting fallback model: (1 | article) only\n")
+  m_fallback <- lmer(
+    relevant ~ condition + (1 | PROLIFIC_PID) + (1 | article),
+    data = d_long, REML = TRUE
+  )
+  cat("Fallback fixed effects:\n")
+  print(tidy(m_fallback, effects = "fixed", conf.int = TRUE) |>
+          mutate(across(where(is.numeric), ~round(., 3))))
+} else {
+  cat("No convergence warnings.\n")
+}
+```
+
+### By article
+
+Simple OLS within each article. Reference level: **control**.
+
+```{r helpers, include=FALSE}
+sig_stars <- function(p) case_when(
+  p < .001 ~ "***",
+  p < .01  ~ "**",
+  p < .05  ~ "*",
+  TRUE     ~ ""
+)
+
+fit_by_article <- function(outcome_var) {
+  map_dfr(levels(d_long$article), function(a) {
+    m <- lm(reformulate("condition", response = outcome_var),
+            data = filter(d_long, article == a))
+    tidy(m, conf.int = TRUE) |>
+      filter(term == "conditionrelevance") |>
+      mutate(article     = a,
+             n_control   = sum(d_long$article == a & d_long$condition == "control",   na.rm = TRUE),
+             n_relevance = sum(d_long$article == a & d_long$condition == "relevance", na.rm = TRUE))
+  }) |>
+    mutate(sig = sig_stars(p.value),
+           across(c(estimate, std.error, conf.low, conf.high), ~round(., 2)),
+           statistic = round(statistic, 2),
+           p.value   = round(p.value, 3))
+}
+
+outcome_plot <- function(outcome_var, results, ylabel, title) {
+  plot_means <- d_long |>
+    group_by(article, condition) |>
+    summarise(
+      M  = mean(.data[[outcome_var]], na.rm = TRUE),
+      SE = sd(.data[[outcome_var]], na.rm = TRUE) / sqrt(sum(!is.na(.data[[outcome_var]]))),
+      .groups = "drop"
+    )
+
+  sig_labels <- plot_means |>
+    group_by(article) |>
+    summarise(y_pos = max(M) + 8, .groups = "drop") |>
+    left_join(select(results, article, sig), by = "article") |>
+    mutate(x = 1.5)
+
+  plot_means |>
+    ggplot(aes(x = condition, y = M, color = condition,
+               ymin = M - SE, ymax = M + SE)) +
+    geom_pointrange(size = 0.6) +
+    geom_text(data = sig_labels,
+              aes(x = x, y = y_pos, label = sig),
+              inherit.aes = FALSE, size = 5, color = "black") +
+    facet_wrap(~article, nrow = 1,
+               labeller = as_labeller(function(x) gsub("_", " ", x))) +
+    scale_color_manual(values = c(control = "grey50", relevance = "#011F5B")) +
+    scale_y_continuous(limits = c(0, 100)) +
+    labs(x = NULL, y = ylabel, color = NULL, title = title,
+         caption = "Points = mean, bars = ±1 SE. Asterisks: * p<.05, ** p<.01, *** p<.001") +
+    theme_minimal(base_size = 11) +
+    theme(legend.position = "bottom",
+          strip.text = element_text(face = "bold"))
+}
+
+print_by_article <- function(results) {
+  for (a in levels(d_long$article)) {
+    stim <- stimuli[[a]]
+    stat <- filter(results, article == a)
+
+    cat("#### ", gsub("_", " ", a), "\n\n")
+    cat("**Control:** *", stim$control$headline, "*\n\n",
+        stim$control$lede, "\n\n", sep = "")
+    cat("**Relevance:** *", stim$relevance$headline, "*\n\n",
+        stim$relevance$lede, "\n\n", sep = "")
+    cat("**Effect (relevance vs control):**",
+        "B =", stat$estimate,
+        "| SE =", stat$std.error,
+        "| t =", stat$statistic,
+        "| p =", stat$p.value,
+        "| N control =", stat$n_control,
+        "| N relevance =", stat$n_relevance,
+        "\n\n---\n\n")
+  }
+}
+```
+
+```{r selfrelevance-results}
+relev_results <- fit_by_article("relevant")
+```
+
+```{r selfrelevance-plot}
+outcome_plot("relevant", relev_results,
+             ylabel = "Self-relevance (0–100)",
+             title  = "Self-relevance ratings by article and condition")
+```
+
+```{r stimuli}
+stimuli <- list(
+  article_1 = list(
+    control = list(
+      headline = "A Second Sight on American History",
+      lede     = "In her new book, Associate Professor Sarah J. Jackson traces how historical and contemporary Black mediamakers and storytellers have strengthened the promise of life, liberty, and the pursuit of happiness."
+    ),
+    relevance = list(
+      headline = "Black Mediamakers Improve Our Understanding of the U.S.",
+      lede     = "In her new book, Associate Professor Sarah J. Jackson traces more than two centuries of Black mediamakers to show how they have strengthened the promise of life, liberty, and the pursuit of happiness, and what that means for us now."
+    )
+  ),
+  article_2 = list(
+    control   = list(headline = "AI Chatbots and Youth Mental Health", lede = "PIK Professor Desmond Upton Patton provides insight into young people’s use of chatbots for mental health advice."),
+    relevance = list(headline = "Advice about AI and Youth Mental Health", lede = "Youth are turning to AI for mental health support — should adults be concerned? PIK Professor Desmond Upton Patton explains the trend and offers guidance on how to respond.")
+  ),
+  article_3 = list(
+    control   = list(headline = "Jury Service Boosts Public Trust in Courts", lede = "A new study by the Annenberg Public Policy Center found that jury service is linked to better attitudes toward the courts, but that jury trials in the U.S. are vanishing."),
+    relevance = list(headline = "Your Trust in the Courts Changes with Jury Service", lede = "A new Annenberg Public Policy Center study reveals that jury service can improve trust in courts, but opportunities to serve are vanishing.")
+  ),
+  article_4 = list(
+    control   = list(headline = "Final Center for Media at Risk Symposium Explores the Power of the Media", lede = "The symposium brought speakers to discuss actionable strategies for mediamakers and media researchers that foreground collective action and creativity."),
+    relevance = list(headline = "How the Media can Strengthen Our Community in Uncertain Times", lede = "Journalists and scholars examined how media can strengthen our community with strategies that foreground action and creativity at the Center for Media at Risk’s final symposium.")
+  )
+)
+```
+
+```{r by-article-print, results='asis'}
+print_by_article(relev_results)
+```
+
+---
+
+## Manipulation check: want to read more
+
+Did the relevance framing increase interest in reading more? Reference level: **control**.
+
+### Overall: MLM
+
+```{r read-mlm}
+m_read <- lmer(
+  read ~ condition + (1 | PROLIFIC_PID) + (1 + condition | article),
+  data = d_long, REML = TRUE
+)
+```
+
+```{r read-mlm-summary}
+tidy(m_read, effects = "fixed", conf.int = TRUE) |>
+  mutate(across(where(is.numeric), ~round(., 3))) |>
+  kable()
+```
+
+```{r read-mlm-ranef}
+tidy(m_read, effects = "ran_pars") |>
+  mutate(across(where(is.numeric), ~round(., 3))) |>
+  kable()
+```
+
+```{r read-mlm-convergence}
+if (length(m_read@optinfo$conv$lme4) > 0) {
+  cat("Convergence warning:", m_read@optinfo$conv$lme4$messages, "\n")
+  cat("\nFitting fallback model: (1 | article) only\n")
+  m_read_fallback <- lmer(
+    read ~ condition + (1 | PROLIFIC_PID) + (1 | article),
+    data = d_long, REML = TRUE
+  )
+  print(tidy(m_read_fallback, effects = "fixed", conf.int = TRUE) |>
+          mutate(across(where(is.numeric), ~round(., 3))))
+} else {
+  cat("No convergence warnings.\n")
+}
+```
+
+### By article
+
+```{r read-results}
+read_results <- fit_by_article("read")
+```
+
+```{r read-plot}
+outcome_plot("read", read_results,
+             ylabel = "Want to read more (0–100)",
+             title  = "Reading interest by article and condition")
+```
+
+```{r read-by-article-print, results='asis'}
+print_by_article(read_results)
+```
+
+---
+
+## Manipulation check: sharing
+
+Did the relevance framing increase willingness to share? Reference level: **control**.
+
+### Overall: MLM
+
+```{r share-mlm}
+m_share <- lmer(
+  share ~ condition + (1 | PROLIFIC_PID) + (1 + condition | article),
+  data = d_long, REML = TRUE
+)
+```
+
+```{r share-mlm-summary}
+tidy(m_share, effects = "fixed", conf.int = TRUE) |>
+  mutate(across(where(is.numeric), ~round(., 3))) |>
+  kable()
+```
+
+```{r share-mlm-ranef}
+tidy(m_share, effects = "ran_pars") |>
+  mutate(across(where(is.numeric), ~round(., 3))) |>
+  kable()
+```
+
+```{r share-mlm-convergence}
+if (length(m_share@optinfo$conv$lme4) > 0) {
+  cat("Convergence warning:", m_share@optinfo$conv$lme4$messages, "\n")
+  cat("\nFitting fallback model: (1 | article) only\n")
+  m_share_fallback <- lmer(
+    share ~ condition + (1 | PROLIFIC_PID) + (1 | article),
+    data = d_long, REML = TRUE
+  )
+  print(tidy(m_share_fallback, effects = "fixed", conf.int = TRUE) |>
+          mutate(across(where(is.numeric), ~round(., 3))))
+} else {
+  cat("No convergence warnings.\n")
+}
+```
+
+### By article
+
+```{r share-results}
+share_results <- fit_by_article("share")
+```
+
+```{r share-plot}
+outcome_plot("share", share_results,
+             ylabel = "Willingness to share (0–100)",
+             title  = "Sharing by article and condition")
+```
+
+```{r share-by-article-print, results='asis'}
+print_by_article(share_results)
+```
+
+---
+
+## Impact of self-relevance
+
+Does perceiving an article as self-relevant predict engagement and research attitudes? Models use self-relevance as a continuous predictor. Random slopes for self-relevance are attempted for both person and article; the model falls back to random intercepts only if convergence fails.
+
+- `read`, `share`: 0–100 sliders, vary within person
+- `research_apply` ("It is clear how to apply findings from academic research in my own life"), `research_relev` ("Research at universities is relevant to me personally"): 1–7 Likert, measured once per person (constant within person; between-person effect only)
+
+```{r sr-helpers, include=FALSE}
+# For article-level outcomes (read, share): MLM with person + article random effects
+fit_sr_mlm <- function(outcome_var) {
+  f_rs <- reformulate(
+    c("relevant",
+      "(1 + relevant | PROLIFIC_PID)",
+      "(1 + relevant | article)"),
+    response = outcome_var
+  )
+  f_ri <- reformulate(
+    c("relevant", "(1 | PROLIFIC_PID)", "(1 | article)"),
+    response = outcome_var
+  )
+
+  m_rs <- tryCatch(
+    lmer(f_rs, data = d_long, REML = TRUE),
+    error = function(e) NULL
+  )
+
+  if (!is.null(m_rs) && length(m_rs@optinfo$conv$lme4) == 0) {
+    attr(m_rs, "model_spec") <- "random slopes"
+    return(m_rs)
+  }
+
+  m_ri <- lmer(f_ri, data = d_long, REML = TRUE)
+  attr(m_ri, "model_spec") <- "random intercepts (fallback)"
+  m_ri
+}
+
+# For person-level outcomes (Q1295): aggregate self-relevance to person, OLS
+fit_sr_ols <- function(outcome_var) {
+  d_person <- d_long |>
+    group_by(PROLIFIC_PID) |>
+    summarise(mean_relevant = mean(relevant, na.rm = TRUE),
+              outcome       = first(.data[[outcome_var]]),
+              .groups = "drop") |>
+    filter(!is.na(outcome))
+  lm(outcome ~ mean_relevant, data = d_person)
+}
+
+sr_plot_mlm <- function(outcome_var, ylabel) {
+  d_long |>
+    ggplot(aes(x = relevant, y = .data[[outcome_var]], color = condition)) +
+    geom_point(alpha = 0.15, size = 0.7) +
+    geom_smooth(method = "lm", se = TRUE, linewidth = 0.8) +
+    facet_wrap(~article, nrow = 1,
+               labeller = as_labeller(function(x) gsub("_", " ", x))) +
+    scale_color_manual(values = c(control = "grey50", relevance = "#011F5B")) +
+    labs(x = "Self-relevance (0–100)", y = ylabel, color = NULL,
+         caption = "Lines = OLS fit per condition within article") +
+    theme_minimal(base_size = 11) +
+    theme(legend.position = "bottom",
+          strip.text = element_text(face = "bold"))
+}
+
+sr_plot_ols <- function(outcome_var, ylabel) {
+  d_long |>
+    group_by(PROLIFIC_PID) |>
+    summarise(mean_relevant = mean(relevant, na.rm = TRUE),
+              outcome       = first(.data[[outcome_var]]),
+              .groups = "drop") |>
+    filter(!is.na(outcome)) |>
+    ggplot(aes(x = mean_relevant, y = outcome)) +
+    geom_point(alpha = 0.3, size = 0.9, color = "grey40") +
+    geom_smooth(method = "lm", se = TRUE, color = "#011F5B", linewidth = 0.8) +
+    labs(x = "Mean self-relevance across articles (0–100)", y = ylabel,
+         caption = "Each point = one participant") +
+    theme_minimal(base_size = 11)
+}
+
+show_mlm <- function(m) {
+  cat("**Model:**", attr(m, "model_spec"), "\n\n")
+  tidy(m, effects = "fixed", conf.int = TRUE) |>
+    mutate(across(where(is.numeric), ~round(., 3))) |>
+    kable() |> print()
+  cat("\n")
+  tidy(m, effects = "ran_pars") |>
+    mutate(across(where(is.numeric), ~round(., 3))) |>
+    kable() |> print()
+}
+
+show_ols <- function(m) {
+  tidy(m, conf.int = TRUE) |>
+    mutate(across(where(is.numeric), ~round(., 3))) |>
+    kable() |> print()
+}
+```
+
+### Reading interest
+
+`read ~ relevant + (1 + relevant | person) + (1 + relevant | article)`, falling back to random intercepts if needed.
+
+```{r sr-read}
+m_sr_read <- fit_sr_mlm("read")
+```
+
+```{r sr-read-summary, results='asis'}
+show_mlm(m_sr_read)
+```
+
+```{r sr-read-plot}
+sr_plot_mlm("read", "Want to read more (0–100)")
+```
+
+---
+
+### Sharing
+
+`share ~ relevant + (1 + relevant | person) + (1 + relevant | article)`, falling back to random intercepts if needed.
+
+```{r sr-share}
+m_sr_share <- fit_sr_mlm("share")
+```
+
+```{r sr-share-summary, results='asis'}
+show_mlm(m_sr_share)
+```
+
+```{r sr-share-plot}
+sr_plot_mlm("share", "Willingness to share (0–100)")
+```
+
+---
+
+### Research attitudes: apply findings
+
+"It is clear how to apply findings from academic research in my own life." (1–7; person-level, measured once per participant)
+
+Because this outcome does not vary within person, a person random intercept would absorb all outcome variance. Instead: mean self-relevance is aggregated to the person level and modeled with OLS.
+
+```{r sr-apply-summary, results='asis'}
+show_ols(fit_sr_ols("research_apply"))
+```
+
+```{r sr-apply-plot}
+sr_plot_ols("research_apply", "Apply findings (1–7)")
+```
+
+---
+
+### Research attitudes: personal relevance
+
+"Research at universities is relevant to me personally." (1–7; person-level, measured once per participant)
+
+```{r sr-relev-summary, results='asis'}
+show_ols(fit_sr_ols("research_relev"))
+```
+
+```{r sr-relev-plot}
+sr_plot_ols("research_relev", "Research relevant to me (1–7)")
+```

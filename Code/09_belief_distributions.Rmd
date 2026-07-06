@@ -1,0 +1,233 @@
+---
+title: "Step 1: Belief Item Distributions"
+author: "Nicole Cooper"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width = 9, fig.height = 5)
+options(scipen = 999)
+```
+
+```{r packages}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse)
+```
+
+```{r load-data}
+path <- "~/Documents/GitHub/UniversityNews"
+data <- readRDS(sprintf("%s/Data/Cleaned/UnivNews_Step1_combined.rds", path))
+```
+
+```{r aesthetics}
+plot_aes <- theme_minimal() +
+  theme(
+    legend.position    = "bottom",
+    legend.text        = element_text(size = 9),
+    text               = element_text(size = 12),
+    axis.text          = element_text(color = "black"),
+    axis.ticks.y       = element_blank(),
+    panel.grid.major.y = element_blank()
+  )
+
+palette_main <- "#197278"
+```
+
+Full library of response scales used across the Step 1 instrument (copied from `02_descriptives_step1_pilot.Rmd` — keep in sync if that file's scale levels ever change).
+
+```{r scale-levels}
+# ── Amount / knowledge (None at all → A great deal) ─────────────────────────
+lvl_know    <- c("None at all", "A little", "A moderate amount", "A lot", "A great deal")
+lvl_know_ns <- c(lvl_know, "Not sure")
+
+# ── Agree / disagree (5-point, Somewhat variant) ────────────────────────────
+lvl_agree5 <- c("Strongly disagree", "Somewhat disagree", "Neither agree nor disagree",
+                "Somewhat agree", "Strongly agree")
+
+# ── Positive / negative effect ───────────────────────────────────────────────
+lvl_pos_neg <- c("Extremely negative", "Somewhat negative", "Neither positive nor negative",
+                 "Somewhat positive", "Extremely positive")
+
+# ── Importance ───────────────────────────────────────────────────────────────
+lvl_importance <- c("Not at all important", "Slightly important", "Moderately important",
+                    "Very important", "Extremely important")
+
+# ── Likelihood: research_5#2 and research_6#2 (Very unlikely → Very likely) ─
+lvl_likelihood_res <- c("Very unlikely", "Somewhat unlikely", "Neutral",
+                        "Somewhat likely", "Very likely")
+
+# ── Likelihood: govtfund_5 (Extremely unlikely → Extremely likely) ───────────
+lvl_likelihood_gov <- c("Extremely unlikely", "Somewhat unlikely", "Neither likely nor unlikely",
+                        "Somewhat likely", "Extremely likely")
+
+# ── Problematic ──────────────────────────────────────────────────────────────
+lvl_problematic <- c("Not at all problematic", "Slightly problematic", "Moderately problematic",
+                     "Very problematic", "Extremely problematic")
+
+# ── Approve / disapprove (4-point, no midpoint) ─────────────────────────────
+lvl_approve4 <- c("Strongly disapprove", "Somewhat disapprove",
+                  "Somewhat approve", "Strongly approve")
+
+# ── Approve / disapprove (5-point, "Neither approve nor disapprove") ─────────
+# Used for govtfund_4, govtfund_9
+lvl_approve5 <- c("Strongly disapprove", "Somewhat disapprove",
+                  "Neither approve nor disapprove",
+                  "Somewhat approve", "Strongly approve")
+
+# ── Approve / disapprove (5-point, "Neutral / neither…" wording) ─────────────
+# Used for highered_1
+lvl_approve5_he <- c("Strongly disapprove", "Somewhat disapprove",
+                     "Neutral / neither approve nor disapprove",
+                     "Somewhat approve", "Strongly approve")
+
+# ── Priority ─────────────────────────────────────────────────────────────────
+lvl_priority <- c("Not a priority", "Low priority", "Somewhat priority",
+                  "Moderate priority", "High priority")
+
+# ── Frequency (past engagement) ──────────────────────────────────────────────
+lvl_freq <- c("Never", "Once or twice a year", "Once or twice a month",
+              "Once or twice a week", "Almost every day", "Once or more per day")
+
+# ── Behavioral intention (7-point, includes "Unsure") ────────────────────────
+lvl_intent <- c("Definitely will not", "Probably will not", "Maybe will not",
+                "Unsure", "Maybe will", "Probably will", "Definitely will")
+
+# ── Local impact of cuts ─────────────────────────────────────────────────────
+lvl_impact <- c("Strong negative impact", "Somewhat negative impact",
+                "Neither positive nor negative impact",
+                "Somewhat positive impact", "Strong positive impact")
+
+# ── Climate scientist trust ──────────────────────────────────────────────────
+lvl_climate_trust <- c("Not at all", "Slightly", "Moderately", "Very strongly")
+
+# ── Proportion nonprofit ─────────────────────────────────────────────────────
+lvl_proportion <- c("None", "Less than half", "About half", "Most", "All", "Not sure")
+```
+
+## Function
+
+```{r plot-fn}
+# Bar chart of one item's raw response distribution, with N and % labels.
+# col      - column name in `data` (string; back-tick if it contains a period, e.g. "research_6.2_1")
+# question - exact question/item text to use as the plot title
+# levels   - the ordered response scale (one of the lvl_* vectors above)
+# out_file - filename (no path) to save under Output/; skip saving with out_file = NULL
+plot_item_distribution <- function(data, col, question, levels, out_file = NULL) {
+  df <- data %>%
+    filter(!is.na(.data[[col]]), .data[[col]] != "") %>%
+    count(response = .data[[col]]) %>%
+    mutate(response = factor(response, levels = levels),
+           pct = n / sum(n) * 100)
+
+  p <- ggplot(df, aes(x = response, y = n)) +
+    geom_col(fill = palette_main) +
+    geom_text(aes(label = paste0(n, " (", round(pct, 1), "%)")), hjust = -0.1, size = 3.8) +
+    coord_flip() +
+    expand_limits(y = max(df$n) * 1.2) +
+    labs(x = "", y = "Count", title = str_wrap(question, width = 68)) +
+    plot_aes +
+    theme(plot.title = element_text(size = 11))
+
+  if (!is.null(out_file)) {
+    ggsave(sprintf("%s/Output/%s", path, out_file), p, width = 9, height = 5, dpi = 200)
+  }
+  p
+}
+```
+
+Before plotting a new item, check `Output/03_correlations_intent.csv` (r_composite, p_composite) and `Output/04_promising_beliefs.csv` (`pct_at_strongest`, `small_n_flag`, `ceiling_flag`) for that variable — the `small_n_flag` in particular means fewer than 30 people sit at the "strongest" position, so any PTG number for that item is unreliable even though the raw distribution below is still accurate.
+
+## Examples
+
+### Approval of federal funding for university research (`govtfund_1`)
+
+r_composite = .358, p < .001. 55.9% already at "Strongly approve" — a strong correlate that's ceiling-limited.
+
+```{r govtfund_1}
+plot_item_distribution(
+  data, "govtfund_1",
+  "Do you approve or disapprove of the federal government using taxpayer funds to invest in scientific research at colleges and universities?",
+  lvl_approve4,
+  "govtfund1_distribution.png"
+)
+```
+
+### Research advancing knowledge is necessary even without immediate benefits (`research_4_8`)
+
+r_composite = .137, p = .018. 58.3% at "Strongly agree" — correlated but weaker, also ceiling-limited.
+
+```{r research_4_8}
+plot_item_distribution(
+  data, "research_4_8",
+  "Research advancing knowledge is necessary, even w/o immediate benefits",
+  lvl_agree5,
+  "research4_8_distribution.png"
+)
+```
+
+### University researchers are motivated primarily by profit (`gotvfund_6_5`)
+
+r_composite = -.027, p = .64 (n.s.). 20.3% at "Strongly disagree" (the outcome-aligned pole). Not correlated, moderate prevalence.
+
+```{r gotvfund_6_5}
+plot_item_distribution(
+  data, "gotvfund_6_5",
+  "University researchers are motivated primarily by profit",
+  lvl_agree5,
+  "gotvfund6_5_distribution.png"
+)
+```
+
+### Researchers make mistakes and results are incorrect — likelihood (`research_6.2_1`)
+
+r_composite = -.108, p = .061 (borderline n.s.). Only 5.3% at "Very unlikely" (n=16) — **small_n_flag = TRUE**, so treat any PTG figure for this item as unreliable.
+
+```{r research_6.2_1}
+plot_item_distribution(
+  data, "research_6.2_1",
+  "How likely is academic research to produce this outcome: Researchers make mistakes and results are incorrect",
+  lvl_likelihood_res,
+  "research6_2_1_distribution.png"
+)
+```
+
+### I think about the impact of science on my daily life (`research_4_4`)
+
+r_composite = .46, p < .001 — the strongest correlate in the survey. Only 19.3% at "Strongly agree" (n=58). Correlated + headroom: a genuine high-value target.
+
+```{r research_4_4}
+plot_item_distribution(
+  data, "research_4_4",
+  "I often think about the impact of science on my everyday life",
+  lvl_agree5,
+  "research4_4_distribution.png"
+)
+```
+
+### Priority: Making a profit (`govtfund_7_1`)
+
+r_composite = -.026, p = .656 (n.s.). Nearly uniform spread across all 5 priority levels (12.7% / 24.0% / 23.3% / 15.0% / 25.0%) — genuine disagreement in the sample, but it doesn't track intent to talk/share/contact reps.
+
+```{r govtfund_7_1}
+plot_item_distribution(
+  data, "govtfund_7_1",
+  "What are the priorities of government-funded research at colleges and universities? Making a profit",
+  lvl_priority,
+  "govtfund7_1_distribution.png"
+)
+```
+
+## Adding a new item
+
+1. Find the variable name and exact question wording in `UnivNews_Step1_Survey_Reference.md` (or the labels vectors in `02_descriptives_step1_pilot.Rmd`).
+2. Confirm which `lvl_*` scale it uses (check the matching `bar_matrix`/`bar_single` call in `02_descriptives_step1_pilot.Rmd`).
+3. Optionally pull `r_composite`/`pct_at_strongest`/flags from `Output/03_correlations_intent.csv` and `Output/04_promising_beliefs.csv`.
+4. Copy one of the chunks above and swap in the new `col`, `question`, `levels`, and `out_file`.

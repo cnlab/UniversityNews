@@ -35,19 +35,22 @@ outcomes <- c(
   article_self_relev   = "Self-relevance",
   article_social_relev = "Social relevance",
   govtfund_general     = "Govt funding (general)",
-  govtfund_cuts        = "Approval of funding cuts",
+  govtfund_cuts        = "Disapproval of funding cuts",
   talk_intent          = "Talk to others about cuts",
   share_intent         = "Share info online about cuts",
-  reps_intent          = "Contact reps to support funding",
-  climate_3_1          = "Climate attitude (3a)",
-  climate_3_2          = "Climate attitude (3b)",
-  climate_3_3          = "Climate attitude (3c)"
+  reps_intent          = "Contact reps to support funding"
 )
 
 covariates <- c(
   climate_warming = "Global warming happening? (1–3)",
   climate_cause   = "Cause of warming (1–4)"
 )
+
+# Reverse-code funding cuts so higher = disapproval (consistent positive direction)
+d <- d |> mutate(govtfund_cuts = 8 - govtfund_cuts)
+
+# Z-score all outcomes so coefficients are in SD units and comparable across scales
+d <- d |> mutate(across(all_of(names(outcomes)), ~as.numeric(scale(.))))
 
 condition_colors <- c(
   origcontrol1  = "#444444",
@@ -62,6 +65,11 @@ variant_colors <- c(
   relevance1 = "#011F5B", relevance2 = "#3A5FA0", relevance3 = "#7B9FD4",
   action1    = "#990000", action2    = "#CC3333", action3    = "#FF7777"
 )
+
+contrast_levels <- c("relevance", "action")
+contrast_colors <- c(relevance = "#011F5B", action = "#990000")
+contrast_labels <- c(relevance = "Relevance vs OrigControl1",
+                     action    = "Action vs OrigControl1")
 
 sig_stars <- function(p) case_when(
   p < .001 ~ "***", p < .01 ~ "**", p < .05 ~ "*", p < .10 ~ "†", TRUE ~ ""
@@ -95,7 +103,7 @@ moderators <- c(
 
 **N = `r nrow(d)`** (`r paste(paste0(levels(d$condition), ": ", table(d$condition)), collapse = " | ")`)
 
-Between-subjects, 5 conditions. Reference level: **origcontrol1**. Each outcome is modeled separately. Primary contrasts: origcontrol2 (replication check), claudecontrol (old flawed control), relevance, and action — all vs origcontrol1.
+Between-subjects, 5 conditions. Reference level: **origcontrol1**. Each outcome is modeled separately and z-scored prior to modeling. Primary contrasts: **relevance** and **action** vs origcontrol1. origcontrol2 and claudecontrol are retained in the data (and in the variant analysis) but excluded from the primary condition-effect tables and plots.
 
 ---
 
@@ -115,8 +123,7 @@ if (length(skipped) > 0)
   cat("Skipped (insufficient data):", paste(skipped, collapse = ", "), "\n")
 models <- Filter(Negate(is.null), models)
 
-primary_contrasts <- c("conditionorigcontrol2", "conditionclaudecontrol",
-                       "conditionrelevance",    "conditionaction")
+primary_contrasts <- c("conditionrelevance", "conditionaction")
 
 results <- map_dfr(names(models), function(var) {
   tidy(models[[var]], conf.int = TRUE) |>
@@ -132,7 +139,7 @@ results <- map_dfr(names(models), function(var) {
          sig       = sig_stars(p.value))
 
 cohens_d_results <- map_dfr(names(models), function(var) {
-  map_dfr(c("origcontrol2", "claudecontrol", "relevance", "action"), function(cond) {
+  map_dfr(c("relevance", "action"), function(cond) {
     tryCatch(
       cohens_d(as.formula(paste(var, "~ condition")),
                data = d |> filter(condition %in% c("origcontrol1", cond))) |>
@@ -170,43 +177,131 @@ results |>
 
 ## Coefficient plot {.unnumbered}
 
-Outcomes split by scale: 0–100 sliders (top) and 1–7 Likert items (bottom).
+All coefficients are in SD units (outcomes z-scored prior to modeling).
 
-```{r coef-plot, fig.height = 9}
-slider_vars <- c("Share directly (narrow)", "Share on social media (broad)",
-                 "Want to read more")
-likert_vars <- setdiff(unname(outcomes), slider_vars)
-
-contrast_levels <- c("origcontrol2", "claudecontrol", "relevance", "action")
-contrast_colors <- c(origcontrol2  = "#888888", claudecontrol = "#BBBBBB",
-                     relevance     = "#011F5B", action        = "#990000")
-contrast_labels <- c(origcontrol2  = "OrigControl2 vs OrigControl1",
-                     claudecontrol = "ClaudeControl vs OrigControl1",
-                     relevance     = "Relevance vs OrigControl1",
-                     action        = "Action vs OrigControl1")
-
+```{r coef-plot, fig.height = 6}
 coef_plot <- function(data, keep_outcomes, xlim, title) {
   data |>
     filter(outcome %in% keep_outcomes) |>
     mutate(
       outcome  = factor(outcome, levels = rev(keep_outcomes)),
-      contrast = factor(contrast, levels = contrast_levels)
+      contrast = factor(contrast, levels = contrast_levels),
+      y_dodge  = case_when(
+        contrast == "relevance" ~ -0.15,
+        contrast == "action"    ~  0.15
+      )
     ) |>
     ggplot(aes(x = estimate, y = outcome, color = contrast,
                xmin = conf.low, xmax = conf.high)) +
     geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
     geom_pointrange(position = position_dodge(width = 0.6), size = 0.5) +
+    geom_text(aes(x = conf.high + 0.05,
+                  y = as.numeric(outcome) + y_dodge,
+                  label = sig),
+              hjust = 0, vjust = 0.5, size = 4, color = "black",
+              show.legend = FALSE) +
     scale_color_manual(values = contrast_colors, labels = contrast_labels) +
-    coord_cartesian(xlim = xlim) +
-    labs(x = "Coefficient (B)", y = NULL, color = NULL, title = title) +
+    coord_cartesian(xlim = xlim, clip = "off") +
+    labs(x = "Standardized coefficient (SD units)", y = NULL, color = NULL, title = title) +
     theme_minimal(base_size = 11) +
     theme(legend.position = "bottom")
 }
 
-coef_plot(results, slider_vars, xlim = c(-20, 10),
-          title = "0–100 scale outcomes")
-coef_plot(results, likert_vars, xlim = c(-1, 0.6),
-          title = "1–7 scale outcomes")
+coef_plot(results,
+          c("Self-relevance", "Social relevance", "Want to read more",
+            "Share directly (narrow)", "Share on social media (broad)"),
+          xlim = c(-0.5, 0.5),
+          title = "Article engagement outcomes (standardized)")
+coef_plot(results, tail(unname(outcomes), 5), xlim = c(-0.5, 0.5),
+          title = "Attitudes and behavioral intentions (standardized)")
+```
+
+## Condition means {.unnumbered}
+
+Condition means ± 1 SE in SD units. The zero line is the full-sample grand mean.
+
+```{r means-plot, fig.height = 6}
+means_df <- map_dfr(names(outcomes), function(var) {
+  d |>
+    group_by(condition) |>
+    summarise(
+      M  = mean(.data[[var]], na.rm = TRUE),
+      SE = sd(.data[[var]], na.rm = TRUE) / sqrt(sum(!is.na(.data[[var]]))),
+      .groups = "drop"
+    ) |>
+    mutate(outcome = outcomes[[var]])
+})
+
+means_plot <- function(data, keep_outcomes) {
+  data |>
+    filter(outcome %in% keep_outcomes,
+           condition %in% c("origcontrol1", contrast_levels)) |>
+    mutate(
+      outcome   = factor(outcome, levels = rev(keep_outcomes)),
+      condition = factor(condition, levels = c("origcontrol1", contrast_levels))
+    ) |>
+    ggplot(aes(x = M, y = outcome, color = condition,
+               xmin = M - SE, xmax = M + SE)) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+    geom_pointrange(position = position_dodge(width = 0.6), size = 0.5) +
+    scale_color_manual(values = condition_colors) +
+    labs(x = "Mean (SD units)", y = NULL, color = NULL) +
+    theme_minimal(base_size = 11) +
+    theme(legend.position = "bottom")
+}
+
+means_plot(means_df,
+           c("Self-relevance", "Social relevance", "Want to read more",
+             "Share directly (narrow)", "Share on social media (broad)"))
+means_plot(means_df, tail(unname(outcomes), 5))
+```
+
+## Self-relevance → outcomes {.unnumbered}
+
+Within-condition regression of each attitude/behavioral outcome on self-relevance (both z-scored). The coefficient equals the Pearson *r* between self-relevance and that outcome within each condition.
+
+```{r selfrelevance-reg, fig.height = 5}
+selfrelev_reg <- map_dfr(c("origcontrol1", "relevance", "action"), function(cond) {
+  dat <- d |> filter(condition == cond)
+  map_dfr(tail(names(outcomes), 5), function(var) {
+    m <- tryCatch(
+      lm(as.formula(paste(var, "~ article_self_relev")), data = dat),
+      error = function(e) NULL
+    )
+    if (is.null(m)) return(NULL)
+    tidy(m, conf.int = TRUE) |>
+      filter(term == "article_self_relev") |>
+      mutate(outcome = outcomes[[var]], condition = cond)
+  })
+}) |>
+  mutate(
+    across(c(estimate, conf.low, conf.high, std.error), ~round(., 3)),
+    condition = factor(condition, levels = c("origcontrol1", "relevance", "action"))
+  )
+
+selfrelev_reg |>
+  mutate(
+    outcome = factor(outcome, levels = rev(tail(unname(outcomes), 5))),
+    sig     = sig_stars(p.value),
+    y_dodge = case_when(
+      condition == "origcontrol1" ~ -0.2,
+      condition == "relevance"    ~  0.0,
+      condition == "action"       ~  0.2
+    )
+  ) |>
+  ggplot(aes(x = estimate, y = outcome, color = condition,
+             xmin = conf.low, xmax = conf.high)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+  geom_pointrange(position = position_dodge(width = 0.6), size = 0.5) +
+  geom_text(aes(x = conf.high + 0.05,
+                y = as.numeric(outcome) + y_dodge,
+                label = sig),
+            hjust = 0, vjust = 0.5, size = 4, color = "black",
+            show.legend = FALSE) +
+  scale_color_manual(values = condition_colors[c("origcontrol1", "relevance", "action")]) +
+  labs(x = "Standardized β (outcome ~ self-relevance)", y = NULL, color = NULL) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
 ```
 
 ## Contrasts {.unnumbered}
@@ -294,9 +389,9 @@ variant_vs_control <- map_dfr(names(variant_models), function(var) {
 
 ## Coefficient plot {.unnumbered}
 
-Outcomes split by scale: 0–100 sliders (top) and 1–7 Likert items (bottom).
+All coefficients in SD units (outcomes z-scored).
 
-```{r variant-coef-plot, fig.height = 11}
+```{r variant-coef-plot, fig.height = 7}
 variant_coef_plot <- function(data, keep_outcomes, xlim, title) {
   data |>
     filter(is.finite(estimate), outcome %in% keep_outcomes) |>
@@ -310,16 +405,14 @@ variant_coef_plot <- function(data, keep_outcomes, xlim, title) {
     geom_pointrange(position = position_dodge(width = 0.7), size = 0.4) +
     scale_color_manual(values = variant_colors) +
     coord_cartesian(xlim = xlim) +
-    labs(x = "Coefficient vs OrigControl1 (B)", y = NULL,
+    labs(x = "Standardized coefficient vs OrigControl1 (SD units)", y = NULL,
          color = "Variant", title = title) +
     theme_minimal(base_size = 10) +
     theme(legend.position = "right")
 }
 
-variant_coef_plot(variant_vs_control, slider_vars, xlim = c(-25, 10),
-                  title = "0–100 scale outcomes")
-variant_coef_plot(variant_vs_control, likert_vars, xlim = c(-1, 0.8),
-                  title = "1–7 scale outcomes")
+variant_coef_plot(variant_vs_control, unname(outcomes), xlim = c(-0.6, 0.6),
+                  title = "Variant effects vs OrigControl1 (standardized)")
 ```
 
 ## Each variant vs Control {.unnumbered}
@@ -394,7 +487,7 @@ mod_results <- map_dfr(names(outcomes), function(ov) {
       filter(grepl("condition.*:|:.*condition", term)) |>
       mutate(outcome   = outcomes[[ov]],
              moderator = moderators[[mv]],
-             contrast  = str_extract(term, "origcontrol2|claudecontrol|relevance|action"))
+             contrast  = str_extract(term, "relevance|action"))
   })
 }) |>
   filter(!is.na(p.value)) |>
@@ -411,7 +504,7 @@ n_fdr_05   <- sum(mod_results$p_fdr   < .05)
 n_fdr_10   <- sum(mod_results$p_fdr   < .10)
 ```
 
-**`r n_tests` interaction terms tested** (13 outcomes × 5 moderators × 4 contrasts).
+**`r n_tests` interaction terms tested** (`r length(outcomes)` outcomes × `r length(moderators)` moderators × `r length(contrast_levels)` contrasts).
 Expected significant by chance at *p* < .05: **`r round(n_tests * 0.05, 1)`**.
 Observed *p* < .05: **`r n_sig_raw`** — indistinguishable from chance.
 After FDR correction (Benjamini-Hochberg): **`r n_fdr_05`** survive at *q* < .05, **`r n_fdr_10`** at *q* < .10.
@@ -457,6 +550,8 @@ mod_results |>
 
 ## Randomization and control replication check
 
+> **Note:** The numbers below are from the prior unstandardized analysis. Update after re-rendering with z-scored outcomes. All B coefficients are now in SD units.
+
 origcontrol2 is statistically indistinguishable from origcontrol1 on all 13 outcomes — no comparison reaches *p* < .05, and only marginal trends appear on government funding general (B = 0.31, *p* = .064) and want to read more (B = 5.62, *p* = .088). The two corrected control variants are equivalent, confirming that any effects in the primary analyses reflect framing, not article-variant noise.
 
 ## What the old control was doing
@@ -489,7 +584,7 @@ Government funding attitudes, behavioral intentions, and climate attitudes remai
 
 ## Moderation
 
-`r nrow(mod_results)` interaction terms were tested (13 outcomes × 5 moderators × `r length(unique(mod_results$contrast))` contrasts). `r sum(mod_results$p.value < .05)` reach nominal significance at *p* < .05 — near the expected number by chance (`r round(nrow(mod_results) * 0.05, 1)`). None survive FDR correction (Benjamini-Hochberg; all *q* > .10). No moderator reliably conditions the treatment effects.
+`r nrow(mod_results)` interaction terms were tested (`r length(outcomes)` outcomes × `r length(moderators)` moderators × `r length(contrast_levels)` contrasts). `r sum(mod_results$p.value < .05)` reach nominal significance at *p* < .05 — near the expected number by chance (`r round(nrow(mod_results) * 0.05, 1)`). None survive FDR correction (Benjamini-Hochberg; all *q* > .10). No moderator reliably conditions the treatment effects.
 
 ---
 
