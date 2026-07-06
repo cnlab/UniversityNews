@@ -47,7 +47,7 @@ We fielded a 30-minute cross-sectional survey with **300 U.S. adults** recruited
 
 The goal was to identify which beliefs are most strongly associated with supportive attitudes and intentions — the psychological leverage points most worth targeting in Step 2 messaging.
 
-→ *Full survey items list:* [UnivNews_Step1_Survey_Reference.html](UnivNews_Step1_Survey_Reference.html) · [.Rmd](UnivNews_Step1_Survey_Reference.Rmd)
+→ *Full survey items list:* [UnivNews_Step1_Survey_Reference.html](https://cnlab.github.io/UniversityNews/UnivNews_Step1_Survey_Reference.html) · [.Rmd](UnivNews_Step1_Survey_Reference.Rmd)
 
 ---
 
@@ -64,7 +64,7 @@ The goal was to identify which beliefs are most strongly associated with support
 
 The sample overrepresents women and college-educated adults relative to the U.S. population, consistent with typical Prolific samples. Political ideology skews more liberal than the national average, but consistent with Prolific samples and with the likely readership of Penn communications.
 
-→ *Full descriptives:* [02_descriptives_step1_pilot.html](Code/02_descriptives_step1_pilot.html) · [.Rmd](Code/02_descriptives_step1_pilot.Rmd)
+→ *Full descriptives:* [02_descriptives_step1_pilot.html](https://cnlab.github.io/UniversityNews/Code/02_descriptives_step1_pilot.html) · [.Rmd](Code/02_descriptives_step1_pilot.Rmd)
 
 ---
 
@@ -81,7 +81,7 @@ Participants rated four behavioral intentions on a 7-point scale (1 = *Definitel
 
 Talking to others is the most commonly endorsed intention; contacting representatives is least common. The two representative-contact behaviors (oppose cuts, support funding) are highly correlated with each other (r = .81), suggesting they largely reflect the same underlying motivation. A composite of all four outcomes was used as the primary analysis target.
 
-→ *Outcome intercorrelations and descriptives:* [03_correlations_intent.html](Code/03_correlations_intent.html) · [.Rmd](Code/03_correlations_intent.Rmd)
+→ *Outcome intercorrelations and descriptives:* [03_correlations_intent.html](https://cnlab.github.io/UniversityNews/Code/03_correlations_intent.html) · [.Rmd](Code/03_correlations_intent.Rmd)
 
 ---
 
@@ -104,7 +104,7 @@ The table below shows the ten beliefs most strongly correlated with the composit
 
 Several themes emerge: science salience (thinking about the impact of science), personal and social relevance of research, perceived benefits of universities, and economic framing of government funding are the strongest cross-outcome predictors. Correlations are modest in magnitude — consistent with attitude-behavior relationships in survey data — but directionally consistent across outcomes.
 
-→ *Full correlation tables and plots:* [03_correlations_intent.html](Code/03_correlations_intent.html) · [.Rmd](Code/03_correlations_intent.Rmd)
+→ *Full correlation tables and plots:* [03_correlations_intent.html](https://cnlab.github.io/UniversityNews/Code/03_correlations_intent.html) · [.Rmd](Code/03_correlations_intent.Rmd)
 
 ---
 
@@ -120,11 +120,11 @@ We used the [Hornik & Woolf (1999)](https://doi.org/10.1080/10410239909374661) p
 
 **4. Government funding benefits** — Beliefs that federal funding advances important goals (job creation, competitiveness, discovery) are reliable secondary targets. These respond well to economic framing.
 
-→ *PTG analysis:* [04_promising_beliefs.html](Code/04_promising_beliefs.html) · [.Rmd](Code/04_promising_beliefs.Rmd) · [04_ptg_interim_summary.html](Code/04_ptg_interim_summary.html) · [.Rmd](Code/04_ptg_interim_summary.Rmd)
+→ *PTG analysis:* [04_promising_beliefs.html](https://cnlab.github.io/UniversityNews/Code/04_promising_beliefs.html) · [.Rmd](Code/04_promising_beliefs.Rmd) · [04_ptg_interim_summary.html](https://cnlab.github.io/UniversityNews/Code/04_ptg_interim_summary.html) · [.Rmd](Code/04_ptg_interim_summary.Rmd)
 
-→ *Attitude outcome:* [06_correlations_attitude.html](Code/06_correlations_attitude.html) · [07_promising_beliefs_attitude.html](Code/07_promising_beliefs_attitude.html)
+→ *Attitude outcome:* [06_correlations_attitude.html](https://cnlab.github.io/UniversityNews/Code/06_correlations_attitude.html) · [07_promising_beliefs_attitude.html](https://cnlab.github.io/UniversityNews/Code/07_promising_beliefs_attitude.html)
 
-→ *Intermediate outcomes (perceived benefits, costs, trust, tax relevance):* [08_promising_beliefs_intermediate.html](Code/08_promising_beliefs_intermediate.html)
+→ *Intermediate outcomes (perceived benefits, costs, trust, tax relevance):* [08_promising_beliefs_intermediate.html](https://cnlab.github.io/UniversityNews/Code/08_promising_beliefs_intermediate.html)
 
 ---
 
@@ -140,9 +140,9 @@ We estimated a partial correlation network across 58 belief nodes using EBIC-GLA
 
 **Researcher integrity beliefs (community 11)** — including whether taxpayer money is wasted and whether researchers are honest — have moderate centrality and strong PTG specifically for talking and sharing. Unlike the clusters above, these are unlikely to cascade through the network, but they are effective direct messaging targets, particularly for behaviors that involve spreading information to others.
 
-→ *Network visualization and centrality tables:* [05_belief_network.html](Code/05_belief_network.html) · [.Rmd](Code/05_belief_network.Rmd)
+→ *Network visualization and centrality tables:* [05_belief_network.html](https://cnlab.github.io/UniversityNews/Code/05_belief_network.html) · [.Rmd](Code/05_belief_network.Rmd)
 
-→ *Centrality × PTG quadrant analysis:* [04_ptg_interim_summary.html](Code/04_ptg_interim_summary.html) · [.Rmd](Code/04_ptg_interim_summary.Rmd)
+→ *Centrality × PTG quadrant analysis:* [04_ptg_interim_summary.html](https://cnlab.github.io/UniversityNews/Code/04_ptg_interim_summary.html) · [.Rmd](Code/04_ptg_interim_summary.Rmd)
 
 ---
 
@@ -181,18 +181,18 @@ In addition to supporting initial results and staff research time, this seed fun
 
 ## Analysis Files
 
-> **Note:** HTML files can be downloaded and opened in any browser. Click a filename in the `Code/` folder, then click **Download**.
+> **Note:** These are served via GitHub Pages and render directly in your browser. (GitHub's own file viewer only shows HTML as source code — it never renders it live — so the plain `github.com/.../blob/...` link to any of these will just show markup, not the report.)
 
 | File | Description |
 |------|-------------|
-| `Code/04_ptg_interim_summary.html` | **Start here.** Cross-outcome summary table, top targets by outcome, and centrality × PTG prioritization |
-| `Code/04_promising_beliefs.html` | Full Hornik & Woolf PTG analysis across all beliefs × 4 behavioral intentions |
-| `Code/05_belief_network.html` | EBIC-GLASSO partial correlation belief network (58 nodes, 11 communities) |
-| `Code/03_correlations_intent.html` | Spearman correlations, all beliefs × behavioral intentions |
-| `Code/06_correlations_attitude.html` | Spearman correlations, all beliefs × attitude toward federal funding |
-| `Code/07_promising_beliefs_attitude.html` | PTG analysis, beliefs × attitude outcome |
-| `Code/08_promising_beliefs_intermediate.html` | PTG analysis, beliefs × intermediate outcomes (perceived benefits, costs, trust, tax relevance) |
-| `Code/02_descriptives_step1_pilot.html` | Sample descriptives and open-ended responses |
+| [`Code/04_ptg_interim_summary.html`](https://cnlab.github.io/UniversityNews/Code/04_ptg_interim_summary.html) | **Start here.** Cross-outcome summary table, top targets by outcome, and centrality × PTG prioritization |
+| [`Code/04_promising_beliefs.html`](https://cnlab.github.io/UniversityNews/Code/04_promising_beliefs.html) | Full Hornik & Woolf PTG analysis across all beliefs × 4 behavioral intentions |
+| [`Code/05_belief_network.html`](https://cnlab.github.io/UniversityNews/Code/05_belief_network.html) | EBIC-GLASSO partial correlation belief network (58 nodes, 11 communities) |
+| [`Code/03_correlations_intent.html`](https://cnlab.github.io/UniversityNews/Code/03_correlations_intent.html) | Spearman correlations, all beliefs × behavioral intentions |
+| [`Code/06_correlations_attitude.html`](https://cnlab.github.io/UniversityNews/Code/06_correlations_attitude.html) | Spearman correlations, all beliefs × attitude toward federal funding |
+| [`Code/07_promising_beliefs_attitude.html`](https://cnlab.github.io/UniversityNews/Code/07_promising_beliefs_attitude.html) | PTG analysis, beliefs × attitude outcome |
+| [`Code/08_promising_beliefs_intermediate.html`](https://cnlab.github.io/UniversityNews/Code/08_promising_beliefs_intermediate.html) | PTG analysis, beliefs × intermediate outcomes (perceived benefits, costs, trust, tax relevance) |
+| [`Code/02_descriptives_step1_pilot.html`](https://cnlab.github.io/UniversityNews/Code/02_descriptives_step1_pilot.html) | Sample descriptives and open-ended responses |
 
 ---
 
