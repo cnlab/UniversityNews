@@ -56,13 +56,24 @@ data <- data %>%
 
 data <- data %>%
   mutate(
-    flag_recaptcha  = as.numeric(Q_RecaptchaScore) < 0.5,
-    flag_bot        = prolific_check_bot == "mixed",
-    flag_attn       = attention_1 != "Somewhat agree" &
-                      attention_2 != "Disagree" &
-                      attention_3 != "Somewhat disagree",
-    flag_offtask    = off_task_min > 15,
-    n_flags         = flag_recaptcha + flag_bot + flag_attn + flag_offtask,
+    flag_recaptcha  = as.numeric(Q_RecaptchaScore) < 0.5,   # Qualtrics reCAPTCHA / bot score
+    flag_bot        = prolific_check_bot == "mixed",        # Prolific bot detection
+    flag_attn       = coalesce(attention_1 != "Somewhat agree", FALSE) |   # failed ANY of the 3 attention checks
+                      coalesce(attention_2 != "Disagree", FALSE) |
+                      coalesce(attention_3 != "Somewhat disagree", FALSE),
+    flag_offtask    = off_task_min > 15,                    # >15 min off-task (kept, NOT an exclusion criterion)
+
+    # ---- Exclusion rule --------------------------------------------------
+    # Exclude participants who failed MORE THAN ONE of the three quality tests:
+    # attention check, Qualtrics bot detection, Prolific bot detection.
+    # NA on a check is treated as "not failed" so missing data does not drive exclusion.
+    n_quality_fail  = coalesce(flag_attn, FALSE) +
+                      coalesce(flag_recaptcha, FALSE) +
+                      coalesce(flag_bot, FALSE),
+    exclude         = n_quality_fail >= 2,
+
+    n_flags         = coalesce(flag_recaptcha, FALSE) + coalesce(flag_bot, FALSE) +
+                      coalesce(flag_attn, FALSE) + coalesce(flag_offtask, FALSE),
     flag_any        = n_flags >= 2
   )
 
@@ -85,16 +96,26 @@ data <- data %>%
 data <- data %>%
   select(-condition, -activeweek)
 
-# ---- save ----------------------------------------------------------------
+# ---- apply exclusions & save ---------------------------------------------
+
+# Pre-exclusion quality summary
+cat("Before exclusions: N =", nrow(data), "\n")
+cat("  flag_recaptcha (Qualtrics bot):", sum(data$flag_recaptcha, na.rm = TRUE), "\n")
+cat("  flag_bot (Prolific bot):       ", sum(data$flag_bot, na.rm = TRUE), "\n")
+cat("  flag_attn (any of 3 attn failed):", sum(data$flag_attn, na.rm = TRUE), "\n")
+cat("  flag_offtask (>15 min, NOT an exclusion criterion):", sum(data$flag_offtask, na.rm = TRUE), "\n")
+cat("  n_quality_fail distribution:\n"); print(table(data$n_quality_fail))
+cat("  -> excluded (failed 2+ quality tests):", sum(data$exclude), "\n")
+
+# Keep a full (pre-exclusion) copy for sensitivity checks
+saveRDS(data, sprintf("%s/Data/Cleaned/UnivNews_Step1_combined_full.rds", path))
+
+# Apply exclusion: drop participants who failed more than one quality test
+data <- data %>% filter(!exclude)
 
 saveRDS(data, sprintf("%s/Data/Cleaned/UnivNews_Step1_combined.rds", path))
 
-cat("Saved:", nrow(data), "participants (cohort 1 =",
+cat("\nSaved (post-exclusion): N =", nrow(data), "(cohort 1 =",
     sum(data$cohort == 1), ", cohort 2 =", sum(data$cohort == 2),
     ", cohort 3 =", sum(data$cohort == 3), ")\n")
 cat("Columns:", ncol(data), "\n")
-cat("flag_recaptcha:", sum(data$flag_recaptcha, na.rm = TRUE), "\n")
-cat("flag_bot:", sum(data$flag_bot, na.rm = TRUE), "\n")
-cat("flag_attn (all 3 failed):", sum(data$flag_attn, na.rm = TRUE), "\n")
-cat("flag_offtask (>15 min):", sum(data$flag_offtask, na.rm = TRUE), "\n")
-cat("flag_any (2+ flags):", sum(data$flag_any, na.rm = TRUE), "\n")

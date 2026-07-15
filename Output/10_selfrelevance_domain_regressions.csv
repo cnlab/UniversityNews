@@ -1,27 +1,27 @@
 Domain,beta,p,sig,adjR2,model
-`Space exploration`,0.225,6.74437697873617e-5,***,0.339,importance
-`Better public policy`,0.185,0.0033392382768874396,**,0.339,importance
-`AI / machine learning`,0.156,0.007077062518014835,**,0.339,importance
-`Environment / clean air & water`,0.153,0.014139292984881438,*,0.339,importance
-`Awareness of others' perspectives`,0.134,0.025729981650621944,*,0.339,importance
-`Energy independence`,0.118,0.049037212240709956,*,0.339,importance
-`Social science`,0.115,0.06120328695717571,,0.339,importance
-`Manufacturing / domestic production`,0.1,0.12052816174463775,,0.339,importance
-`Defense / national security`,-0.089,0.13272427420509839,,0.339,importance
-`Education systems`,-0.083,0.1854822218422781,,0.339,importance
-`Medicine / cure disease`,-0.078,0.16335791138975067,,0.339,importance
-`Economic growth / wages`,-0.041,0.5013574196675836,,0.339,importance
-`Understanding to improve own life`,-0.011,0.8636227882602169,,0.339,importance
-`Space exploration`,0.231,6.608561512180064e-5,***,0.291,payoff
-`Medicine / cure disease`,0.148,0.014552697563856774,*,0.291,payoff
-`Manufacturing / domestic production`,0.132,0.03003601479029937,*,0.291,payoff
-`Economic growth / wages`,0.119,0.049024522617149784,*,0.291,payoff
-`Awareness of others' perspectives`,0.096,0.153611813717885,,0.291,payoff
-`Social science`,0.093,0.14628870924143983,,0.291,payoff
-`AI / machine learning`,-0.071,0.2102377628483033,,0.291,payoff
-`Education systems`,0.066,0.3100828412547898,,0.291,payoff
-`Better public policy`,0.051,0.4282095014294446,,0.291,payoff
-`Environment / clean air & water`,-0.039,0.5373876726935276,,0.291,payoff
-`Understanding to improve own life`,0.037,0.5959550958458827,,0.291,payoff
-`Energy independence`,0.008,0.9041833471498473,,0.291,payoff
-`Defense / national security`,0.002,0.9762031700392613,,0.291,payoff
+`Space exploration`,0.227,5.972071102330919e-5,***,0.338,importance
+`Better public policy`,0.184,0.003680021635020194,**,0.338,importance
+`AI / machine learning`,0.159,0.006156473296808035,**,0.338,importance
+`Environment / clean air & water`,0.156,0.012950101649364953,*,0.338,importance
+`Awareness of others' perspectives`,0.135,0.0248939564968386,*,0.338,importance
+`Energy independence`,0.116,0.05386608796243406,,0.338,importance
+`Social science`,0.111,0.0685299794350945,,0.338,importance
+`Manufacturing / domestic production`,0.104,0.10548992704700395,,0.338,importance
+`Defense / national security`,-0.095,0.11177154471392485,,0.338,importance
+`Education systems`,-0.08,0.20453594285332274,,0.338,importance
+`Medicine / cure disease`,-0.079,0.1599036567047939,,0.338,importance
+`Economic growth / wages`,-0.049,0.4206426359195866,,0.338,importance
+`Understanding to improve own life`,-0.011,0.8572051367063535,,0.338,importance
+`Space exploration`,0.233,6.266177354298078e-5,***,0.289,payoff
+`Medicine / cure disease`,0.145,0.017315246331811137,*,0.289,payoff
+`Manufacturing / domestic production`,0.134,0.028251548886173015,*,0.289,payoff
+`Economic growth / wages`,0.118,0.050115695059114305,,0.289,payoff
+`Social science`,0.097,0.13132174869847862,,0.289,payoff
+`Awareness of others' perspectives`,0.096,0.15607306814150132,,0.289,payoff
+`AI / machine learning`,-0.077,0.17229271103602964,,0.289,payoff
+`Education systems`,0.065,0.31824169045230694,,0.289,payoff
+`Better public policy`,0.052,0.41722254343353204,,0.289,payoff
+`Environment / clean air & water`,-0.043,0.4961052176588526,,0.289,payoff
+`Understanding to improve own life`,0.036,0.6077264251566319,,0.289,payoff
+`Energy independence`,0.012,0.8452617187081359,,0.289,payoff
+`Defense / national security`,-0.002,0.9686781534227782,,0.289,payoff

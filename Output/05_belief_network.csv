@@ -1,59 +1,59 @@
 col,label,block,community_id,eigenvector_abs,r_composite,pct_to_gain_Contact reps: oppose cuts,pct_to_gain_Talk to others about cuts,pct_to_gain_Share info online,pct_to_gain_Contact reps: support funding,ror_Contact reps: oppose cuts,ror_Talk to others about cuts,ror_Share info online,ror_Contact reps: support funding
-govtfund_9_1,Approve cutting: health research funding,Govt Funding,6,1,-0.089,3,5.2,4.3,1.9,11.08,5.88,8.56,2.54
-govtfund_9_2,Approve cutting: education funding,Govt Funding,6,0.9784294461827496,-0.143,2.5,5.6,4.5,1.8,3.73,5.25,6.28,2.19
-govtfund_9_3,Approve cutting: science funding,Govt Funding,6,0.891347108782926,-0.174,3.5,7.2,6,1.7,4.88,5.6,8.29,1.79
-govtfund_8_2,Tax investment in research: improves health & saves lives,Govt Funding,2,0.82487450030971,0.315,2.3,6.5,4.8,2.7,2.51,4.53,4.43,2.84
-govtfund_9_5,Approve cutting: humanities funding,Govt Funding,6,0.7762185894403166,-0.182,4.5,10.9,8.3,4.6,3.56,5.42,5.38,3.25
-govtfund_8_6,Tax investment in research: leads to breakthroughs,Govt Funding,2,0.726528060737006,0.232,2.7,6.8,4.6,2.6,3.27,5.34,4.3,2.76
-govtfund_8_7,Tax investment in research: benefits people like you,Govt Funding,2,0.6571136006895998,0.287,1.6,8,3.8,4.6,1.51,3.21,2.03,3.25
-govtfund_9_4,Approve cutting: arts funding,Govt Funding,6,0.6177842123319003,-0.277,5.5,17.1,14.7,5.8,3.37,8.56,12.86,3.23
-univ_5_1,Universities benefit: you personally,University Perceptions,3,0.5983919018827687,0.411,6.1,9.7,7,4.4,3.13,2.68,2.5,2.15
-govtfund_8_1,Tax investment in research: boosts economy,Govt Funding,2,0.5982702834654119,0.355,4.9,11.5,8.4,9.3,2.68,3.48,3.23,5.85
-climate_3,Trust in climate scientists,Climate,4,0.594864466186038,0.328,8,12,8.8,5.5,6.66,4.3,4,3.12
-climate_1,Believes global warming is happening,Climate,4,0.5698169184814992,0.226,0.5,1.1,0.8,0.6,NA,NA,NA,NA
-research_3_2,Research impact: people you care about,Research Beliefs,3,0.5627003412288379,0.391,7.8,22.9,19.3,11.7,3.3,6.52,7.39,4.97
-govtfund_1,Approval of federal research funding,Govt Funding,4,0.5621897085261349,0.358,1,5.4,3.7,2.2,1.41,2.81,2.6,2.02
-govtfund_5_7,Govt funding risk: taxpayer money is wasted,Govt Funding,1,0.5574609801618358,-0.323,4.9,11.3,15.3,4.3,2.13,2.54,4.46,1.86
-govtfund_8_4,Tax investment in research: makes US a leader,Govt Funding,2,0.552648413845216,0.2,0.5,7.8,4.7,1.4,1.15,2.9,2.3,1.4
-govtfund_7_2,Perceived university priority: advance knowledge & society,Govt Funding,2,0.5522573064084639,0.345,3.6,6.3,6.7,3.6,4.07,3.42,7.09,3.43
-research_3_1,Research impact: you personally,Research Beliefs,3,0.5364563074783715,0.37,8.8,14.4,8.1,9.6,3.88,3.45,2.51,3.93
-govtfund_8_3,Tax investment in research: drives industry investment,Govt Funding,2,0.5347739867321505,0.294,2.9,7.4,4.9,5.1,1.9,2.37,2.09,2.75
-univ_5_2,Universities benefit: people you care about,University Perceptions,3,0.5185054325502884,0.335,4.4,8.5,6.6,6.7,2.08,2.15,2.15,2.68
-climate_4_mean,Climate research importance,Climate,4,0.5060607594028641,0.343,7,14.6,7.4,6.3,4.04,4.89,2.81,3.2
-climate_2,Believes warming caused by humans,Climate,4,0.48843318828097276,0.235,1.4,3.9,2.6,1.6,3.37,8.14,5.51,3.74
-research_4_7,Science creates opportunities for next generation,Research Beliefs,2,0.4882400204720834,0.209,3,3.9,3.6,2.4,3.03,2.03,2.42,2.13
-govtfund_8_5,Tax investment in research: protects national security,Govt Funding,2,0.48709416121939253,0.242,1.8,11.3,7.2,4.1,1.45,3.41,2.76,2.17
-research_5_composite,Research value (importance × likelihood),Research Beliefs,2,0.4867351266597506,0.301,5.7,17.5,16.3,6.3,2.62,4.88,6.59,2.69
-research_3_3,Research impact: local community,Research Beliefs,3,0.4864049783544889,0.334,6,16.7,12.3,7,2.48,3.81,3.54,2.65
-govtfund_5_10,Govt funding risk: researchers lie to maintain funding,Govt Funding,1,0.48238727359548417,-0.092,7,17.7,17.6,6.3,2.62,3.71,4.88,2.29
-highered_2_1,Trust: private colleges & universities,Higher Education,8,0.48090546933143996,0.255,3.3,12.7,14.5,4.8,1.65,2.64,3.79,1.91
-research_4_8,Basic science has value without immediate benefits,Research Beliefs,2,0.4808215936722127,0.137,2.4,6.7,3.3,2.9,2.58,4.68,2.44,2.92
-govtfund_2,Govt investment in research is ESSENTIAL,Govt Funding,4,0.48004568735960396,0.213,0.7,1.5,1,0.9,2.13,2.31,2.1,2.36
-univ_2_7,Universities contribute: compassion & tolerance,University Perceptions,3,0.4592129576524011,0.383,7.9,16.6,14.3,7.2,3.78,4.65,5.42,3.12
-govtfund_7_1,Perceived university priority: making a profit,Govt Funding,7,0.44831670116672495,-0.026,8.5,11.3,-4.3,7.8,2.88,2.32,0.54,2.54
-govtfund_5_6,Govt funding risk: money spent on less important things,Govt Funding,1,0.4424890795081286,-0.197,8.9,17.6,12.3,8.3,3.14,3.52,3.08,2.75
-research_1,Knowledge of university research,Research Beliefs,5,0.4351597579326669,0.326,3,12.6,13.1,5.8,1.53,2.41,3,2.01
-govfund_10,Local area negatively impacted by funding cuts,Govt Funding,6,0.4329690606274323,-0.223,10.1,12.9,9.9,8.3,6.25,3.56,3.51,3.97
-univ_2_9,Universities contribute: better intl relationships,University Perceptions,3,0.4317286081329797,0.39,2.1,20.1,14.7,4.2,1.47,5.9,5.23,1.95
-govtfund_3,Knowledge of recent funding cuts,Govt Funding,5,0.43096641669685265,0.438,24.2,37.6,41.6,23.6,7.64,7.81,12.46,6.74
-research_4_3,Clear how to apply research findings in my life,Research Beliefs,5,0.42788383361307153,0.3,10.7,13,11,16,4,2.75,2.92,6.26
-research_3_nat_mean,Research impact: US people & government (nat. subscale),Research Beliefs,3,0.3970349274456187,0.295,4.8,11.2,6.8,4.1,2.83,3.67,2.76,2.29
-research_4_2,Know where to look up academic research,Research Beliefs,5,0.3836434756857577,0.271,3,7.7,6.5,4.4,1.83,2.3,2.48,2.25
-highered_1_1,Approval: private colleges & universities,Higher Education,8,0.35847476432937486,0.171,-1,7.8,6.7,2.1,0.81,2.12,2.29,1.44
-govtfund_7_3,Perceived university priority: develop products to sell,Govt Funding,7,0.35497338869613404,0.108,7.6,6.3,6,9,2.78,1.68,1.87,3.04
-research_4_1,Usually understand academic research findings,Research Beliefs,5,0.3494623485226789,0.296,4.7,11.7,10.3,8,2.22,2.91,3.32,3.38
-research_4_4,Often think about science impact on daily life,Research Beliefs,5,0.3484844013733245,0.46,16.8,19.5,11.4,19.6,9.31,4.57,3.21,11.14
-highered_3_1,Scientific contribution: private colleges,Higher Education,8,0.3389786283633455,0.151,-0.7,2.8,0.5,-1,0.84,1.51,1.1,0.77
-highered_4_1,Perception: private colleges are nonprofit,Higher Education,1,0.32434781639297633,0.166,8.7,-4.5,5.4,7.9,2.51,0.66,1.64,2.25
-research_4_5,Science benefits outweigh harms,Research Beliefs,2,0.3173607921517096,0.164,7.3,6.9,5.7,5.5,4.18,2.1,2.2,2.75
-govtfund_7_4,Perceived university priority: serve govt interests,Govt Funding,7,0.3107809825495175,0.004,-1.8,7.2,1.3,-2.4,0.73,1.68,1.19,0.66
-govtfund_5_4,Govt funding benefit: results become publicly available,Govt Funding,9,0.3029298790421424,0.283,8.9,13.4,13.3,9.6,4.18,3.33,4.52,4.17
-research_2,Science is the best way to find truth,Research Beliefs,2,0.296139278529865,0.175,2.1,7,4.7,1.4,1.7,2.6,2.3,1.4
-govtfund_5_9,Govt funding risk: political agendas influence funding,Govt Funding,1,0.2915880034206387,-0.11,7,27.9,31.9,20.6,2.16,4.48,6.58,4.93
-research_3_13,Research impact: disadvantaged individuals,Research Beliefs,3,0.2798541336743521,0.162,7.2,14,14.8,6.5,2.94,3.2,4.52,2.52
-govtfund_5_2,Govt funding benefit: research can focus long-term,Govt Funding,9,0.2747495065080914,0.18,2.2,9.8,8,3.4,1.61,3.05,3.29,1.97
-govtfund_5_3,Govt funding benefit: exciting research is sped up,Govt Funding,9,0.22700989482521003,0.194,3.3,16.8,11.7,5.6,1.73,4.08,3.53,2.31
-govtfund_5_8,Govt funding risk: research delayed by oversight,Govt Funding,1,0.22294150171482768,-0.011,26,4.2,2.5,25.3,7.16,1.45,1.33,6.43
-govtfund_5_1,Govt funding benefit: researchers have enough resources,Govt Funding,9,0.1681094411641542,0.071,-0.8,11.3,4.8,2.5,0.86,2.84,1.81,1.53
-research_6_composite,Perceived research risk (severity × likelihood),Research Beliefs,1,0.12632962339335407,-0.032,0.6,3.2,-4.4,1.2,1.11,1.38,0.49,1.24
-govtfund_5_5,Govt funding benefit: researchers held to higher standards,Govt Funding,9,0.11315230515484798,0.235,12.3,12.5,12.5,7.7,4.82,2.66,3.34,2.71
+govtfund_9_1,Approve cutting: health research funding,Govt Funding,4,1,-0.091,3,5.1,4.2,1.8,10.96,5.82,8.47,2.51
+govtfund_9_2,Approve cutting: education funding,Govt Funding,4,0.9737519350486427,-0.146,2.4,5.6,4.4,1.8,3.69,5.19,6.22,2.17
+govtfund_9_3,Approve cutting: science funding,Govt Funding,4,0.887232000338754,-0.177,3.4,7.1,6,1.6,4.84,5.55,8.22,1.77
+govtfund_8_2,Tax investment in research: improves health & saves lives,Govt Funding,8,0.8196644075611059,0.319,2.2,6.4,4.8,2.7,2.49,4.49,4.4,2.81
+govtfund_9_5,Approve cutting: humanities funding,Govt Funding,4,0.7766813198357545,-0.183,4.5,10.9,8.2,4.6,3.54,5.39,5.35,3.23
+govtfund_8_6,Tax investment in research: leads to breakthroughs,Govt Funding,8,0.7260010482538842,0.234,2.7,6.7,4.6,2.6,3.24,5.29,4.26,2.73
+govtfund_8_7,Tax investment in research: benefits people like you,Govt Funding,8,0.6540774738934072,0.29,1.5,7.9,3.8,4.6,1.5,3.19,2.02,3.23
+govtfund_9_4,Approve cutting: arts funding,Govt Funding,4,0.615151470970809,-0.278,5.5,17.1,14.7,5.7,3.35,8.51,12.79,3.21
+univ_5_1,Universities benefit: you personally,University Perceptions,2,0.5975222441287361,0.412,6.1,9.7,6.9,4.3,3.12,2.67,2.49,2.14
+govtfund_8_1,Tax investment in research: boosts economy,Govt Funding,8,0.595271506837245,0.357,4.9,11.5,8.4,9.3,2.67,3.46,3.21,5.82
+climate_3,Trust in climate scientists,Climate,3,0.5920149470399464,0.328,8,12,8.8,5.5,6.62,4.27,3.98,3.11
+climate_1,Believes global warming is happening,Climate,3,0.5661303874200454,0.226,0.5,1.1,0.8,0.6,NA,NA,NA,NA
+govtfund_1,Approval of federal research funding,Govt Funding,3,0.5635289521332,0.362,1,5.3,3.7,2.1,1.4,2.78,2.57,2
+research_3_2,Research impact: people you care about,Research Beliefs,2,0.5605077233238652,0.394,7.8,22.8,19.3,11.7,3.29,6.49,7.36,4.95
+govtfund_5_7,Govt funding risk: taxpayer money is wasted,Govt Funding,1,0.5592304648084496,-0.323,4.9,11.3,15.3,4.3,2.12,2.52,4.44,1.85
+govtfund_7_2,Perceived university priority: advance knowledge & society,Govt Funding,8,0.5484867723946907,0.348,3.6,6.3,6.6,3.6,4.04,3.39,7.04,3.41
+govtfund_8_4,Tax investment in research: makes US a leader,Govt Funding,8,0.5459509619556746,0.204,0.5,7.8,4.7,1.4,1.14,2.89,2.29,1.39
+research_3_1,Research impact: you personally,Research Beliefs,2,0.5348955833512172,0.373,8.8,14.4,8.1,9.6,3.86,3.43,2.49,3.91
+govtfund_8_3,Tax investment in research: drives industry investment,Govt Funding,8,0.5316485693585956,0.297,2.9,7.4,4.9,5.1,1.89,2.35,2.08,2.74
+univ_5_2,Universities benefit: people you care about,University Perceptions,2,0.5169738391704326,0.336,4.4,8.5,6.6,6.7,2.07,2.14,2.14,2.67
+climate_4_mean,Climate research importance,Climate,3,0.5022272972406078,0.345,6.9,14.5,7.3,6.3,4.02,4.86,2.79,3.18
+research_4_7,Science creates opportunities for next generation,Research Beliefs,9,0.48721276425576915,0.21,3,3.9,3.6,2.3,3.01,2.01,2.4,2.11
+highered_2_1,Trust: private colleges & universities,Higher Education,5,0.4853247051009475,0.255,3.3,12.6,14.5,4.7,1.65,2.63,3.77,1.9
+research_3_3,Research impact: local community,Research Beliefs,2,0.48485839749119386,0.336,6,16.6,12.3,7,2.47,3.8,3.52,2.64
+climate_2,Believes warming caused by humans,Climate,3,0.4843357378265745,0.239,1.4,3.8,2.6,1.6,3.32,8.02,5.43,3.68
+govtfund_2,Govt investment in research is ESSENTIAL,Govt Funding,3,0.48391265991891375,0.213,0.7,1.5,1,0.9,2.14,2.32,2.11,2.38
+govtfund_8_5,Tax investment in research: protects national security,Govt Funding,8,0.48337302367444224,0.243,1.7,11.2,7.1,4.1,1.44,3.39,2.74,2.16
+research_5_composite,Research value (importance × likelihood),Research Beliefs,9,0.4809359530060202,0.304,5.6,17.4,16.2,6.3,2.61,4.86,6.56,2.68
+govtfund_5_10,Govt funding risk: researchers lie to maintain funding,Govt Funding,1,0.4805766351261663,-0.092,6.9,17.6,17.5,6.3,2.61,3.69,4.86,2.28
+research_4_8,Basic science has value without immediate benefits,Research Beliefs,9,0.47956794586907076,0.138,2.4,6.7,3.2,2.8,2.56,4.64,2.42,2.9
+univ_2_7,Universities contribute: compassion & tolerance,University Perceptions,2,0.45681369656997595,0.386,7.8,16.6,14.3,7.2,3.76,4.63,5.4,3.1
+govtfund_7_1,Perceived university priority: making a profit,Govt Funding,7,0.4478351417655591,-0.026,8.4,11.3,-4.4,7.8,2.87,2.31,0.53,2.53
+govtfund_5_6,Govt funding risk: money spent on less important things,Govt Funding,1,0.4422613363480583,-0.197,8.9,17.5,12.2,8.3,3.12,3.5,3.07,2.73
+research_1,Knowledge of university research,Research Beliefs,6,0.4342778106098327,0.326,3,12.5,13.1,5.8,1.52,2.4,2.99,2
+govtfund_3,Knowledge of recent funding cuts,Govt Funding,6,0.4325907735007224,0.438,24.2,37.6,41.6,23.6,7.62,7.78,12.42,6.72
+govfund_10,Local area negatively impacted by funding cuts,Govt Funding,4,0.430743199321347,-0.225,10.1,12.9,9.9,8.3,6.22,3.54,3.49,3.95
+univ_2_9,Universities contribute: better intl relationships,University Perceptions,2,0.42921890430104254,0.392,2.1,20.1,14.6,4.1,1.46,5.87,5.21,1.94
+research_4_3,Clear how to apply research findings in my life,Research Beliefs,6,0.42668052225988473,0.301,10.6,12.9,11,16,3.98,2.73,2.91,6.24
+research_3_nat_mean,Research impact: US people & government (nat. subscale),Research Beliefs,2,0.39588204724328674,0.297,4.8,11.1,6.7,4.1,2.81,3.65,2.75,2.28
+research_4_2,Know where to look up academic research,Research Beliefs,6,0.38268276898704784,0.274,3,7.6,6.5,4.3,1.82,2.28,2.47,2.24
+govtfund_7_3,Perceived university priority: develop products to sell,Govt Funding,7,0.35556330189577756,0.107,7.5,6.2,6,9,2.77,1.68,1.86,3.03
+highered_1_1,Approval: private colleges & universities,Higher Education,5,0.35550781552828137,0.172,-1,7.7,6.7,2.1,0.81,2.11,2.28,1.44
+research_4_1,Usually understand academic research findings,Research Beliefs,6,0.3488916720825554,0.298,4.6,11.6,10.3,8,2.21,2.89,3.3,3.37
+research_4_4,Often think about science impact on daily life,Research Beliefs,6,0.34793450495410383,0.461,16.8,19.4,11.4,19.6,9.27,4.55,3.19,11.1
+highered_3_1,Scientific contribution: private colleges,Higher Education,5,0.337290268513028,0.153,-0.7,2.8,0.5,-1.1,0.83,1.5,1.09,0.77
+highered_4_1,Perception: private colleges are nonprofit,Higher Education,3,0.32251147014689735,0.166,8.6,-4.6,5.4,7.9,2.49,0.66,1.63,2.24
+research_4_5,Science benefits outweigh harms,Research Beliefs,9,0.3167291072370119,0.166,7.2,6.8,5.6,5.5,4.16,2.09,2.19,2.73
+govtfund_7_4,Perceived university priority: serve govt interests,Govt Funding,7,0.30757292809183573,0.005,-1.8,7.2,1.3,-2.5,0.73,1.67,1.18,0.66
+research_2,Science is the best way to find truth,Research Beliefs,9,0.30320938580687484,0.174,2.2,7.2,4.8,1.5,1.72,2.62,2.32,1.41
+govtfund_5_4,Govt funding benefit: results become publicly available,Govt Funding,10,0.30003748313187506,0.286,8.9,13.3,13.3,9.5,4.16,3.32,4.5,4.15
+govtfund_5_9,Govt funding risk: political agendas influence funding,Govt Funding,1,0.2831503074243775,-0.109,6.9,27.8,31.8,20.5,2.15,4.46,6.55,4.91
+research_3_13,Research impact: disadvantaged individuals,Research Beliefs,2,0.27842299036671736,0.163,7.2,14,14.8,6.5,2.93,3.18,4.5,2.51
+govtfund_5_2,Govt funding benefit: research can focus long-term,Govt Funding,10,0.27291333881330043,0.182,2.2,9.7,8,3.4,1.6,3.03,3.28,1.96
+govtfund_5_3,Govt funding benefit: exciting research is sped up,Govt Funding,10,0.22276729030518455,0.197,3.2,16.8,11.7,5.6,1.72,4.06,3.51,2.29
+govtfund_5_8,Govt funding risk: research delayed by oversight,Govt Funding,1,0.2182723422339764,-0.01,26,4.2,55.6,25.3,7.13,1.44,19.48,6.4
+govtfund_5_1,Govt funding benefit: researchers have enough resources,Govt Funding,10,0.1669440906820321,0.072,-0.8,11.3,4.8,2.5,0.85,2.83,1.8,1.52
+research_6_composite,Perceived research risk (severity × likelihood),Research Beliefs,1,0.11914999418854856,-0.03,0.6,3.1,-4.4,1.3,1.13,1.37,0.5,1.25
+govtfund_5_5,Govt funding benefit: researchers held to higher standards,Govt Funding,10,0.11408061043395032,0.234,12.2,12.4,12.5,7.7,4.8,2.65,3.33,2.7

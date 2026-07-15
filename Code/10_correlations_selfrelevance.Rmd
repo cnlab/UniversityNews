@@ -417,14 +417,16 @@ is a broad *"research pays off for society"* orientation, and the specific domai
 
 ```{r predictor-recode}
 lvl_likelihood_r <- c("Very unlikely","Somewhat unlikely","Neutral","Somewhat likely","Very likely")
-lvl_ideology     <- c("Extremely liberal","Liberal","Slightly liberal","Moderate",
+lvl_ideology     <- c("Extremely liberal","Liberal","Slightly liberal","Moderate / middle of the road",
                       "Slightly conservative","Conservative","Extremely conservative")
 lvl_climate_trust <- c("Not at all","Slightly","Moderately","Very strongly")
 lvl_degree       <- c("No formal education","Did not complete high school",
-                      "High school graduate (diploma or GED)","Some college (1-4 years, no degree)",
-                      "Associate's degree","Bachelor's degree (BA, BS, etc.)",
+                      "High school graduate (diploma)","High school graduate (GED)",
+                      "Some college (1-4 years, no degree)",
+                      "Associate's degree (including occupational or academic degrees)",
+                      "Bachelor's degree (BA, BS, etc.)",
                       "Master's degree (MA, MS, MEng, MSW, etc.)",
-                      "Professional school degree (MD, JD, etc.)","Doctoral degree (PhD, EdD, etc.)")
+                      "Professional school degree (MD, DDC, JD, etc.)","Doctoral degree (PhD, EdD, etc.)")
 
 # Source these blocks from the raw `data` frame: some columns (e.g. research_5.1_12)
 # were already recoded to numeric above, so re-applying to_num to `d` would wipe them to NA.

@@ -250,7 +250,7 @@ summary_table |>
     locations = cells_column_labels(columns = composite)
   ) |>
   tab_footnote(
-    footnote = "Eigenvector centrality from EBIC-GLASSO network (58 nodes). Percentile rank in parentheses.",
+    footnote = "Eigenvector centrality from the EBIC-GLASSO network. Percentile rank in parentheses.",
     locations = cells_column_labels(columns = Centrality)
   ) |>
   tab_options(
@@ -440,11 +440,11 @@ hi_ptg_hi_cent <- quad_df |>
 
 1. **Single best cross-cutting target: "Think about the impact of science on daily life"** (composite PTG = `r r44_comp`%, lb ≥ 5 on `r r44_nlb5` of 4 outcomes). However, its centrality is at the `r r44_cent`th percentile — it is a strong behavior predictor but peripheral in the belief network. It is a high-value **direct messaging target**, not a gateway belief.
 
-2. **Best combined target: personal relevance cluster (research_3).** "People you care about" (composite PTG = `r r32_comp`%, `r r32_cent`th centrality percentile) sits in the priority quadrant: high PTG and moderately central. The full personal relevance cluster (items 1, 2, 3, 13) all fall in community 3 together, confirming construct coherence. Shifting personal relevance beliefs may cascade through the network.
+2. **Best combined target: personal relevance cluster (research_3).** "People you care about" (composite PTG = `r r32_comp`%, `r r32_cent`th centrality percentile) sits in the priority quadrant: high PTG and moderately central. The full personal relevance cluster (items 1, 2, 3, 13) all fall in the same network community, confirming construct coherence. Shifting personal relevance beliefs may cascade through the network.
 
 3. **Social behaviors vs. political action require different frames.** Personal relevance drives talking and sharing; science salience and applied relevance ("clear how to apply research findings," composite PTG = `r r43_comp`%) drive contacting representatives. A single message strategy is unlikely to move all four outcomes equally.
 
-4. **Researcher skepticism cluster is specific to online sharing and is highly central.** "Taxpayer money is wasted" (centrality `r r57_cent`th percentile), "researchers lie," and "money spent on less important things" cluster together in community 11 and are each other's neighbors in the network. These beliefs form a coherent structural unit — but their behavioral payoff is concentrated in sharing behavior, not political action.
+4. **Researcher skepticism cluster is specific to online sharing and is highly central.** "Taxpayer money is wasted" (centrality `r r57_cent`th percentile), "researchers lie," and "money spent on less important things" cluster together in the network and are each other's neighbors. These beliefs form a coherent structural unit — but their behavioral payoff is concentrated in sharing behavior, not political action.
 
 5. **"Funded researchers held to higher standards"** is the most outcome-consistent govt funding item (lb ≥ 5 on three of four outcomes) but has near-zero centrality — structurally isolated. Strong for direct messaging; unlikely to cascade.
 
