@@ -61,13 +61,15 @@ lvl_climate_trust <- c("Not at all","Slightly","Moderately","Very strongly")
 lvl_proportion   <- c("None","Less than half","About half","Most","All")
 lvl_intent       <- c("Definitely will not","Probably will not","Maybe will not",
                       "Unsure","Maybe will","Probably will","Definitely will")
-lvl_ideology     <- c("Extremely liberal","Liberal","Slightly liberal","Moderate",
+lvl_ideology     <- c("Extremely liberal","Liberal","Slightly liberal","Moderate / middle of the road",
                       "Slightly conservative","Conservative","Extremely conservative")
 lvl_degree       <- c("No formal education","Did not complete high school",
-                      "High school graduate (diploma or GED)","Some college (1-4 years, no degree)",
-                      "Associate's degree","Bachelor's degree (BA, BS, etc.)",
+                      "High school graduate (diploma)","High school graduate (GED)",
+                      "Some college (1-4 years, no degree)",
+                      "Associate's degree (including occupational or academic degrees)",
+                      "Bachelor's degree (BA, BS, etc.)",
                       "Master's degree (MA, MS, MEng, MSW, etc.)",
-                      "Professional school degree (MD, JD, etc.)","Doctoral degree (PhD, EdD, etc.)")
+                      "Professional school degree (MD, DDC, JD, etc.)","Doctoral degree (PhD, EdD, etc.)")
 lvl_income       <- c("Less than $5,000","$5,000 through $11,999","$12,000 through $15,999",
                       "$16,000 through $24,999","$25,000 through $34,999","$35,000 through $49,999",
                       "$50,000 through $74,999","$75,000 through $99,999",
