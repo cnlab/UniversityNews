@@ -1,0 +1,8 @@
+variable,Item,r_personal,p_personal,r_applic,p_applic,gap
+govtfund_8_1,Tax: boosts economy,0.54,3.540447920892889e-24,0.36,7.125364284838709e-11,0.18
+govtfund_8_7,Tax: benefits people like you (in composite),0.47,3.0182164924830106e-18,0.23,6.899408753020544e-5,0.24
+govtfund_8_3,Tax: drives industry investment,0.45,5.215119011962638e-16,0.26,7.365569622876477e-6,0.19
+govtfund_8_4,Tax: makes America a leader,0.45,4.3332110733223483e-16,0.2,5.700349677432933e-4,0.25
+govtfund_8_5,Tax: protects national security,0.44,1.482560567783453e-15,0.26,5.790304138259554e-6,0.18
+govtfund_8_2,Tax: improves health / saves lives,0.41,1.8503688930949463e-13,0.23,3.976527643073721e-5,0.18
+govtfund_8_6,Tax: scientific breakthroughs,0.37,6.639598678833406e-11,0.18,0.002065440449237906,0.19

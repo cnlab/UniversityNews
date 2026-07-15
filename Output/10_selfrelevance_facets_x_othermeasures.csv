@@ -1,0 +1,181 @@
+target,Group,Measure,variable,r,p
+Overall composite (9 items),Tax-investment payoff,Tax: boosts economy,govtfund_8_1,0.61,9.366290673381666e-32
+Overall composite (9 items),Broad benefit / trust,Univ → knowledgeable population,univ_2_4,0.58,4.3360114510266265e-28
+Overall composite (9 items),Broad benefit / trust,Univ → economic growth,univ_2_8,0.55,9.919801502707376e-25
+Overall composite (9 items),Tax-investment payoff,Tax: improves health / saves lives,govtfund_8_2,0.55,5.497932793203258e-25
+Overall composite (9 items),Broad benefit / trust,Univ → compassion / tolerance,univ_2_7,0.54,1.5538509861973772e-24
+Overall composite (9 items),Broad benefit / trust,Climate research is important,climate_4_1,0.53,4.867940003176796e-23
+Overall composite (9 items),Broad benefit / trust,Trust in climate scientists,climate_3,0.52,7.623388631500614e-22
+Overall composite (9 items),Tax-investment payoff,Tax: drives industry investment,govtfund_8_3,0.5,2.262571181932676e-20
+Overall composite (9 items),Tax-investment payoff,Tax: makes America a leader,govtfund_8_4,0.5,1.0646650210596921e-20
+Overall composite (9 items),Tax-investment payoff,Tax: protects national security,govtfund_8_5,0.5,3.4130197820113184e-20
+Overall composite (9 items),Broad benefit / trust,Univ → innovation,univ_2_1,0.48,2.3321804209611055e-18
+Overall composite (9 items),Tax-investment payoff,Tax: scientific breakthroughs,govtfund_8_6,0.47,3.2746450922902936e-18
+Overall composite (9 items),Broad benefit / trust,Univ → benefits communities,univ_2_10,0.45,1.1872694149312394e-16
+Overall composite (9 items),Domain importance,Importance: Better public policy,research_5.1_11,0.41,1.1010555106683936e-13
+Overall composite (9 items),Domain payoff,Expected payoff: Space exploration,research_5.2_9,0.39,4.547739870652919e-12
+Overall composite (9 items),Domain importance,Importance: Awareness of others' perspectives,research_5.1_13,0.38,7.668388023794782e-12
+Overall composite (9 items),Broad benefit / trust,Trust: science is best route to truth,research_2,0.37,5.215487428819379e-11
+Overall composite (9 items),Domain importance,Importance: Space exploration,research_5.1_9,0.37,5.7477046909605095e-11
+Overall composite (9 items),Domain payoff,Expected payoff: Social science,research_5.2_1,0.37,3.3780807109458315e-11
+Overall composite (9 items),Domain payoff,Expected payoff: Education systems,research_5.2_10,0.37,4.906046665104817e-11
+Overall composite (9 items),Broad benefit / trust,Self-rated research knowledge,research_1,0.36,2.390379578719983e-10
+Overall composite (9 items),Domain importance,Importance: Social science,research_5.1_1,0.36,9.789538909518003e-11
+Overall composite (9 items),Domain payoff,Expected payoff: Medicine / cure disease,research_5.2_2,0.36,1.9228029027320127e-10
+Overall composite (9 items),Domain payoff,Expected payoff: Better public policy,research_5.2_11,0.36,7.308048514092185e-11
+Overall composite (9 items),Domain payoff,Expected payoff: Understanding to improve own life,research_5.2_12,0.36,1.3886562942379222e-10
+Overall composite (9 items),Domain importance,Importance: Energy independence,research_5.1_4,0.35,4.75740366981019e-10
+Overall composite (9 items),Domain payoff,Expected payoff: Economic growth / wages,research_5.2_5,0.35,5.708526768118747e-10
+Overall composite (9 items),Domain payoff,Expected payoff: Manufacturing / domestic production,research_5.2_6,0.35,6.312532676541297e-10
+Overall composite (9 items),Domain importance,Importance: Understanding to improve own life,research_5.1_12,0.33,4.136277609773338e-9
+Overall composite (9 items),Domain payoff,Expected payoff: Awareness of others' perspectives,research_5.2_13,0.33,2.9985078412724723e-9
+Overall composite (9 items),Domain payoff,Expected payoff: Energy independence,research_5.2_4,0.32,1.93973758541322e-8
+Overall composite (9 items),Domain importance,Importance: Environment / clean air & water,research_5.1_3,0.31,4.228887625443458e-8
+Overall composite (9 items),Domain importance,Importance: Manufacturing / domestic production,research_5.1_6,0.3,1.6395696466845846e-7
+Overall composite (9 items),Domain payoff,Expected payoff: Environment / clean air & water,research_5.2_3,0.3,8.504427210075257e-8
+Overall composite (9 items),Domain importance,Importance: AI / machine learning,research_5.1_8,0.28,5.786356750865546e-7
+Overall composite (9 items),Domain importance,Importance: Economic growth / wages,research_5.1_5,0.27,1.5311853662187762e-6
+Overall composite (9 items),Domain importance,Importance: Education systems,research_5.1_10,0.26,3.624616484715449e-6
+Overall composite (9 items),Broad benefit / trust,Subjective SES (ladder),ses_ladder,0.24,2.5538618406037094e-5
+Overall composite (9 items),Broad benefit / trust,Education,ses_degree,0.24,1.783155689153051e-4
+Overall composite (9 items),Domain payoff,Expected payoff: Defense / national security,research_5.2_7,0.18,0.0016815278661408035
+Overall composite (9 items),Broad benefit / trust,Ideology (liberal → conservative),politics_ideology,-0.15,0.024239753012772394
+Overall composite (9 items),Domain importance,Importance: Defense / national security,research_5.1_7,0.14,0.015925681211113145
+Overall composite (9 items),Domain payoff,Expected payoff: AI / machine learning,research_5.2_8,0.13,0.02902008051383825
+Overall composite (9 items),Domain importance,Importance: Medicine / cure disease,research_5.1_2,0.11,0.05286840316578549
+Overall composite (9 items),Broad benefit / trust,Age,age,0.08,0.15635586178425892
+Personal / close-other benefit,Tax-investment payoff,Tax: boosts economy,govtfund_8_1,0.54,3.540447920892889e-24
+Personal / close-other benefit,Broad benefit / trust,Univ → compassion / tolerance,univ_2_7,0.53,1.566205182208182e-23
+Personal / close-other benefit,Broad benefit / trust,Univ → economic growth,univ_2_8,0.52,3.861754556291667e-22
+Personal / close-other benefit,Broad benefit / trust,Univ → knowledgeable population,univ_2_4,0.51,2.275249905128772e-21
+Personal / close-other benefit,Broad benefit / trust,Trust in climate scientists,climate_3,0.47,1.5883132096928438e-17
+Personal / close-other benefit,Tax-investment payoff,Tax: drives industry investment,govtfund_8_3,0.45,5.215119011962638e-16
+Personal / close-other benefit,Tax-investment payoff,Tax: makes America a leader,govtfund_8_4,0.45,4.3332110733223483e-16
+Personal / close-other benefit,Broad benefit / trust,Univ → benefits communities,univ_2_10,0.44,1.8672264211838195e-15
+Personal / close-other benefit,Broad benefit / trust,Climate research is important,climate_4_1,0.44,9.52202053043487e-16
+Personal / close-other benefit,Tax-investment payoff,Tax: protects national security,govtfund_8_5,0.44,1.482560567783453e-15
+Personal / close-other benefit,Tax-investment payoff,Tax: improves health / saves lives,govtfund_8_2,0.41,1.8503688930949463e-13
+Personal / close-other benefit,Broad benefit / trust,Univ → innovation,univ_2_1,0.38,1.2894764068755555e-11
+Personal / close-other benefit,Broad benefit / trust,Self-rated research knowledge,research_1,0.37,4.9602748031707324e-11
+Personal / close-other benefit,Tax-investment payoff,Tax: scientific breakthroughs,govtfund_8_6,0.37,6.639598678833406e-11
+Personal / close-other benefit,Domain importance,Importance: Space exploration,research_5.1_9,0.34,2.004282862197242e-9
+Personal / close-other benefit,Domain importance,Importance: Better public policy,research_5.1_11,0.34,1.0407745467129684e-9
+Personal / close-other benefit,Domain payoff,Expected payoff: Social science,research_5.2_1,0.34,1.4361548363255065e-9
+Personal / close-other benefit,Domain payoff,Expected payoff: Better public policy,research_5.2_11,0.32,1.0689544093226414e-8
+Personal / close-other benefit,Domain importance,Importance: Social science,research_5.1_1,0.31,3.711970305770176e-8
+Personal / close-other benefit,Domain importance,Importance: Energy independence,research_5.1_4,0.31,3.9073570763754314e-8
+Personal / close-other benefit,Domain importance,Importance: AI / machine learning,research_5.1_8,0.31,4.4492419925192823e-8
+Personal / close-other benefit,Broad benefit / trust,Trust: science is best route to truth,research_2,0.3,9.114885548384388e-8
+Personal / close-other benefit,Domain importance,Importance: Manufacturing / domestic production,research_5.1_6,0.3,7.848967196081947e-8
+Personal / close-other benefit,Domain importance,Importance: Awareness of others' perspectives,research_5.1_13,0.3,1.0370316838570164e-7
+Personal / close-other benefit,Domain payoff,Expected payoff: Manufacturing / domestic production,research_5.2_6,0.3,1.1714756164601142e-7
+Personal / close-other benefit,Domain payoff,Expected payoff: Space exploration,research_5.2_9,0.3,7.173026902918816e-8
+Personal / close-other benefit,Domain payoff,Expected payoff: Understanding to improve own life,research_5.2_12,0.3,8.361942940863675e-8
+Personal / close-other benefit,Domain payoff,Expected payoff: Medicine / cure disease,research_5.2_2,0.29,2.1564687196174888e-7
+Personal / close-other benefit,Broad benefit / trust,Subjective SES (ladder),ses_ladder,0.28,1.3161884900643603e-6
+Personal / close-other benefit,Domain importance,Importance: Understanding to improve own life,research_5.1_12,0.28,1.2660616225736778e-6
+Personal / close-other benefit,Domain payoff,Expected payoff: Education systems,research_5.2_10,0.28,6.871534868251401e-7
+Personal / close-other benefit,Domain payoff,Expected payoff: Energy independence,research_5.2_4,0.27,1.512824807930889e-6
+Personal / close-other benefit,Domain payoff,Expected payoff: Economic growth / wages,research_5.2_5,0.27,1.6116424855432001e-6
+Personal / close-other benefit,Domain importance,Importance: Economic growth / wages,research_5.1_5,0.26,3.841169831933074e-6
+Personal / close-other benefit,Domain payoff,Expected payoff: Environment / clean air & water,research_5.2_3,0.26,6.2127898830672695e-6
+Personal / close-other benefit,Domain payoff,Expected payoff: Awareness of others' perspectives,research_5.2_13,0.26,3.474824598617092e-6
+Personal / close-other benefit,Broad benefit / trust,Education,ses_degree,0.24,1.4413586563764207e-4
+Personal / close-other benefit,Domain importance,Importance: Environment / clean air & water,research_5.1_3,0.23,5.195897955144038e-5
+Personal / close-other benefit,Domain importance,Importance: Education systems,research_5.1_10,0.18,0.001498574206544224
+Personal / close-other benefit,Domain importance,Importance: Defense / national security,research_5.1_7,0.14,0.016799458581137117
+Personal / close-other benefit,Broad benefit / trust,Ideology (liberal → conservative),politics_ideology,-0.11,0.10304678165519562
+Personal / close-other benefit,Domain payoff,Expected payoff: Defense / national security,research_5.2_7,0.11,0.06612887855696634
+Personal / close-other benefit,Domain payoff,Expected payoff: AI / machine learning,research_5.2_8,0.08,0.14991076200507694
+Personal / close-other benefit,Domain importance,Importance: Medicine / cure disease,research_5.1_2,0.07,0.20594023354721924
+Personal / close-other benefit,Broad benefit / trust,Age,age,0.03,0.5782330727322931
+Tangible / everyday relevance,Tax-investment payoff,Tax: improves health / saves lives,govtfund_8_2,0.69,7.629781380792397e-44
+Tangible / everyday relevance,Tax-investment payoff,Tax: scientific breakthroughs,govtfund_8_6,0.63,2.204876314528501e-34
+Tangible / everyday relevance,Tax-investment payoff,Tax: boosts economy,govtfund_8_1,0.54,1.1619518419514922e-23
+Tangible / everyday relevance,Tax-investment payoff,Tax: makes America a leader,govtfund_8_4,0.54,2.00761087985512e-24
+Tangible / everyday relevance,Broad benefit / trust,Univ → knowledgeable population,univ_2_4,0.53,3.650648086224084e-23
+Tangible / everyday relevance,Broad benefit / trust,Univ → innovation,univ_2_1,0.52,5.452666436508931e-22
+Tangible / everyday relevance,Broad benefit / trust,Climate research is important,climate_4_1,0.51,1.6423399319891905e-21
+Tangible / everyday relevance,Tax-investment payoff,Tax: drives industry investment,govtfund_8_3,0.48,4.699895108109085e-19
+Tangible / everyday relevance,Tax-investment payoff,Tax: protects national security,govtfund_8_5,0.48,1.724722392399097e-18
+Tangible / everyday relevance,Broad benefit / trust,Trust in climate scientists,climate_3,0.44,1.2570289557340089e-15
+Tangible / everyday relevance,Broad benefit / trust,Univ → economic growth,univ_2_8,0.42,6.155367799412357e-14
+Tangible / everyday relevance,Domain payoff,Expected payoff: Space exploration,research_5.2_9,0.4,1.1551904704176974e-12
+Tangible / everyday relevance,Broad benefit / trust,Univ → compassion / tolerance,univ_2_7,0.39,3.01199449604057e-12
+Tangible / everyday relevance,Domain importance,Importance: Environment / clean air & water,research_5.1_3,0.39,3.169797276307663e-12
+Tangible / everyday relevance,Domain importance,Importance: Social science,research_5.1_1,0.37,2.0761678183157143e-11
+Tangible / everyday relevance,Broad benefit / trust,Univ → benefits communities,univ_2_10,0.36,2.2415312768119561e-10
+Tangible / everyday relevance,Broad benefit / trust,Trust: science is best route to truth,research_2,0.36,1.8486939987455182e-10
+Tangible / everyday relevance,Domain importance,Importance: Better public policy,research_5.1_11,0.36,1.9640622347881243e-10
+Tangible / everyday relevance,Domain importance,Importance: Energy independence,research_5.1_4,0.34,1.2914690212812143e-9
+Tangible / everyday relevance,Domain importance,Importance: Awareness of others' perspectives,research_5.1_13,0.33,3.7498990436079475e-9
+Tangible / everyday relevance,Domain payoff,Expected payoff: Medicine / cure disease,research_5.2_2,0.33,3.363946863609913e-9
+Tangible / everyday relevance,Broad benefit / trust,Ideology (liberal → conservative),politics_ideology,-0.32,3.3247652486200654e-7
+Tangible / everyday relevance,Domain importance,Importance: Education systems,research_5.1_10,0.32,9.659533554343024e-9
+Tangible / everyday relevance,Domain payoff,Expected payoff: Social science,research_5.2_1,0.32,1.6525146853622878e-8
+Tangible / everyday relevance,Domain payoff,Expected payoff: Education systems,research_5.2_10,0.32,1.0312633791361723e-8
+Tangible / everyday relevance,Domain payoff,Expected payoff: Environment / clean air & water,research_5.2_3,0.29,2.2629808001807826e-7
+Tangible / everyday relevance,Domain payoff,Expected payoff: Energy independence,research_5.2_4,0.29,2.1600529032282549e-7
+Tangible / everyday relevance,Domain payoff,Expected payoff: Economic growth / wages,research_5.2_5,0.26,4.679627016083849e-6
+Tangible / everyday relevance,Domain payoff,Expected payoff: Awareness of others' perspectives,research_5.2_13,0.26,5.712121585065665e-6
+Tangible / everyday relevance,Domain importance,Importance: Space exploration,research_5.1_9,0.24,2.177741482346786e-5
+Tangible / everyday relevance,Domain importance,Importance: Understanding to improve own life,research_5.1_12,0.23,4.6693911518653846e-5
+Tangible / everyday relevance,Domain payoff,Expected payoff: Manufacturing / domestic production,research_5.2_6,0.23,5.99848883023058e-5
+Tangible / everyday relevance,Domain payoff,Expected payoff: Understanding to improve own life,research_5.2_12,0.23,5.851870124402857e-5
+Tangible / everyday relevance,Domain payoff,Expected payoff: Defense / national security,research_5.2_7,0.22,8.780071905211561e-5
+Tangible / everyday relevance,Domain payoff,Expected payoff: Better public policy,research_5.2_11,0.2,6.090777597588885e-4
+Tangible / everyday relevance,Domain importance,Importance: Economic growth / wages,research_5.1_5,0.19,0.0012475144458736248
+Tangible / everyday relevance,Domain importance,Importance: Medicine / cure disease,research_5.1_2,0.17,0.003472398012696607
+Tangible / everyday relevance,Domain payoff,Expected payoff: AI / machine learning,research_5.2_8,0.17,0.0032238320783129536
+Tangible / everyday relevance,Domain importance,Importance: Manufacturing / domestic production,research_5.1_6,0.11,0.05422239077559409
+Tangible / everyday relevance,Broad benefit / trust,Subjective SES (ladder),ses_ladder,0.07,0.21533439889670244
+Tangible / everyday relevance,Broad benefit / trust,Age,age,0.07,0.19753333179753518
+Tangible / everyday relevance,Domain importance,Importance: AI / machine learning,research_5.1_8,0.07,0.21788655521417571
+Tangible / everyday relevance,Domain importance,Importance: Defense / national security,research_5.1_7,0.06,0.3383824552604705
+Tangible / everyday relevance,Broad benefit / trust,Education,ses_degree,0.05,0.4855581331542207
+Tangible / everyday relevance,Broad benefit / trust,Self-rated research knowledge,research_1,0.02,0.7525346825914094
+Personal applicability / salience,Broad benefit / trust,Self-rated research knowledge,research_1,0.41,1.576065775120946e-13
+Personal applicability / salience,Tax-investment payoff,Tax: boosts economy,govtfund_8_1,0.36,7.125364284838709e-11
+Personal applicability / salience,Domain payoff,Expected payoff: Better public policy,research_5.2_11,0.33,3.2336932837701283e-9
+Personal applicability / salience,Domain payoff,Expected payoff: Economic growth / wages,research_5.2_5,0.31,2.669196194765215e-8
+Personal applicability / salience,Domain payoff,Expected payoff: Understanding to improve own life,research_5.2_12,0.31,5.0953717579892646e-8
+Personal applicability / salience,Broad benefit / trust,Univ → knowledgeable population,univ_2_4,0.28,7.497660973037166e-7
+Personal applicability / salience,Broad benefit / trust,Univ → economic growth,univ_2_8,0.28,7.954216917728895e-7
+Personal applicability / salience,Domain importance,Importance: Space exploration,research_5.1_9,0.28,5.865882803962105e-7
+Personal applicability / salience,Domain importance,Importance: Understanding to improve own life,research_5.1_12,0.28,1.0993340060221674e-6
+Personal applicability / salience,Domain payoff,Expected payoff: Manufacturing / domestic production,research_5.2_6,0.28,7.377050182904228e-7
+Personal applicability / salience,Domain payoff,Expected payoff: Space exploration,research_5.2_9,0.28,1.2139059715552372e-6
+Personal applicability / salience,Domain payoff,Expected payoff: Awareness of others' perspectives,research_5.2_13,0.28,9.606001291489248e-7
+Personal applicability / salience,Broad benefit / trust,Univ → compassion / tolerance,univ_2_7,0.27,1.437550487428474e-6
+Personal applicability / salience,Broad benefit / trust,Climate research is important,climate_4_1,0.27,2.1435115706094467e-6
+Personal applicability / salience,Broad benefit / trust,Trust in climate scientists,climate_3,0.27,2.1515054449340337e-6
+Personal applicability / salience,Domain importance,Importance: Awareness of others' perspectives,research_5.1_13,0.27,1.8445032495922155e-6
+Personal applicability / salience,Domain payoff,Expected payoff: Education systems,research_5.2_10,0.27,3.1213648161602677e-6
+Personal applicability / salience,Domain importance,Importance: AI / machine learning,research_5.1_8,0.26,6.5768340024416326e-6
+Personal applicability / salience,Tax-investment payoff,Tax: drives industry investment,govtfund_8_3,0.26,7.365569622876477e-6
+Personal applicability / salience,Tax-investment payoff,Tax: protects national security,govtfund_8_5,0.26,5.790304138259554e-6
+Personal applicability / salience,Domain importance,Importance: Better public policy,research_5.1_11,0.25,1.0193480505722856e-5
+Personal applicability / salience,Broad benefit / trust,Univ → innovation,univ_2_1,0.23,7.631448657593638e-5
+Personal applicability / salience,Domain importance,Importance: Manufacturing / domestic production,research_5.1_6,0.23,4.311992095165284e-5
+Personal applicability / salience,Tax-investment payoff,Tax: improves health / saves lives,govtfund_8_2,0.23,3.976527643073721e-5
+Personal applicability / salience,Broad benefit / trust,Univ → benefits communities,univ_2_10,0.21,2.1363534288042514e-4
+Personal applicability / salience,Broad benefit / trust,Education,ses_degree,0.21,0.0010263414028781632
+Personal applicability / salience,Broad benefit / trust,Trust: science is best route to truth,research_2,0.2,4.450511195094963e-4
+Personal applicability / salience,Tax-investment payoff,Tax: makes America a leader,govtfund_8_4,0.2,5.700349677432933e-4
+Personal applicability / salience,Domain payoff,Expected payoff: Social science,research_5.2_1,0.19,7.520351922339454e-4
+Personal applicability / salience,Domain payoff,Expected payoff: Medicine / cure disease,research_5.2_2,0.19,6.875337741648212e-4
+Personal applicability / salience,Domain payoff,Expected payoff: Energy independence,research_5.2_4,0.18,0.0021718111312627616
+Personal applicability / salience,Tax-investment payoff,Tax: scientific breakthroughs,govtfund_8_6,0.18,0.002065440449237906
+Personal applicability / salience,Domain importance,Importance: Social science,research_5.1_1,0.17,0.0036890347549262204
+Personal applicability / salience,Domain payoff,Expected payoff: Environment / clean air & water,research_5.2_3,0.17,0.003557886855582116
+Personal applicability / salience,Broad benefit / trust,Subjective SES (ladder),ses_ladder,0.16,0.004570027681104673
+Personal applicability / salience,Domain importance,Importance: Energy independence,research_5.1_4,0.16,0.004458359759737031
+Personal applicability / salience,Domain importance,Importance: Education systems,research_5.1_10,0.15,0.011866335389106617
+Personal applicability / salience,Domain importance,Importance: Economic growth / wages,research_5.1_5,0.13,0.020684314831237817
+Personal applicability / salience,Domain importance,Importance: Environment / clean air & water,research_5.1_3,0.12,0.042933962296964105
+Personal applicability / salience,Domain payoff,Expected payoff: Defense / national security,research_5.2_7,0.12,0.03350287622552915
+Personal applicability / salience,Broad benefit / trust,Age,age,0.11,0.04736218614775977
+Personal applicability / salience,Domain importance,Importance: Defense / national security,research_5.1_7,0.1,0.09037493649775381
+Personal applicability / salience,Domain importance,Importance: Medicine / cure disease,research_5.1_2,0.05,0.3710035520157109
+Personal applicability / salience,Domain payoff,Expected payoff: AI / machine learning,research_5.2_8,0.05,0.37404904937009664
+Personal applicability / salience,Broad benefit / trust,Ideology (liberal → conservative),politics_ideology,0.04,0.5838576243150355
