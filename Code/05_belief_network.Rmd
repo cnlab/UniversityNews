@@ -37,9 +37,27 @@ as expected empirically); `govtfund_4` restricted to non-partisan stakeholder it
 restricted to items 2–4, 7 (α = 0.694) — private-company comparison items and
 profit-motive item dropped. Node selection finalized at N = 300.
 
-**PTG adaptation note:** H&W PTG is designed for single items on a common scale.
-For subscale means we dichotomize at the empirical 75th percentile as an approximation
-of "strongest desired position." Thresholds based on full N = 300 sample.
+**PTG note:** Percentage-to-gain follows Hornik & Woolf (1999). For single Likert / binary
+items "strong" endorsement is the *scale endpoint* ("strongly (dis)agree"), matching the reference
+method. The four continuous composites have no natural endpoint, so for those (only) we substitute
+the top/bottom quartile. Thresholds based on full N = 300 sample. See Section 7.
+
+**Correspondence to the reference method (Lydic et al., 2025; OSF a6xf5):**
+
+| Step | Reference paper | This script |
+|---|---|---|
+| Network model | Gaussian Graphical Model, GLASSO-regularized (`qgraph`) | `qgraph::EBICglasso`, γ = 0.5 |
+| Correlation input | ordinal-appropriate (belief-network standard) | `qgraph::cor_auto` (polychoric / polyserial / Pearson) |
+| Community detection | walktrap (`igraph`) | `cluster_walktrap` on absolute weights |
+| Centrality | eigenvector; validated vs. belief–intention r (Fisher-z, abs) | same |
+| Promising beliefs | Hornik & Woolf percentage-to-gain (scale endpoint) | same (§7) |
+
+**This revision (2026-07-15)** fixed bugs in the prior version: (1) network estimated from
+ordinal-appropriate correlations (`cor_auto`) instead of Pearson; (2) all downstream objects keyed
+by node id, removing a fragile display-label round-trip that could mis-map communities/centrality;
+(3) percentage-to-gain now uses the H&W scale-endpoint rule for items (quartiles only for the four
+continuous composites) rather than a blanket 75th-percentile split; (4) added the Fisher-z transform
+to the centrality-validation step; (5) removed dead code and the stale "N = 10 pilot" note.
 
 ---
 
@@ -534,69 +552,90 @@ node_cors |>
 
 ## 4.1 Correlation matrix
 
-```{r cor-matrix}
-node_mat <- d_nodes |>
-  select(all_of(node_cols)) |>
-  as.matrix()
+The network is estimated from an association matrix among the nodes. Because most nodes are
+**ordinal Likert items** (and a few are binary), we do NOT use raw Pearson correlations — those
+assume continuous, normally distributed variables and distort associations among ordinal / binary
+items. Instead we use `qgraph::cor_auto()`, which automatically applies **polychoric** correlations
+to ordinal pairs, **polyserial** to ordinal–continuous pairs, and **Pearson** to continuous pairs
+(the product composites), and returns a positive-definite matrix suitable for GLASSO. This matches
+the belief-network standard (Turner-Zwinkels et al., 2022) that Lydic et al. (2025) follow.
 
-# Remove zero-variance nodes before GLASSO
-node_sds      <- apply(node_mat, 2, sd, na.rm = TRUE)
-dropped_nodes <- names(node_sds)[node_sds == 0 | is.na(node_sds)]
+```{r cor-matrix}
+# ---- Assemble the node data frame ------------------------------------------------
+# One column per node, rows = participants. Keep it as a data frame (not a matrix) so
+# cor_auto() can detect each variable's measurement level (ordinal vs. continuous).
+node_df <- d_nodes |> select(all_of(node_cols))
+
+# ---- Drop zero-variance nodes ----------------------------------------------------
+# A constant column has no correlations and breaks both cor_auto() and GLASSO.
+node_sds      <- vapply(node_df, sd, numeric(1), na.rm = TRUE)
+dropped_nodes <- names(node_sds)[is.na(node_sds) | node_sds == 0]
 if (length(dropped_nodes) > 0) {
   cat(sprintf("Dropping %d zero-variance node(s): %s\n",
               length(dropped_nodes), paste(dropped_nodes, collapse = ", ")))
-  node_cols_net <- setdiff(node_cols, dropped_nodes)
-  node_mat      <- node_mat[, node_cols_net, drop = FALSE]
-} else {
-  node_cols_net <- node_cols
 }
+node_cols_net <- setdiff(node_cols, dropped_nodes)   # nodes that enter the network
+node_df       <- node_df[, node_cols_net, drop = FALSE]
 
-cor_mat <- cor(node_mat, use = "pairwise.complete.obs")
+# ---- Association matrix ----------------------------------------------------------
+# cor_auto(): polychoric / polyserial / Pearson as appropriate; forcePD guarantees a
+# positive-definite matrix (required by GLASSO). Falls back to Spearman only if
+# cor_auto() errors, so the document still renders and prints a message if it happens.
+cor_mat <- tryCatch(
+  qgraph::cor_auto(node_df, forcePD = TRUE, verbose = FALSE),
+  error = function(e) {
+    message("cor_auto() failed (", conditionMessage(e),
+            "); falling back to Spearman correlations.")
+    cor(as.matrix(node_df), method = "spearman", use = "pairwise.complete.obs")
+  }
+)
 
-# Short labels for network plot (wrap to ~20 chars)
-node_labels <- node_registry$label |>
+# ---- Display labels (wrapped) keyed by node id -----------------------------------
+node_labels    <- node_registry$label |>
   stringr::str_wrap(width = 18) |>
   setNames(node_registry$col)
-
-labels_ordered <- node_labels[node_cols_net]
+labels_ordered <- node_labels[node_cols_net]   # same order as cor_mat rows/cols
 ```
 
 ## 4.2 Network estimator
 
-EBIC-GLASSO partial correlation network (EBICglasso via qgraph, gamma = 0.5).
-GLASSO requires approximately 5–10 observations per node (N/p ≥ 5–10). With
-`r length(node_cols_net)` nodes and N = `r nrow(node_mat)`,
-N/p = `r round(nrow(node_mat) / length(node_cols_net), 1)` — within the acceptable range.
+EBIC-GLASSO Gaussian Graphical Model (partial-correlation network), following Lydic et al. (2025):
+graphical-LASSO regularization (Friedman et al., 2008) with EBIC model selection
+(`qgraph::EBICglasso`, tuning `gamma = 0.5`, the standard default). Regularization shrinks small
+partial correlations to exactly zero, yielding a sparse, interpretable network. GLASSO is stable at
+roughly N/p ≥ 5–10 observations per node. With `r length(node_cols_net)` nodes and
+N = `r nrow(node_df)`, N/p = `r round(nrow(node_df) / length(node_cols_net), 1)` — at the lower end
+of the acceptable range, so edges should be read as exploratory (consistent with the "post-hoc"
+framing in the reference paper).
 
 ```{r cor-network, fig.width=12, fig.height=12}
-n_obs <- nrow(node_mat)
+n_obs <- nrow(node_df)
 p     <- ncol(cor_mat)
 
-# EBIC-GLASSO partial correlation network
-graph <- tryCatch(
-  qgraph(cor_mat, graph = "glasso", sampleSize = n_obs,
-         DoNotPlot = TRUE, labels = labels_ordered),
-  error = function(e) {
-    cat(sprintf("GLASSO failed: %s\n", conditionMessage(e)))
-    NULL
-  }
+# ---- Estimate the regularized partial-correlation weights ONCE -------------------
+# EBICglasso() returns a p x p weights matrix of regularized partial correlations
+# (zeros = no edge). n = sample size for the EBIC penalty. cor_auto() used pairwise
+# deletion, so n_obs is an upper bound on the effective N (documented, not a bug).
+glasso_mat <- tryCatch(
+  qgraph::EBICglasso(cor_mat, n = n_obs, gamma = 0.5, returnAllResults = FALSE),
+  error = function(e) { cat(sprintf("GLASSO failed: %s\n", conditionMessage(e))); NULL }
 )
 
-glasso_mat <- if (!is.null(graph)) qgraph::getWmat(graph) else NULL
-n_edges    <- if (!is.null(glasso_mat)) sum(glasso_mat[upper.tri(glasso_mat)] != 0) else 0
-network_ok <- !is.null(graph) && n_edges > 0
+# Ensure the weights matrix is keyed by node id so every downstream step can join on it.
+if (!is.null(glasso_mat)) dimnames(glasso_mat) <- list(node_cols_net, node_cols_net)
 
+n_edges    <- if (!is.null(glasso_mat)) sum(glasso_mat[upper.tri(glasso_mat)] != 0) else 0
+network_ok <- !is.null(glasso_mat) && n_edges > 0
 cat(sprintf("GLASSO edges retained: %d (of %d possible)\n", n_edges, p * (p - 1) / 2))
 
+# ---- Plot the estimated weights matrix directly (input = weights, not raw data) --
 if (network_ok) {
   qgraph(
-    cor_mat,
-    graph       = "glasso",
-    sampleSize  = n_obs,
-    layout      = "spring",
+    glasso_mat,
+    layout      = "spring",   # force-directed: strongly connected nodes are pulled together
     repulsion   = 1.5,
-    negCol      = "#2D93AD",
-    posCol      = "#c44535",
+    negCol      = "#2D93AD",  # negative partial correlations
+    posCol      = "#c44535",  # positive partial correlations
     edge.labels = FALSE,
     labels      = labels_ordered,
     label.scale = FALSE,
@@ -605,11 +644,11 @@ if (network_ok) {
     vsize       = 5,
     vsize2      = 3,
     legend      = FALSE,
-    title       = sprintf("Belief Network (GLASSO, N = %d)", n_obs)
+    title       = sprintf("Belief Network (EBIC-GLASSO, N = %d)", n_obs)
   )
 } else {
   cat(sprintf(
-    "GLASSO produced empty network at N = %d, p = %d (N/p = %.1f). Network sections skipped.\n",
+    "GLASSO produced an empty network at N = %d, p = %d (N/p = %.1f). Downstream network sections are skipped.\n",
     n_obs, p, n_obs / p
   ))
 }
@@ -619,41 +658,39 @@ if (network_ok) {
 
 # 5. Community detection
 
-Walktrap algorithm on absolute edge weights (follows Lydic et al., 2025).
+Walktrap community detection on the absolute edge weights (Pons & Latapy, 2005), as in Lydic et al.
+(2025). Walktrap finds densely connected clusters via short random walks; absolute weights are used
+because community structure concerns connection *strength*, not sign.
 
 ```{r communities}
-as_igraph_qgraph <- function(x) {
-  adj <- qgraph::getWmat(x)
-  g   <- igraph::graph_from_adjacency_matrix(
-    abs(adj), mode = "undirected", weighted = TRUE, diag = FALSE
-  )
-  igraph::V(g)$label <- x$graphAttributes$Nodes$labels
-  g
-}
-
 if (network_ok) {
-  g        <- as_igraph_qgraph(graph)
-  g_abs    <- g
-  igraph::E(g_abs)$weight <- abs(igraph::E(g_abs)$weight)
+  # Build an undirected weighted igraph directly from the GLASSO weights.
+  # Vertex names come from dimnames(glasso_mat) = node ids, so EVERYTHING downstream
+  # is keyed by node id — no fragile matching on wrapped display labels (a prior bug).
+  g <- igraph::graph_from_adjacency_matrix(
+    abs(glasso_mat), mode = "undirected", weighted = TRUE, diag = FALSE
+  )
 
-  wtc         <- igraph::cluster_walktrap(g_abs)
-  communities <- igraph::communities(wtc)
+  wtc  <- igraph::cluster_walktrap(g)   # random-walk clustering; uses E(g)$weight (absolute)
+  memb <- igraph::membership(wtc)       # named integer vector: names = node ids
 
-  cat(sprintf("Number of communities detected: %d\n", length(communities)))
+  cat(sprintf("Communities detected: %d\n", length(igraph::communities(wtc))))
   cat(sprintf("Modularity: %.3f\n", igraph::modularity(wtc)))
 
-  label_to_col   <- setNames(names(labels_ordered), as.character(labels_ordered))
-  membership_vec <- igraph::membership(wtc)
-  community_df <- tibble(
-    col          = label_to_col[names(membership_vec)],
-    community_id = as.integer(membership_vec)
-  ) |>
+  # Node id -> community, joined to the registry for labels/blocks.
+  community_df <- tibble(col = names(memb), community_id = as.integer(memb)) |>
     left_join(node_registry, by = "col") |>
     arrange(community_id, block, label)
+
+  # For qgraph plotting: a named list of node *indices* (into node_cols_net) per community.
+  # glasso_mat columns are in node_cols_net order, so these indices line up with the plot.
+  communities <- split(match(names(memb), node_cols_net), as.integer(memb))
+  names(communities) <- paste("Community", sort(unique(as.integer(memb))))
 } else {
   cat("Community detection skipped (empty GLASSO network).\n")
   community_df <- tibble(col = character(), community_id = integer(),
                          label = character(), block = character())
+  communities <- list()
 }
 ```
 
@@ -710,12 +747,15 @@ those connections are. Predicts actual causal influence of nodes reasonably well
 
 ```{r centrality}
 if (network_ok) {
-  centrality_raw <- igraph::eigen_centrality(g)$vector
+  # Eigenvector centrality on the absolute-weight graph. eigen_centrality() returns a
+  # vector NAMED by vertex id, so we key on names() rather than assuming the vector is
+  # in node_cols_net order (the prior positional assignment could mis-map centrality).
+  ec <- igraph::eigen_centrality(g, weights = igraph::E(g)$weight)$vector
 
   centrality_df <- tibble(
-    col             = node_cols_net,
-    eigenvector     = centrality_raw,
-    eigenvector_abs = abs(centrality_raw)
+    col             = names(ec),
+    eigenvector     = ec,
+    eigenvector_abs = abs(ec)
   ) |>
     left_join(node_registry, by = "col") |>
     left_join(community_df |> select(col, community_id), by = "col") |>
@@ -763,19 +803,23 @@ are also more strongly correlated with the behavioral outcome.
 
 ```{r centrality-vs-r, fig.width=7, fig.height=6}
 if (network_ok) {
+  # Match Lydic et al.: correlate node centrality with the strength of each node's
+  # association with the outcome. Per the paper, the belief-intention correlations are
+  # Fisher z-transformed (atanh) and the absolute value taken (centrality ignores sign).
   cent_cor <- centrality_df |>
-    left_join(
-      node_cors |> filter(outcome == "Composite") |> select(node, r),
-      by = c("col" = "node")
-    ) |>
-    mutate(r_abs = abs(r))
+    left_join(node_cors |> filter(outcome == "Composite") |> select(node, r),
+              by = c("col" = "node")) |>
+    mutate(
+      r_clip = pmax(pmin(r, 0.999), -0.999),   # guard atanh() against +/-1
+      z_abs  = abs(atanh(r_clip))
+    )
 
-  cor_test_result <- cor.test(cent_cor$eigenvector_abs, cent_cor$r_abs, method = "pearson")
-  cat(sprintf("r(centrality, |r with composite|) = %.2f, p = %.3f\n",
-              cor_test_result$estimate, cor_test_result$p.value))
+  ct <- cor.test(cent_cor$eigenvector_abs, cent_cor$z_abs, method = "pearson")
+  cat(sprintf("r(centrality, |Fisher z of Spearman r with composite|) = %.2f, p = %.3f\n",
+              ct$estimate, ct$p.value))
 
   print(
-    ggplot(cent_cor, aes(eigenvector_abs, r_abs)) +
+    ggplot(cent_cor, aes(eigenvector_abs, z_abs)) +
       geom_point(aes(color = factor(community_id)), size = 3) +
       geom_smooth(method = "lm", color = "grey40", se = TRUE) +
       geom_label_repel(aes(label = stringr::str_wrap(label, 20)),
@@ -784,8 +828,8 @@ if (network_ok) {
                        segment.color = "grey60", max.overlaps = 20) +
       scale_color_brewer(palette = "Set2", name = "Community") +
       labs(x = "Eigenvector centrality",
-           y = "|Spearman r with intent composite|",
-           title = "Centrality vs. association with intent") +
+           y = "|Fisher z of Spearman r with intent composite|",
+           title = "Centrality vs. association with intent (Lydic et al., Fig 1C)") +
       theme_minimal() +
       theme(legend.position = "top")
   )
@@ -798,81 +842,78 @@ if (network_ok) {
 
 # 7. Percentage to gain (per node × per intent outcome)
 
-**Adaptation from H&W:** Outcome dichotomy = "Definitely will" (7 of 7-point scale).
-Predictor dichotomy = empirical 75th percentile as "strong endorsement" — used for
-both subscale means and individual items to maintain consistency. At N = 10 (pilot),
-expect many boundary cells (rate_other ≈ 0 or NA).
+**Hornik & Woolf (1999) method, as used by Lydic et al. (2025).** For each belief × intent item:
+
+- **Outcome ("intender")** = top box of the 7-point intent scale ("Definitely will").
+- **"Strong" belief** = the *extreme scale point in the pro-intention direction*. For each Likert /
+  binary item we take the endpoint (the max value if the belief correlates positively with intent,
+  the min value if it correlates negatively — this reproduces the H&W "strongly (dis)agree"
+  reorientation). The four **continuous composites** have no natural scale endpoint, so for those
+  (only) we substitute the top/bottom quartile. The rule actually used is reported per row in the
+  `rule` column.
+- **Percentage to gain** = P(intender | strong belief) − P(intender overall), in points — exactly
+  the Table 2 definition in the reference paper (a − b).
+
+N = `r nrow(d_nodes)`. A node × outcome cell returns NA when there is no "strong" group or no
+"other" group (no contrast can be formed).
 
 ```{r ptg-function}
-INTENT_TOP <- 7L   # "Definitely will"
+INTENT_TOP <- 7L   # top box of the 7-point intent scale = "Definitely will"
 
-compute_ptg <- function(x_num, y_num) {
-  # Direction from sign of x_num correlation with y_num
-  # (called within an outcome-specific loop, so y_num is already one intent item)
+# Continuous composites have no natural "strongly agree" endpoint, so PTG uses the
+# top/bottom quartile for these; every other node uses the scale endpoint (H&W rule).
+continuous_nodes <- c("research_3_nat_mean", "research_5_composite",
+                      "research_6_composite", "climate_4_mean")
+
+compute_ptg <- function(node_name, x_num, y_num) {
+  # Direction: the sign of the belief-outcome association orients "strong" toward the
+  # pro-intention pole (positive r -> high values are pro; negative r -> low values are pro).
   r_xy <- suppressWarnings(cor(x_num, y_num, method = "spearman", use = "complete.obs"))
   if (is.na(r_xy) || r_xy == 0) return(NULL)
+  direction <- if (r_xy > 0) "positive" else "negative"
 
-  # 75th percentile as "strongest desired position" threshold
-  q75 <- quantile(x_num, 0.75, na.rm = TRUE)
-
-  pred_01 <- case_when(
-    is.na(x_num)                     ~ NA_integer_,
-    r_xy > 0 & x_num >= q75         ~ 1L,   # desired: high values
-    r_xy < 0 & x_num <= (1 - 0.75 + min(x_num, na.rm=TRUE))  ~ 1L,  # placeholder; see below
-    TRUE                             ~ 0L
-  )
-
-  # Cleaner direction handling: bottom quartile if negative correlation
-  q25 <- quantile(x_num, 0.25, na.rm = TRUE)
-  pred_01 <- case_when(
-    is.na(x_num)              ~ NA_integer_,
-    r_xy > 0 & x_num >= q75  ~ 1L,
-    r_xy < 0 & x_num <= q25  ~ 1L,
-    TRUE                      ~ 0L
-  )
-
-  out_01 <- case_when(
-    is.na(y_num)        ~ NA_integer_,
-    y_num == INTENT_TOP ~ 1L,
-    TRUE                ~ 0L
-  )
-
-  ok <- !is.na(pred_01) & !is.na(out_01)
-  p  <- pred_01[ok]
-  o  <- out_01[ok]
-
-  n_total     <- length(p)
-  n_strongest <- sum(p == 1L)
-  n_other     <- sum(p == 0L)
-  rate_overall <- mean(o)
-
-  if (n_strongest == 0 || n_other == 0) {
-    return(tibble(
-      direction       = if (r_xy > 0) "positive" else "negative",
-      pct_at_q75      = round(n_strongest / n_total * 100, 1),
-      rate_strongest  = NA_real_,
-      rate_other      = NA_real_,
-      rate_overall    = round(rate_overall * 100, 1),
-      pct_to_gain     = NA_real_,
-      ror             = NA_real_
-    ))
+  # ---- Define "strong belief in the pro-intention direction" ---------------------
+  if (node_name %in% continuous_nodes) {
+    thr_hi <- quantile(x_num, 0.75, na.rm = TRUE)
+    thr_lo <- quantile(x_num, 0.25, na.rm = TRUE)
+    strong <- if (r_xy > 0) x_num >= thr_hi else x_num <= thr_lo
+    rule   <- "quartile"
+  } else {
+    hi <- max(x_num, na.rm = TRUE); lo <- min(x_num, na.rm = TRUE)  # observed scale endpoints
+    strong <- if (r_xy > 0) x_num == hi else x_num == lo
+    rule   <- "endpoint"
   }
 
-  rate_s <- mean(o[p == 1L])
-  rate_o <- mean(o[p == 0L])
-  ptg    <- (rate_s - rate_overall) * 100
-  ror    <- if (rate_o %in% c(0, 1) || rate_s %in% c(0, 1)) NA_real_ else
-              (rate_s / (1 - rate_s)) / (rate_o / (1 - rate_o))
+  pred_01 <- ifelse(is.na(x_num), NA_integer_, as.integer(strong))          # 1 = strong belief
+  out_01  <- ifelse(is.na(y_num), NA_integer_, as.integer(y_num == INTENT_TOP))  # 1 = intender
 
-  tibble(
-    direction      = if (r_xy > 0) "positive" else "negative",
-    pct_at_q75     = round(n_strongest / n_total * 100, 1),
-    rate_strongest = round(rate_s  * 100, 1),
-    rate_other     = round(rate_o  * 100, 1),
-    rate_overall   = round(rate_overall * 100, 1),
-    pct_to_gain    = round(ptg, 1),
-    ror            = round(ror, 2)
-  )
+  ok <- !is.na(pred_01) & !is.na(out_01)
+  p  <- pred_01[ok]; o <- out_01[ok]
+  n_total <- length(p); n_strong <- sum(p == 1L); n_other <- sum(p == 0L)
+  rate_overall <- mean(o)   # 'b' in Table 2: overall intender rate
+
+  # Need both a "strong" and an "other" group to form the contrast.
+  if (n_strong == 0 || n_other == 0) {
+    return(tibble(direction, rule,
+                  pct_strong   = round(n_strong / n_total * 100, 1),
+                  rate_strong  = NA_real_, rate_other = NA_real_,
+                  rate_overall = round(rate_overall * 100, 1),
+                  pct_to_gain  = NA_real_, ror = NA_real_))
+  }
+
+  rate_s <- mean(o[p == 1L])   # 'a' in Table 2: P(intender | strong belief)
+  rate_o <- mean(o[p == 0L])   # P(intender | weak belief)
+  ptg    <- (rate_s - rate_overall) * 100          # H&W: a - b
+  ror    <- if (rate_o %in% c(0, 1) || rate_s %in% c(0, 1)) NA_real_ else
+              (rate_s / (1 - rate_s)) / (rate_o / (1 - rate_o))   # relative odds ratio
+
+  tibble(direction, rule,
+         pct_strong   = round(n_strong / n_total * 100, 1),
+         rate_strong  = round(rate_s * 100, 1),
+         rate_other   = round(rate_o * 100, 1),
+         rate_overall = round(rate_overall * 100, 1),
+         pct_to_gain  = round(ptg, 1),
+         ror          = round(ror, 2))
 }
 ```
 
@@ -881,7 +922,7 @@ ptg_results <- map_dfr(node_cols, function(nc) {
   x <- d_nodes[[nc]]
   map_dfr(seq_along(intent_cols), function(i) {
     y  <- d_nodes[[intent_cols[i]]]
-    pt <- compute_ptg(x, y)
+    pt <- compute_ptg(nc, x, y)          # pass node id so the fn can pick endpoint vs. quartile
     if (is.null(pt)) return(NULL)
     bind_cols(tibble(node = nc, outcome = intent_labels[i]), pt)
   })
