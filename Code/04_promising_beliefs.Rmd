@@ -466,7 +466,7 @@ hw_results <- map_dfr(registry, function(entry) {
 write_csv(hw_results, file.path(path, "Output", "04_promising_beliefs.csv"))
 ```
 
-**N = `r N`** (Cohorts 1–3 combined). Hornik & Woolf (1999) percentage-to-gain analysis. Outcome dichotomy: "Definitely will" (top of 7-point scale). Predictor dichotomy: top response category if positively correlated with the intent composite; bottom if negatively correlated. Ceiling flag (⊙): ≥ 60% already at desired position. Small-n flag (▲ / ⚠): fewer than 30 participants at the desired position — PTG estimates for these items are unreliable and should not drive prioritization decisions. Moveable beliefs only (demographics excluded).
+**N = `r N`** (Cohorts 1–3 combined). Hornik & Woolf (1999) percentage-to-gain analysis. Outcome dichotomy: "Definitely will" (top of 7-point scale). Predictor dichotomy: top response category if positively correlated with the intent composite; bottom if negatively correlated. Ceiling flag (⊙): ≥ 60% already at desired position. Small-n flag (▲ / ⚠): fewer than 30 participants at the desired position — PTG estimates for these items are unreliable and should not drive prioritization decisions; they are excluded from the top-20 plots below (but retained, flagged ⚠, in the tables). Moveable beliefs only (demographics excluded).
 
 ---
 
@@ -502,7 +502,7 @@ block_colors <- c(
 
 make_hw_plot <- function(df, x_label) {
   top20 <- df |>
-    filter(moveable, block != "Past Engagement", !is.na(pct_to_gain)) |>
+    filter(moveable, block != "Past Engagement", !is.na(pct_to_gain), !small_n_flag) |>
     arrange(desc(pct_to_gain)) |>
     slice_head(n = 20) |>
     mutate(
@@ -544,7 +544,7 @@ make_hw_plot <- function(df, x_label) {
     ) +
     scale_x_continuous(limits = c(0, NA), labels = function(x) paste0(x, "%")) +
     labs(x = x_label, y = NULL,
-         caption = "Error bars = ±1 SE. Hollow circle = ceiling (≥60% already at desired position). Triangle = small n (<30 at desired position, estimate unreliable). Sorted by % to gain; Past Engagement excluded.") +
+         caption = "Error bars = ±1 SE. Hollow circle = ceiling (≥60% already at desired position). Small-n beliefs (<30 at desired position) excluded from the plot. Sorted by % to gain; Past Engagement excluded.") +
     theme_minimal(base_size = 11) +
     theme(
       legend.position    = "bottom",
