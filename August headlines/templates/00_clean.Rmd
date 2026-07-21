@@ -1,0 +1,145 @@
+---
+title: "Multi-Variant Headline Study — Data Cleaning"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(knitr)
+library(here)
+source(here("August headlines", "templates", "config.R"))
+```
+
+This template reads the Qualtrics + Prolific exports named in `config.R`, applies
+exclusions, and saves a cleaned wide data frame. **To run a new round, edit only
+`config.R`.** All quality-flag logic lives in `helpers.R::compute_flags()` and is
+shared with `02_prolific_rejections.Rmd`, so exclusions and payment rejections
+always use identical rules.
+
+## Load data
+
+```{r load}
+raw <- read_qualtrics(CFG$qualtrics_path)
+```
+
+Raw Qualtrics: **`r nrow(raw)` rows**, **`r ncol(raw)` columns**.
+
+## Basic exclusions
+
+```{r basic}
+n_raw <- nrow(raw)
+d <- raw |>
+  filter(DistributionChannel == "anonymous") |>
+  filter(Finished == TRUE) |>
+  filter(PROLIFIC_PID != "{{%PROLIFIC_PID%}}", !is.na(PROLIFIC_PID))
+n_basic <- nrow(d)
+```
+
+| Step | N |
+|------|---|
+| Raw | `r n_raw` |
+| Anonymous channel | `r nrow(filter(raw, DistributionChannel == "anonymous"))` |
+| Finished | `r nrow(filter(raw, DistributionChannel == "anonymous", Finished == TRUE))` |
+| Valid Prolific PID | `r n_basic` |
+
+## Merge Prolific + drop non-completions
+
+```{r prolific}
+prolific <- read_prolific(CFG$prolific_path)
+d <- d |> left_join(prolific, by = "PROLIFIC_PID")
+
+cat("Prolific status:\n"); print(table(d$prolific_status, useNA = "ifany"))
+
+n_before_hard <- nrow(d)
+d <- d |> filter(!prolific_status %in% c("RETURNED", "TIMED-OUT"))
+cat("\n", n_before_hard - nrow(d),
+    "removed (RETURNED / TIMED-OUT). N =", nrow(d), "\n")
+```
+
+## Quality flags
+
+Flags (see `config.R` for thresholds). A participant is **excluded/rejected** if
+any standalone-reject flag fires (off-task > `r CFG$offtask_threshold_min` min by
+default) **or** they accumulate `r CFG$reject_nflags`+ flags.
+
+- `flag_bot_combined` — reCAPTCHA < `r CFG$recaptcha_threshold` **and** Prolific bot ∈ {`r paste(CFG$prolific_bot_fail, collapse=", ")`}
+- `flag_duplicate` — Qualtrics `Q_DuplicateRespondent == TRUE`
+- `flag_auth_q` — any Prolific per-question authenticity check == "Fail"
+- `flag_attention` — `r CFG$attn_nfail`+ *seen* attention sliders ≠ `r CFG$attn_correct`
+- `flag_straightline` — identical value across all substantive sliders answered
+- `flag_offtask` — off-task minutes > `r CFG$offtask_threshold_min`
+
+```{r flags}
+d <- compute_flags(d, CFG)
+
+d |>
+  summarise(
+    `Bot (combined)`       = sum(flag_bot_combined),
+    `Duplicate`            = sum(flag_duplicate),
+    `Auth-question fail`   = sum(flag_auth_q),
+    `Attention (2+ seen)`  = sum(flag_attention),
+    `Straightlined`        = sum(flag_straightline),
+    `Off-task > threshold` = sum(flag_offtask),
+    `Rejected / excluded`  = sum(reject)
+  ) |>
+  pivot_longer(everything(), names_to = "Flag", values_to = "N") |>
+  kable()
+```
+
+```{r flag-detail}
+d |>
+  filter(n_flags >= 1 | reject) |>
+  select(PROLIFIC_PID, n_flags, reject, reject_reason,
+         flag_bot_combined, flag_duplicate, flag_auth_q, flag_attention,
+         n_attn_wrong, n_attn_shown, flag_straightline, n_sliders_same,
+         flag_offtask, off_task_min) |>
+  arrange(desc(reject), desc(n_flags)) |>
+  kable(caption = "All participants with at least one flag.")
+```
+
+## Apply exclusions
+
+```{r apply}
+n_before <- nrow(d)
+d_clean <- d |> filter(!reject)
+cat(n_before - nrow(d_clean), "excluded.  Final analytic N =", nrow(d_clean), "\n")
+```
+
+## Condition (arm) assignment check
+
+```{r arms}
+cond_cols <- paste0(CFG$condition_prefix, seq_len(CFG$n_headlines))
+cond_cols <- cond_cols[cond_cols %in% names(d_clean)]
+for (cc in cond_cols) {
+  cat(cc, ":\n"); print(table(d_clean[[cc]], useNA = "ifany")); cat("\n")
+}
+```
+
+## Missing data on primary outcome
+
+```{r missing}
+prim_cols <- sprintf("%s%d_%s_1", CFG$headline_prefix,
+                     seq_len(CFG$n_headlines), CFG$primary_measure)
+prim_cols <- prim_cols[prim_cols %in% names(d_clean)]
+d_clean |>
+  summarise(across(all_of(prim_cols), ~sum(is.na(.)))) |>
+  pivot_longer(everything(), names_to = "Variable", values_to = "N missing") |>
+  kable()
+```
+
+## Save
+
+```{r save}
+dir.create(dirname(CFG$cleaned_rds), showWarnings = FALSE, recursive = TRUE)
+saveRDS(d_clean, CFG$cleaned_rds)
+```
+
+Cleaned data saved to `` `r CFG$cleaned_rds` ``. **Final N = `r nrow(d_clean)`**.

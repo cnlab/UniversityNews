@@ -1,0 +1,118 @@
+---
+title: "Prolific Rejections — Participants to Reject / Not Pay"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(knitr)
+library(here)
+source(here("August headlines", "templates", "config.R"))
+```
+
+> **Purpose.** This report is deliberately separate from the analysis. It lists
+> every Prolific submission that meets the pre-registered rejection criteria,
+> with a reason for each, so a human can review before actioning rejections on
+> Prolific. **Rejection is hard to reverse and Prolific scrutinises it — review
+> this table manually; do not auto-submit.**
+
+Rejection rule (from `config.R`): reject if any standalone-reject flag fires
+(default: off-task > `r CFG$offtask_threshold_min` min) **or** a submission
+accumulates `r CFG$reject_nflags`+ quality flags.
+
+## Load + merge
+
+```{r load}
+q <- read_qualtrics(CFG$qualtrics_path)
+p <- read_prolific(CFG$prolific_path)
+
+# Rejection applies to genuine submissions only: finished, valid PID, and not
+# already unpaid on Prolific (RETURNED / TIMED-OUT are never "rejected").
+d <- q |>
+  filter(DistributionChannel == "anonymous", Finished == TRUE,
+         PROLIFIC_PID != "{{%PROLIFIC_PID%}}", !is.na(PROLIFIC_PID)) |>
+  left_join(p, by = "PROLIFIC_PID") |>
+  filter(!prolific_status %in% c("RETURNED", "TIMED-OUT"))
+
+d <- compute_flags(d, CFG)
+```
+
+Submissions evaluated: **`r nrow(d)`**.
+
+## Summary
+
+```{r summary}
+tibble(
+  Metric = c("Submissions evaluated", "Flagged (>=1)", "TO REJECT",
+             "  via off-task (standalone)", "  via 2+ flags"),
+  N = c(nrow(d), sum(d$n_flags >= 1), sum(d$reject),
+        sum(d$flag_offtask), sum(d$n_flags >= CFG$reject_nflags))
+) |> kable()
+```
+
+## ▶ Participants to reject / not pay
+
+The table below is the actionable output: **Prolific ID, submission ID, and the
+reason for each rejection.** Empty means no submission met the criteria.
+
+```{r reject-table}
+rejects <- d |>
+  filter(reject) |>
+  transmute(
+    PROLIFIC_PID,
+    submission_id,
+    reason        = reject_reason,
+    n_flags,
+    attn          = sprintf("%d/%d wrong", n_attn_wrong, n_attn_shown),
+    off_task_min,
+    completion_code
+  ) |>
+  arrange(desc(n_flags), desc(off_task_min))
+
+if (nrow(rejects) == 0) {
+  cat("No submissions met the rejection criteria.\n")
+} else {
+  kable(rejects, caption = sprintf("%d submission(s) to reject.", nrow(rejects)))
+}
+```
+
+## Write rejection CSV
+
+A CSV of the IDs + reasons is written for your records and for pasting IDs into
+Prolific's bulk-reject flow. (Prolific rejections still require a manual reason;
+use the `reason` column.)
+
+```{r write}
+dir.create(dirname(CFG$reject_csv), showWarnings = FALSE, recursive = TRUE)
+write_excel_csv(rejects, CFG$reject_csv, na = "")
+cat("Wrote", nrow(rejects), "row(s) to", CFG$reject_csv, "\n")
+```
+
+## For contrast: flagged but NOT rejected
+
+Submissions with exactly one flag (below the 2+ threshold and no standalone
+trigger). These are **kept and paid** under the current rule — review in case you
+want to tighten `config.R` (e.g., add `flag_attention` to standalone rejects).
+
+```{r not-rejected}
+d |>
+  filter(!reject, n_flags >= 1) |>
+  transmute(PROLIFIC_PID, n_flags,
+            which_flag = case_when(
+              flag_attention ~ sprintf("attention (%d/%d wrong)", n_attn_wrong, n_attn_shown),
+              flag_straightline ~ sprintf("straightlined (%d sliders)", n_sliders_same),
+              flag_bot_combined ~ "bot",
+              flag_duplicate ~ "duplicate",
+              flag_auth_q ~ "auth-question",
+              flag_offtask ~ "off-task",
+              TRUE ~ "other")) |>
+  arrange(desc(n_flags)) |>
+  kable(caption = "Flagged once — paid under current rule.")
+```
