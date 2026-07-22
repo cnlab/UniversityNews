@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(knitr)
 library(here)
-source(here("August headlines", "templates", "config.R"))
+source(here("Newsletter testing", "templates", "config.R"))
 ```
 
 > **Purpose.** This report is deliberately separate from the analysis. It lists

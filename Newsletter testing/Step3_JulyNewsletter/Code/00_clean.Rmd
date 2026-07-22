@@ -21,11 +21,11 @@ library(knitr)
 ## Load data
 
 ```{r load}
-QUALTRICS_PATH <- here("Step3_JulyNewsletter", "Data",
+QUALTRICS_PATH <- here("Newsletter testing", "Step3_JulyNewsletter", "Data",
                        "UnivNews_JulyNewsletter_July 6, 2026_10.30.csv")
-PROLIFIC_PATH  <- here("Step3_JulyNewsletter", "Data",
+PROLIFIC_PATH  <- here("Newsletter testing", "Step3_JulyNewsletter", "Data",
                        "prolific_demographic_export_6a4566994567f01b9f90d339.csv")
-CLEANED_RDS    <- here("Step3_JulyNewsletter", "Data", "july_newsletter_clean.rds")
+CLEANED_RDS    <- here("Newsletter testing", "Step3_JulyNewsletter", "Data", "july_newsletter_clean.rds")
 
 raw <- read_survey(QUALTRICS_PATH)
 ```

@@ -1,0 +1,280 @@
+---
+title: "WiN Script to Extract Conditions and Daily Diary Reminders"
+author: "Ovidia Stanoi"
+date: "2026-02-13"
+output: html_document
+---
+
+Clear global environment.
+```{r, message=F, warning=F}
+remove(list=ls())
+```
+
+Open packages.
+```{r, message=F, warning=F}
+library("tidyverse")
+library("purrr")
+library("glue")
+library("lubridate")
+```
+
+Define file directory (change path as needed).
+```{r}
+path <- "/Users/omayat/Box sync/WiN-ARO-Extension_Data_857525"
+path <- "~/Library/CloudStorage/Box-Box/WiN-ARO-Extension_Data_857525"
+```
+
+Define cohort number.
+```{r}
+cohort <- 4
+```
+
+Define the start date when the study was posted. 
+```{r}
+start_day <- ymd_hms("2026-07-10 17:00:00")
+```
+
+Open raw version of the baseline survey (update the name of the .csv file as needed).
+```{r}
+b <- read.csv(sprintf("%s/Data/Raw/Cohort %s/WiN_Baseline_Cohort%s.csv", 
+                      path, cohort, cohort)) %>%
+  tail(-2) %>% # remove subtitles
+  filter(StartDate > start_day) # filter out previous cohorts
+```
+
+Open the Prolific .csv file including the demographic information of the participants and add the variable representing the bot check to the main baseline file. 
+```{r, messages = F, warnings = F}
+prolific <- read.csv(sprintf("%s/Data/Raw/Cohort %s/WiN_Baseline_Prolific_Cohort%s.csv", 
+                             path, cohort, cohort)) %>%
+  select(Participant.id, Authenticity.check..Bots) %>%
+  rename(PROLIFIC_PID = Participant.id,
+         prolific_check_bot = Authenticity.check..Bots) 
+
+# Merge with the baseline survey
+b <- plyr::join(b, prolific)
+```
+
+Calculate how much time participants spent off-task.
+```{r}
+b <- b %>%
+  mutate(time_list = strsplit(as.character(worktimeArray), ","),
+         time_numeric = lapply(time_list, function(x) as.numeric(gsub("[^0-9.-]", "", x))),
+         off_task_sec = sapply(time_numeric, function(x) sum(abs(x[x < 0]), na.rm = TRUE)),
+         off_task_min = round(off_task_sec / 60, 2),
+         q_duration = round(as.numeric(`Duration..in.seconds.`)/60,2))
+```
+
+Merge multiple entries (e.g., if a participant completed the survey twice, save only the first answers).
+```{r}
+b <- b %>%
+  arrange(PROLIFIC_PID, desc(as.numeric(as.character(Progress)))) %>% # order data based on progress
+  group_by(PROLIFIC_PID) %>% # group by id
+  dplyr::summarise(across(everything(), ~na.omit(.)[1])) # combine data of participants with multiple answers
+```
+
+Exclude and do not pay participants who: 
+
+1) did not pass the screener (age < 18 or not veterans), or
+
+2) did not consent to the baseline survey, or
+
+3) did not pass the two attention checks, or
+
+4) have a Q_RecaptchaScore score < 0.5 and were identified as likely bots by Prolific, or
+
+5) spent more than 15 mins off-task. 
+
+```{r}
+# First create a list of all participants who should 
+# already be filtered out in Prolific
+# because they did not pass the screener
+exclude_screener <- b %>% 
+  filter(age < 18 | veteran_YN == "No")  %>% 
+  select(PROLIFIC_PID, age, veteran_YN)
+  
+# Next, create a list of all participants who did not meet 
+# the other exclusion criteria and who will have to be excluded manually
+exclude <- b %>%
+  filter(!(PROLIFIC_PID %in% exclude_screener$PROLIFIC_PID)) %>%
+  mutate(Q_RecaptchaScore = as.numeric(as.character(Q_RecaptchaScore)),
+         consent = ifelse(consent_1 == "I agree to participate in this study.", "pass", "fail"),
+         attention_1 = ifelse(attention_1 == "Somewhat agree", "pass", "fail"), 
+         attention_2 = ifelse(attention_2 == "Disagree", "pass", "fail"), 
+         qualtrics_check_bot = ifelse(Q_RecaptchaScore < 0.5, "pass", "fail"), 
+         prolific_check_bot = ifelse(!(prolific_check_bot == "low"), "pass", "fail"), 
+         off_task_time = ifelse(off_task_min <= 15, "pass", "fail"),
+         consent = ifelse(consent == "fail", "fail", "pass"),
+         attention = ifelse(attention_1 == "fail" & attention_2 == "fail", "fail", "pass"),
+         bot_checks = ifelse(qualtrics_check_bot == "fail" & prolific_check_bot == "fail", "fail", "pass"),) %>%
+  filter(consent == "fail" | attention == "fail" |
+           bot_checks == "fail" | off_task_time == "fail")  %>% 
+  select(PROLIFIC_PID, consent, attention, bot_checks, off_task_time, off_task_min) 
+```
+
+For the remaining people, if they agreed to participate in the daily diary portion of the study, extract pIDs, conditions, & active weeks. For the participants in the alcohol perspective condition, also extract the name of their study peer. 
+```{r}
+df <- b %>%
+  filter(!(PROLIFIC_PID %in% exclude_screener$PROLIFIC_PID) & 
+           !(PROLIFIC_PID %in% exclude$PROLIFIC_PID) & 
+           # exclude participants who did not meet inclusion criteria
+           dd_consent == "Yes, I would like to participate in the second portion of the study.") %>%
+                   # exclude participants who did not consent to participate in the daily diary portion of the study
+  filter(!(PROLIFIC_PID == "6633ee8ca35ae4b909110ee3")) %>%
+                     # exclude one participant who messaged on prolific that he would not be able to continue
+  select(PROLIFIC_PID, condition, activeweek, study_peer) %>%
+  arrange(condition, activeweek)
+```
+
+Add the reminders that each participant should receive each day of the daily diary.
+```{r}
+for (day in 1:12) {
+  df <- df %>%
+    mutate(
+      !!paste0("reminder_day", day) := case_when(
+
+        condition == "gen_perspective" & activeweek == 1 & day <= 6 ~ "gen_perspective",
+        condition == "gen_perspective" & activeweek == 1 & day >  6 ~ "gen_react_naturally",
+
+        condition == "gen_perspective" & activeweek == 2 & day <= 6 ~ "gen_react_naturally",
+        condition == "gen_perspective" & activeweek == 2 & day >  6 ~ "gen_perspective",
+
+        condition == "gen_mindful" & activeweek == 1 & day <= 6 ~ "gen_mindful",
+        condition == "gen_mindful" & activeweek == 1 & day >  6 ~ "gen_react_naturally",
+
+        condition == "gen_mindful" & activeweek == 2 & day <= 6 ~ "gen_react_naturally",
+        condition == "gen_mindful" & activeweek == 2 & day >  6 ~ "gen_mindful",
+
+        condition == "alc_perspective" & activeweek == 1 & day <= 6 ~ "alc_perspective",
+        condition == "alc_perspective" & activeweek == 1 & day > 6 ~ "alc_react_naturally",
+
+        condition == "alc_perspective" & activeweek == 2 & day <= 6 ~ "alc_react_naturally",
+        condition == "alc_perspective" & activeweek == 2 & day > 6 ~ "alc_perspective",
+
+        condition == "alc_mindful" & activeweek == 1 & day <= 6 ~ "alc_mindful",
+        condition == "alc_mindful" & activeweek == 1 & day >  6 ~ "alc_react_naturally",
+
+        condition == "alc_mindful" & activeweek == 2 & day <= 6 ~ "alc_react_naturally",
+        condition == "alc_mindful" & activeweek == 2 & day >  6 ~ "alc_mindful",
+
+        condition == "control" ~ "",
+
+        TRUE ~ paste0("", day)
+      )
+    )
+}
+```
+
+Save different .csv files locally.
+```{r}
+## .csv file that needs to be uploaded to Qualtrics
+## it includes info about participants' conditions, active weeks, and student peers
+df_cond <- df %>%
+  select(PROLIFIC_PID, condition, activeweek, study_peer) %>%
+  mutate(study_peer = ifelse(condition == "alc_perspective", study_peer, NA))
+readr::write_excel_csv(df_cond, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Participant_Conditions_Cohort%s.csv", 
+                               path, cohort, cohort), na = "")
+
+## .csv file that includes the different types of reminders participants 
+## should receive each day
+df_reminders <- df %>%
+  select(-study_peer) %>%
+  arrange(condition)
+readr::write_excel_csv(df_reminders, 
+                       sprintf("%s/Prolific reminders/WiN_Participant_Reminders_Cohort%s.csv", 
+                               path, cohort), na = "")
+
+## .csv file that includes the Prolific IDs to be included in the all group
+pid_all <- df %>%
+  select(PROLIFIC_PID) 
+readr::write_excel_csv(pid_all, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Prolific_Participant_Group_All_Cohort%s.csv", 
+                               path, cohort, cohort), na = "")
+
+## .csv file that includes the Prolific IDs to be included in the general perspective-taking & active week 1 group 
+pid_gen_persp_1 <- df %>%
+  filter(condition == "gen_perspective" & activeweek == 1) %>%
+  select(PROLIFIC_PID) 
+readr::write_excel_csv(pid_gen_persp_1, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Prolific_Participant_Group_General_Perspective_Week1_Cohort%s.csv", 
+                               path, cohort, cohort), na = "")
+
+## .csv file that includes the Prolific IDs to be included in the general perspective-taking & active week 2 group 
+pid_gen_persp_2 <- df %>%
+  filter(condition == "gen_perspective" & activeweek == 2) %>%
+  select(PROLIFIC_PID) 
+readr::write_excel_csv(pid_gen_persp_2, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Prolific_Participant_Group_General_Perspective_Week2_Cohort%s.csv", 
+                               path, cohort, cohort), na = "")
+
+## .csv file that includes the Prolific IDs to be included in the general mindful & active week 1 group 
+pid_gen_mind_1 <- df %>%
+  filter(condition == "gen_mindful" & activeweek == 1) %>%
+  select(PROLIFIC_PID) 
+readr::write_excel_csv(pid_gen_mind_1, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Prolific_Participant_Group_General_Mindful_Week1_Cohort%s.csv", 
+                               path, cohort, cohort), na = "")
+
+## .csv file that includes the Prolific IDs to be included in the general mindful & active week 2 group 
+pid_gen_mind_2 <- df %>%
+  filter(condition == "gen_mindful" & activeweek == 2) %>%
+  select(PROLIFIC_PID) 
+readr::write_excel_csv(pid_gen_mind_2, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Prolific_Participant_Group_General_Mindful_Week2_Cohort%s.csv", 
+                               path, cohort, cohort), na = "")
+
+
+## .csv file that includes the Prolific IDs to be included in the alcohol perspective-taking & active week 1 group 
+pid_alc_persp_1 <- df %>%
+  filter(condition == "alc_perspective" & activeweek == 1) %>%
+  select(PROLIFIC_PID) 
+readr::write_excel_csv(pid_alc_persp_1, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Prolific_Participant_Group_Alcohol_Perspective_Week1_Cohort%s.csv", 
+                               path, cohort, cohort), na = "")
+
+## .csv file that includes the Prolific IDs to be included in the alcohol perspective-taking & active week 2 group 
+pid_alc_persp_2 <- df %>%
+  filter(condition == "alc_perspective" & activeweek == 2) %>%
+  select(PROLIFIC_PID) 
+readr::write_excel_csv(pid_alc_persp_2, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Prolific_Participant_Group_Alcohol_Perspective_Week2_Cohort%s.csv", 
+                               path, cohort, cohort), na = "")
+
+## .csv file that includes the Prolific IDs to be included in the alcohol mindful & active week 1 group 
+pid_alc_mind_1 <- df %>%
+  filter(condition == "alc_mindful" & activeweek == 1) %>%
+  select(PROLIFIC_PID) 
+readr::write_excel_csv(pid_alc_mind_1, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Prolific_Participant_Group_Alcohol_Mindful_Week1_Cohort%s.csv", 
+                               path, cohort, cohort), na = "")
+
+## .csv file that includes the Prolific IDs to be included in the alcohol mindful & active week 2 group 
+pid_alc_mind_2 <- df %>%
+  filter(condition == "alc_mindful" & activeweek == 2) %>%
+  select(PROLIFIC_PID) 
+readr::write_excel_csv(pid_alc_mind_2, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Prolific_Participant_Group_Alcohol_Mindful_Week2_Cohort%s.csv", 
+                                               path, cohort, cohort), na = "")
+
+## .csv file that includes the Prolific IDs to be included in the control group 
+pid_control <- df %>%
+  filter(condition == "control") %>%
+  select(PROLIFIC_PID) 
+readr::write_excel_csv(pid_control, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Prolific_Participant_Group_Control_Cohort%s.csv", 
+                                            path, cohort, cohort), na = "")
+
+## .csv file that includes all participants whose submissions should be rejected
+readr::write_excel_csv(exclude, 
+                       sprintf("%s/Prolific participant groups/Cohort %s/WiN_Participant_Prolific_Reject_Cohort%s.csv", 
+                                        path, cohort, cohort), na = "")
+```
+
+
+
+
+
+
+
+
+

@@ -23,7 +23,7 @@ library(knitr)
 ## Load and reshape
 
 ```{r load}
-CLEANED_RDS <- here("Step3_JulyNewsletter", "Data", "july_newsletter_clean.rds")
+CLEANED_RDS <- here("Newsletter testing", "Step3_JulyNewsletter", "Data", "july_newsletter_clean.rds")
 d <- readRDS(CLEANED_RDS)
 ```
 

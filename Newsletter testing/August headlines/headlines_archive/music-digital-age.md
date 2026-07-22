@@ -26,6 +26,10 @@ All headlines <= 6 words. (Q) marks question-form options.
 ## Relationships / belonging
 - **Music Still Connects You to Others**
   Digital platforms changed more than how you hear music, they changed how you form friendships, identities, and communities around it. A new Annenberg course examines what that shift means for the way most of us relate to each other.
+- **Your Music, Your Community**
+  The playlists you share and the artists you follow do more than fill silence, they pull you into communities of people who feel the same way. A new Annenberg course examines how digital platforms reshape the way most of us find belonging through music.
+- **The Online Music Communities You Belong to Are Changing**
+  The forums, playlists, and fan spaces where you find your people are increasingly shaped by algorithms and the platforms that host them. A new Annenberg course uses digital ethnography to examine how online music communities are being remade, and what that means for the way most of us belong.
 
 ## Daily life relevance
 - **Your Daily Soundtrack, Decided for You**
