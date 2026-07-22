@@ -1,5 +1,5 @@
 # =============================================================================
-# helpers.R  --  shared functions for the multi-variant headline pipeline
+# helpers.R  --  shared functions for the August Newsletter pipeline
 # Sourced by config.R. Do not edit for routine data swaps; edit config.R.
 # =============================================================================
 
@@ -194,11 +194,14 @@ reshape_long <- function(d, CFG) {
     pivot_longer(all_of(cond_cols), names_to = "h", values_to = "arm") |>
     mutate(h = sub(CFG$condition_prefix, "", h))
 
-  long |>
+  out <- long |>
     left_join(cond_long, by = c("PROLIFIC_PID", "h")) |>
-    mutate(
-      headline = factor(paste0("headline_", h)),
-      arm      = relevel(factor(arm), ref = CFG$control_label)
-    ) |>
+    mutate(headline = factor(paste0("headline_", h)))
+
+  # map raw condition codes (e.g. A/B) to readable arm labels, if configured
+  if (!is.null(CFG$arm_labels)) out$arm <- dplyr::recode(out$arm, !!!CFG$arm_labels)
+
+  out |>
+    mutate(arm = relevel(factor(arm), ref = CFG$control_label)) |>
     select(-h)   # drop helper key so it can't shadow loop vars named `h`
 }

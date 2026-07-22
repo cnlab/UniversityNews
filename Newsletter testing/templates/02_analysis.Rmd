@@ -22,11 +22,17 @@ library(here)
 source(here("Newsletter testing", "templates", "config.R"))
 ```
 
-Modeled on the July Newsletter analysis, adapted for the August design (5
+Modeled on the July Newsletter analysis, adapted for the August design (6
 articles, each **control** vs one **self-relevant** variant; control is the
 reference for every contrast). Reads the cleaned data from `00_clean.Rmd`.
 
 ## Load + reshape
+
+The cleaned data is one row per participant. `reshape_long()` pivots it to one row
+per participant-by-article, carrying each article's assigned arm (control vs
+self-relevant) and its three slider outcomes. This long format is what the
+article-level and mixed models below consume. The count table is a sanity check
+that every article has both arms populated.
 
 ```{r load}
 d  <- readRDS(CFG$cleaned_rds)
@@ -36,6 +42,13 @@ cat("Analytic N:", n_distinct(dl$PROLIFIC_PID),
     "| arms:", paste(levels(dl$arm), collapse = ", "), "\n")
 dl |> count(headline, arm) |> pivot_wider(names_from = arm, values_from = n) |> kable()
 ```
+
+The hidden chunk below defines the three workhorse functions reused across every
+outcome: `fit_overall()` pools all articles into one mixed model to estimate the
+average self-relevant effect (with a random slope so the effect may vary by
+article, backing off to random intercepts if that model fails to converge);
+`fit_by_article()` runs a separate OLS per article for the article-specific
+effects; and `manip_plot()` draws the arm means with standard-error bars.
 
 ```{r helpers, include=FALSE}
 sig_stars <- function(p) case_when(p < .001 ~ "***", p < .01 ~ "**",
@@ -95,7 +108,11 @@ manip_plot <- function(outcome, ylab, title) {
 
 # Manipulation checks
 
-Does the self-relevant framing move each outcome, relative to control?
+Does the self-relevant framing move each outcome, relative to control? Each outcome
+gets two complementary views: an **overall** mixed model that pools all six
+articles for the average effect and its precision, and a **by-article** table that
+shows where the effect is strong, weak, or reversed. The primary outcome is
+self-relevance; reading interest and sharing follow as secondary outcomes.
 
 ## Self-relevance
 
@@ -141,7 +158,11 @@ manip_plot("share", "Willingness to share (0-100)", "Sharing by article and cond
 
 # Impact of self-relevance
 
-Does *perceived* self-relevance predict engagement and research attitudes?
+The manipulation checks ask whether the framing *raised* self-relevance. This
+section asks the downstream question: regardless of condition, does a reader who
+*perceives* an article as more self-relevant engage with it more and hold warmer
+attitudes toward research? Here self-relevance is a measured predictor, not the
+manipulated arm.
 
 ## Reading + sharing (article-level, MLM)
 
@@ -172,8 +193,11 @@ for (oc in c("read", "share")) {
 
 ## Research attitudes (person-level, OLS)
 
-`research_relevance_1/2` are measured once per person, so self-relevance is
-aggregated to the person mean and modeled with OLS.
+The two research-attitude items are asked once per person, not per article, so they
+cannot go in an article-level model. Instead each participant's self-relevance is
+averaged across their six articles and used to predict each attitude with a simple
+person-level OLS. The recode below maps the 7-point Likert responses to 1–7
+whether they export as text labels or as Qualtrics choice IDs (13–19).
 
 ```{r research-recode, include=FALSE}
 likert <- c("Strongly disagree","Disagree","Somewhat disagree",

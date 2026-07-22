@@ -1,7 +1,7 @@
 # =============================================================================
 # config.R  --  THE ONLY FILE YOU NEED TO EDIT FOR A NEW DATA COLLECTION
 # =============================================================================
-# Every script (00_clean, 01_analysis, 02_prolific_rejections)
+# Every script (00_clean, 01_prolific_rejections, 02_analysis)
 # sources this file, so change paths / design here in ONE place.
 #
 # To run a new round of collection:
@@ -38,9 +38,12 @@ CFG$measures        <- c("relevant", "read", "share")  # slider outcomes (0-100)
 CFG$primary_measure <- "relevant"      # main DV for the analysis writeup
 
 # Per-article condition (arm) columns: <condition_prefix><i>, set by the survey's
-# balanced randomizer. Use meaningful values: "control" / "selfrel".
-#   (If you keep the template's A/B coding instead, set control_label <- "A".)
+# balanced randomizer. The final template codes these as "A" / "B", where
+# A = control and B = self-relevant for every article. `arm_labels` maps those
+# raw codes to readable labels for the analysis output (set to NULL to keep the
+# raw values); `control_label` is the resulting reference arm.
 CFG$condition_prefix <- "condition_"
+CFG$arm_labels       <- c(A = "control", B = "selfrel")  # raw survey value -> display label
 CFG$control_label    <- "control"      # reference arm for all contrasts, every article
 
 # Research-attitude items (7-pt Likert, measured once per person). Newsletter

@@ -23,11 +23,18 @@ source(here("Newsletter testing", "templates", "config.R"))
 > Prolific. **Rejection is hard to reverse and Prolific scrutinises it — review
 > this table manually; do not auto-submit.**
 
-Rejection rule (from `config.R`): reject if any standalone-reject flag fires
-(default: off-task > `r CFG$offtask_threshold_min` min) **or** a submission
-accumulates `r CFG$reject_nflags`+ quality flags.
+Rejection rule (from `config.R`): reject a submission if any *standalone-reject*
+flag fires (`r paste(CFG$standalone_reject_flags, collapse=", ")`) **or** it
+accumulates `r CFG$reject_nflags`+ quality flags of any kind. This is the exact
+rule `00_clean.Rmd` uses to exclude data, computed by the same `compute_flags()`,
+so the people not paid are the same people dropped from analysis.
 
 ## Load + merge
+
+We rebuild the same evaluated sample the cleaning script uses: genuine, finished
+submissions with a valid Prolific ID that Prolific has not already marked
+`RETURNED`/`TIMED-OUT`. Recomputing flags here (rather than reading the cleaned
+file) keeps this report self-contained and lets it run the moment data lands.
 
 ```{r load}
 q <- read_qualtrics(CFG$qualtrics_path)
@@ -48,12 +55,21 @@ Submissions evaluated: **`r nrow(d)`**.
 
 ## Summary
 
+Counts of the whole evaluated pool, the flagged subset, and the rejections. The
+two indented rows split every rejection into the two mutually exclusive paths that
+can trigger it, so they always sum to **TO REJECT**: rejected by a single
+standalone flag (bot, duplicate, or off-task), versus rejected only by reaching the
+2+ flag threshold.
+
 ```{r summary}
+standalone   <- intersect(CFG$standalone_reject_flags, names(d))
+standalone_hit <- if (length(standalone)) rowSums(d[standalone]) > 0 else rep(FALSE, nrow(d))
+
 tibble(
   Metric = c("Submissions evaluated", "Flagged (>=1)", "TO REJECT",
-             "  via off-task (standalone)", "  via 2+ flags"),
+             "  via a standalone flag", "  via 2+ flags (no standalone)"),
   N = c(nrow(d), sum(d$n_flags >= 1), sum(d$reject),
-        sum(d$flag_offtask), sum(d$n_flags >= CFG$reject_nflags))
+        sum(standalone_hit), sum(d$reject & !standalone_hit))
 ) |> kable()
 ```
 
@@ -85,9 +101,9 @@ if (nrow(rejects) == 0) {
 
 ## Write rejection CSV
 
-A CSV of the IDs + reasons is written for your records and for pasting IDs into
-Prolific's bulk-reject flow. (Prolific rejections still require a manual reason;
-use the `reason` column.)
+The rejection table is saved to disk as a durable record and to make actioning it
+easy: paste the IDs into Prolific's bulk-reject flow and use the `reason` column
+for the manual reason Prolific requires on each rejection.
 
 ```{r write}
 dir.create(dirname(CFG$reject_csv), showWarnings = FALSE, recursive = TRUE)
