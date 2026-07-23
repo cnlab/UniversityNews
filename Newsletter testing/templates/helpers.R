@@ -9,24 +9,41 @@ suppressWarnings(suppressMessages({
 }))
 
 # ---- Read raw data ----------------------------------------------------------
+# Both readers accept ONE path or a VECTOR of paths (e.g. pilot + full launch).
+# Multiple files are row-bound and de-duplicated, so combining waves is just a
+# matter of listing every file in config.R. A `source_wave` column records which
+# file each row came from.
 
-# Qualtrics export (handles the 3-row header via qualtRics::read_survey).
-read_qualtrics <- function(path) {
-  suppressWarnings(read_survey(path))
+# Qualtrics export(s) (handles the 3-row header via qualtRics::read_survey).
+# De-dupes by ResponseId so a later export that re-includes earlier responses
+# does not double-count.
+read_qualtrics <- function(paths) {
+  purrr::map(paths, function(p) {
+    x <- suppressWarnings(read_survey(p))
+    x$source_wave <- basename(p)
+    x
+  }) |>
+    dplyr::bind_rows() |>
+    dplyr::distinct(ResponseId, .keep_all = TRUE)
 }
 
-# Prolific export. Renames the stable Prolific columns to internal names and
+# Prolific export(s). Renames the stable Prolific columns to internal names and
 # keeps everything else (demographics + the per-question authenticity checks,
-# which are named "Authenticity check: QID....").
-read_prolific <- function(path) {
-  p <- suppressWarnings(read_csv(path, show_col_types = FALSE))
-  rename(p,
-         PROLIFIC_PID    = `Participant id`,
-         submission_id   = `Submission id`,
-         prolific_status = Status,
-         prolific_time   = `Time taken`,
-         completion_code = `Completion code`,
-         prolific_bot    = `Authenticity check: Bots`)
+# named "Authenticity check: QID...."). De-dupes by PROLIFIC_PID so the later
+# left-join onto Qualtrics stays one-to-one.
+read_prolific <- function(paths) {
+  p <- purrr::map(paths, ~ suppressWarnings(read_csv(.x, show_col_types = FALSE))) |>
+    dplyr::bind_rows()
+  p |>
+    rename(
+      PROLIFIC_PID    = `Participant id`,
+      submission_id   = `Submission id`,
+      prolific_status = Status,
+      prolific_time   = `Time taken`,
+      completion_code = `Completion code`,
+      prolific_bot    = `Authenticity check: Bots`
+    ) |>
+    distinct(PROLIFIC_PID, .keep_all = TRUE)
 }
 
 # ---- Off-task time ----------------------------------------------------------

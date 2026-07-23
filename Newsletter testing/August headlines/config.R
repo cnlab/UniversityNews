@@ -20,10 +20,18 @@ CFG <- list()
 # ---- SECTION 1: FILE PATHS (edit every round) -------------------------------
 # Drop the fielded
 # Qualtrics + Prolific exports into August headlines/Data/ and update the names.
-CFG$qualtrics_path <- here("Newsletter testing", "August headlines", "Data",
-                           "UnivNews_AugustNewsletter_July 22, 2026_19.25.csv")
-CFG$prolific_path  <- here("Newsletter testing", "August headlines", "Data",
-                           "prolific_demographic_export_6a6124f19862d73d0d3791d3.csv")
+# Each path may be a single file OR a vector of files to combine (pilot + full
+# launch). Multiple files are row-bound and de-duplicated (Qualtrics by
+# ResponseId, Prolific by Participant id). Uncomment the second line of each
+# vector when the full-launch exports land.
+CFG$qualtrics_path <- c(
+  here("Newsletter testing", "August headlines", "Data", "UnivNews_AugustNewsletter_July 22, 2026_19.25.csv")   # pilot (n=15)
+  # , here("Newsletter testing", "August headlines", "Data", "<full-launch Qualtrics export>.csv")
+)
+CFG$prolific_path  <- c(
+  here("Newsletter testing", "August headlines", "Data", "prolific_demographic_export_6a6124f19862d73d0d3791d3.csv")   # pilot
+  # , here("Newsletter testing", "August headlines", "Data", "<full-launch Prolific export>.csv")
+)
 CFG$cleaned_rds    <- here("Newsletter testing", "August headlines", "output",
                            "newsletter_clean.rds")
 CFG$reject_csv     <- here("Newsletter testing", "August headlines", "output",

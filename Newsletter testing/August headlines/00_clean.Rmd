@@ -26,15 +26,23 @@ always use identical rules.
 
 ## Load data
 
-The pipeline starts from the raw Qualtrics export named in `config.R`.
+The pipeline starts from the raw Qualtrics export(s) named in `config.R`.
 `read_qualtrics()` parses the three-row Qualtrics header so every column comes in
-with the correct type (sliders as numbers, timestamps as dates).
+with the correct type (sliders as numbers, timestamps as dates). If `config.R`
+lists more than one file (e.g. a pilot plus the full launch), they are row-bound
+and de-duplicated by `ResponseId` here, and a `source_wave` column records the
+origin of each row.
 
 ```{r load}
 raw <- read_qualtrics(CFG$qualtrics_path)
 ```
 
-Raw Qualtrics: **`r nrow(raw)` rows**, **`r ncol(raw)` columns**.
+Raw Qualtrics: **`r nrow(raw)` rows**, **`r ncol(raw)` columns**, from
+**`r length(CFG$qualtrics_path)` file(s)**.
+
+```{r load-by-wave}
+raw |> count(source_wave, name = "rows") |> kable()
+```
 
 ## Basic exclusions
 
