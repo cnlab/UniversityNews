@@ -110,7 +110,23 @@
       "Bash(rm -f \"August headlines/Data/UnivNews_Newsletter.csv\" \"August headlines/Data/prolific_export.csv\")",
       "Bash(rmdir \"August headlines/Data\")",
       "Bash(perl -i -pe 's{August headlines/templates/}{Newsletter testing/templates/}g; s{`August headlines/UnivNews_NewsletterTemplate\\\\.docx`}{`Newsletter testing/August headlines/UnivNews_NewsletterTemplate.docx`}g' \".claude/../../../.claude/projects/-Users-nicolecooper-Documents-GitHub-UniversityNews/memory/project_step4_templates.md\")",
-      "Bash(perl -i -pe 's{August headlines/templates/}{Newsletter testing/templates/}g' \"/Users/nicolecooper/.claude/projects/-Users-nicolecooper-Documents-GitHub-UniversityNews/memory/project_step4_templates.md\")"
+      "Bash(perl -i -pe 's{August headlines/templates/}{Newsletter testing/templates/}g' \"/Users/nicolecooper/.claude/projects/-Users-nicolecooper-Documents-GitHub-UniversityNews/memory/project_step4_templates.md\")",
+      "Bash(rm -rf figure/)",
+      "Bash(rm -f \"Newsletter testing/August headlines/Data/UnivNews_Newsletter.csv\" \"Newsletter testing/August headlines/Data/prolific_export.csv\")",
+      "Bash(rm -rf \"Newsletter testing/templates/output\")",
+      "Bash(rmdir \"Newsletter testing/August headlines/Data\")",
+      "Bash(textutil -convert txt \"UnivNews_6ArticleNewsletter_template.docx\" -stdout)",
+      "Bash(grep -E \"^\\(0|100\\)$\")",
+      "Bash(perl -i -pe 's/x <- rep\\\\\\(\"selfrel\", K\\\\\\); x\\\\[sample\\\\\\(1:K, floor\\\\\\(K\\\\/2\\\\\\)\\\\\\)\\\\] <- \"control\"/x <- rep\\(\"B\", K\\); x[sample\\(1:K, floor\\(K\\\\/2\\)\\)] <- \"A\"/' /private/tmp/claude-501/-Users-nicolecooper-Documents-GitHub-UniversityNews/065d7913-580b-4bf1-9c56-5c5f4c3e919d/scratchpad/make_synth.R)",
+      "Bash(perl -i -pe 's/ifelse\\\\\\(arm==\"selfrel\", 6, 0\\\\\\)/ifelse\\(arm==\"B\", 6, 0\\)/' /private/tmp/claude-501/-Users-nicolecooper-Documents-GitHub-UniversityNews/065d7913-580b-4bf1-9c56-5c5f4c3e919d/scratchpad/make_synth.R)",
+      "Bash(gh auth *)",
+      "Bash(ssh -o BatchMode=yes -o ConnectTimeout=6 -T git@github.com)",
+      "Bash(security find-internet-password *)",
+      "Bash(grep -iE \"\\\\.rmd|\\\\.r$|config|clean|analysis|reject\")",
+      "Bash(awk '{print $NF, $6, $7, $8}')",
+      "Bash(cp templates/helpers.R \"August headlines/helpers.R\")",
+      "Bash(cp templates/00_clean.Rmd \"August headlines/00_clean.Rmd\")",
+      "Bash(perl -i -pe 's{here\\\\\\(\"Newsletter testing\", \"templates\", \"config\\\\.R\"\\\\\\)}{here\\(\"Newsletter testing\", \"August headlines\", \"config.R\"\\)}' \"August headlines/00_clean.Rmd\")"
     ]
   }
 }
